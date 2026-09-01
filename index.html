@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Алгебра 8 — интерактивный курс от простого к сложному." />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Алгебра 8 — Учись · Понимай · Решай</title>
+</head>
+<body>
+  <canvas id="particlesCanvas" class="particles-canvas" aria-hidden="true"></canvas>
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <div class="bg-orb orb-3" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar glass-panel" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">A8</div>
+        <div class="brand-copy">
+          <strong>Алгебра 8</strong>
+          <small>Учись · Понимай · Решай</small>
+        </div>
+        <button id="hideSidebarBtn" class="sidebar-collapse-btn" aria-label="Скрыть боковую панель" title="Скрыть панель">‹</button>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="home">🏠 Главная</button>
+        <button class="nav-btn" data-view="course">🗺️ Карта курса</button>
+        <button class="nav-btn" data-view="trainer">🧩 Тренажёр</button>
+        <button class="nav-btn" data-view="chapterfinal">🏁 Итоги глав</button>
+        <button class="nav-btn" data-view="mistakes">🧠 Мои ошибки</button>
+        <button class="nav-btn" data-view="progress">📈 Прогресс</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="themeBtn" class="ghost">🌙 Тёмная тема</button>
+        <button id="effectsBtn" class="ghost">✨ Эффекты: авто</button>
+        <button id="installBtn" class="ghost hidden">⬇️ Установить приложение</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar glass-topbar">
+        <button id="menuBtn" class="icon-btn" aria-label="Меню">☰</button>
+        <div>
+          <div class="eyebrow">Интерактивный курс</div>
+          <h1 id="pageTitle">Алгебра 8</h1>
+        </div>
+        <div class="top-actions">
+          <span id="streakBadge" class="badge">🔥 0 дней</span>
+          <button id="resetBtn" class="icon-btn" title="Сбросить прогресс">↺</button>
+        </div>
+      </header>
+
+      <section id="content" class="content"></section>
+    </main>
+  </div>
+
+  <template id="homeTpl">
+    <section class="hero reveal">
+      <div class="glass-panel hero-left">
+        <div class="hero-kicker">
+          <span class="pill">8 класс · базовый уровень</span>
+          <span class="soft-dot">•</span>
+          <span class="muted">Понятное объяснение каждого шага</span>
+        </div>
+
+        <h2>Не зубрить формулы.<br><span class="gradient-text">Понимать, почему они работают.</span></h2>
+        <p>Короткие объяснения, визуальные подсказки, красивые микроэффекты и пошаговые решения. Если что-то непонятно — курс объяснит ещё проще и даст попробовать снова.</p>
+
+        <div class="hero-benefits">
+          <span>🌱 от простого</span>
+          <span>🧩 через практику</span>
+          <span>🎯 до уверенного решения</span>
+          <span>📱 удобно и на телефоне</span>
+        </div>
+
+        <div class="hero-actions">
+          <button class="primary glow-btn" data-action="continue">Продолжить обучение →</button>
+          <button class="secondary" data-view-jump="course">Посмотреть программу</button>
+        </div>
+      </div>
+
+      <div class="hero-card glass-panel reveal">
+        <div class="big-progress">
+          <div class="ring" id="heroRing"><span id="heroPercent">0%</span></div>
+          <div>
+            <strong>Общий прогресс</strong>
+            <p id="heroStats">0 из 51 темы</p>
+          </div>
+        </div>
+        <hr />
+        <div class="mini-grid">
+          <div><span>✅</span><b id="doneCount">0</b><small>пройдено</small></div>
+          <div><span>🎯</span><b id="accuracyValue">—</b><small>точность</small></div>
+          <div><span>🧠</span><b id="mistakesValue">0</b><small>ошибок</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Сегодня</span>
+          <h3>С чего продолжить</h3>
+        </div>
+      </div>
+      <div id="continueCard"></div>
+    </section>
+
+    <section class="section reveal">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Полный курс</span>
+          <h3>Все 6 глав</h3>
+        </div>
+        <span class="status-chip">все главы готовы · v1.2</span>
+      </div>
+      <div id="homeTopics" class="cards-grid"></div>
+    </section>
+  </template>
+
+  <script src="./app.js"></script>
+  <script src="./chapter1-v02.js"></script>
+  <script src="./course-v1.js"></script>
+  <script src="./coach-v12.js"></script>
+  <script src="./pedagogy-v12.js"></script>
+</body>
+</html>

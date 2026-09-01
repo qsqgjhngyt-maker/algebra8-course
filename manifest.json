@@ -1,0 +1,36 @@
+{
+  "name": "Алгебра 8 — полный интерактивный курс",
+  "short_name": "Алгебра 8",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#2563eb",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "id": "./",
+  "scope": "./",
+  "description": "Интерактивный курс алгебры 8 класса: объяснения, практика, тренажёры, графики и контрольные.",
+  "orientation": "any",
+  "categories": [
+    "education"
+  ]
+}
