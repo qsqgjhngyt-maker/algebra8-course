@@ -1,6 +1,6 @@
 
-const CACHE="algebra8-v1.2.0";
-const ASSETS=["./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js","./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png","./coach-v12.js","./pedagogy-v12.js"];
+const CACHE="algebra8-v1.3.0";
+const ASSETS=["./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js","./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png","./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener("fetch",e=>e.respondWith(
