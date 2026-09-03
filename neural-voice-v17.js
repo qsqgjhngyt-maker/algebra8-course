@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.3";
+  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.4";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -609,10 +609,21 @@
       try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
       try{window.v161MarkSpeaking?.(false,state)}catch(e){}
       console.warn("[Kitsune Neural Voice fallback]",err);
-      if(modelReady)setStatus("Нейроголос временно недоступен — включён системный fallback.","warn");
+      if(modelReady){
+        if(isIOSLike()){
+          setStatus("На iPhone локальный Neural Voice не запустился. Переключаю эту сессию на системный голос iOS.","warn");
+        }else{
+          setStatus("Нейроголос временно недоступен — включён системный fallback.","warn");
+        }
+      }
 
       if(systemSpeak){
-        return systemSpeak(text,{state,force,onDone});
+        /* Do not wait for another failed neural attempt on every reply. The
+           downloaded model stays intact; this only changes the current session. */
+        if(isIOSLike())mode="system";
+        updateUi({refreshStatus:false});
+        try{window.dispatchEvent(new CustomEvent("kitsune-audio-unlock"))}catch(e){}
+        return systemSpeak(text,{state,force:true,onDone});
       }
       return false;
     }

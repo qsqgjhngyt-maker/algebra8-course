@@ -1,6 +1,6 @@
 # Алгебра 8 — интерактивный курс
 
-Версия: **v1.12.3**
+Версия: **v1.12.4**
 
 Что добавлено в этой итерации:
 - живой фон из мягких частиц;
@@ -1326,3 +1326,16 @@ Service Worker по-прежнему не очищает сторонние/mode
 - при возвращении PWA на экран выполняется `speechSynthesis.resume()` / `AudioContext.resume()`;
 - если iOS всё же блокирует Web Audio, интерфейс выдаёт понятное сообщение вместо «молчания»;
 - Android/Chrome сохраняет прежнюю схему с микропаузой после `speechSynthesis.cancel()`.
+
+
+## v1.12.4 — iPhone PWA Fresh Release + Voice Fallback
+
+Исправлена причина смешивания файлов разных версий на установленном iPhone PWA.
+
+- `kitsune-app-version` теперь объявлен до bootstrap-скрипта;
+- CSS/JS получают release query `?v=1.12.4`;
+- Service Worker использует network-first для навигации;
+- release assets читаются только из cache `algebra8-v1.12.4`;
+- регистрация SW использует `updateViaCache: "none"`;
+- при ошибке Piper/ONNX на iPhone Neural Voice один раз переключается на системный голос iOS вместо повторных неудачных запусков;
+- скачанная neural-модель при этом не удаляется.

@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.3";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.4";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
   const PRIVATE_KEYS=[

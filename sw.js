@@ -1,12 +1,13 @@
-const CACHE="algebra8-v1.12.3";
+const CACHE="algebra8-v1.12.4";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
+const RELEASE="1.12.4";
 const ASSETS=[
-  "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
-  "./manifest.json","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
+  "./","./index.html?v=1.12.4","./styles.css?v=1.12.4","./app.js?v=1.12.4","./chapter1-v02.js?v=1.12.4","./course-v1.js?v=1.12.4",
+  "./manifest.json?v=1.12.4","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
-  "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
-  "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
-  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js","./whisper-worker-v1114.js","./whisper-worker-v1116.js","./kitsune-live-v110.js","./privacy-v1111.js","./security-bootstrap-v1111.js","./pwa-update.js"
+  "./coach-v12.js?v=1.12.4","./pedagogy-v12.js?v=1.12.4","./mastery-data-v13.js?v=1.12.4","./mastery-v13.js?v=1.12.4",
+  "./design-v14.js?v=1.12.4","./learning-fx-v142.js?v=1.12.4","./live-assistant-v15.js?v=1.12.4",
+  "./tutor-lite-v16.js?v=1.12.4","./tutor-smart-v173.js?v=1.12.4","./neural-voice-v17.js?v=1.12.4","./kitsune-brain-v18.js?v=1.12.4","./kitsune-voice-v19.js?v=1.12.4","./whisper-worker-v1114.js?v=1.12.4","./whisper-worker-v1116.js?v=1.12.4","./kitsune-live-v110.js?v=1.12.4","./privacy-v1111.js?v=1.12.4","./security-bootstrap-v1111.js?v=1.12.4","./pwa-update.js?v=1.12.4"
 ];
 
 const CHILD_CSP=[
@@ -101,23 +102,43 @@ self.addEventListener("fetch",e=>{
   const neuralRuntime=url.hostname==="cdn.jsdelivr.net";
 
   if(sameOrigin){
-    e.respondWith(
-      caches.match(e.request).then(async cached=>{
-        if(cached)return secureSameOriginResponse(e.request,cached);
+    const isNavigation=e.request.mode==="navigate"||e.request.destination==="document";
 
+    if(isNavigation){
+      /* Always ask the network for the app shell first. This prevents an old
+         installed iPhone PWA from booting an obsolete index.html forever. */
+      e.respondWith((async()=>{
         try{
-          const resp=await fetch(e.request);
+          const resp=await fetch(e.request,{cache:"no-store"});
           if(resp&&resp.ok){
             const copy=resp.clone();
-            caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{});
+            caches.open(CACHE).then(c=>c.put("./index.html?v="+RELEASE,copy)).catch(()=>{});
           }
           return secureSameOriginResponse(e.request,resp);
         }catch(err){
-          const fallback=await caches.match("./index.html");
+          const fallback=
+            await caches.match("./index.html?v="+RELEASE) ||
+            await caches.match("./index.html",{ignoreSearch:true});
           return secureSameOriginResponse(e.request,fallback);
         }
-      })
-    );
+      })());
+      return;
+    }
+
+    e.respondWith((async()=>{
+      const releaseCache=await caches.open(CACHE);
+      const cached=await releaseCache.match(e.request);
+      if(cached)return secureSameOriginResponse(e.request,cached);
+
+      try{
+        const resp=await fetch(e.request,{cache:"no-store"});
+        if(resp&&resp.ok)releaseCache.put(e.request,resp.clone()).catch(()=>{});
+        return secureSameOriginResponse(e.request,resp);
+      }catch(err){
+        const fallback=await caches.match(e.request,{ignoreSearch:true});
+        return secureSameOriginResponse(e.request,fallback);
+      }
+    })());
     return;
   }
 

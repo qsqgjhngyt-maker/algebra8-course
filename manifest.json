@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.12.3: исправлена озвучка на iPhone/PWA — ранняя разблокировка AudioContext и синхронный старт системного speechSynthesis в пользовательском жесте.",
+  "description": "Алгебра 8 v1.12.4: надёжное обновление iPhone PWA без смешивания старых JS-файлов; исправлен системный fallback озвучки при сбое Neural Voice.",
   "orientation": "any",
   "categories": [
     "education"
