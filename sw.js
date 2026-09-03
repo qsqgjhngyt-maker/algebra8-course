@@ -1,11 +1,11 @@
-const CACHE="algebra8-v1.8.0";
-const NEURAL_CACHE="algebra8-ai-runtime-v1.8.0";
+const CACHE="algebra8-v1.9.0";
+const NEURAL_CACHE="algebra8-ai-runtime-v1.9.0";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
   "./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png",
   "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
   "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
-  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js"
+  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js"
 ];
 
 self.addEventListener("install",e=>{
@@ -43,9 +43,9 @@ self.addEventListener("fetch",e=>{
     return;
   }
 
-  /* jsDelivr-модули Piper и WebLLM кэшируем после первого запуска.
-     Большие модели Piper/WebLLM сами хранят в собственных browser caches/OPFS,
-     поэтому модельные ответы Hugging Face здесь намеренно не дублируем. */
+  /* jsDelivr-модули Piper, WebLLM и Transformers.js кэшируем после первого запуска.
+     Большие модели Piper/WebLLM/Whisper используют собственные browser caches/OPFS.
+     Поэтому большие ответы Hugging Face здесь намеренно не дублируем. */
   if(neuralRuntime){
     e.respondWith(
       caches.open(NEURAL_CACHE).then(cache=>

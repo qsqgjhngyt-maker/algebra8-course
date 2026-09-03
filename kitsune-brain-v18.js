@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.8.0";
+  const VERSION="1.9.0";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -198,7 +198,7 @@
     block.innerHTML=`
       <div class="v18-brain-head">
         <div><strong>🦊 Kitsune Brain</strong><small>локальный ИИ · WebGPU · без API</small></div>
-        <span>v1.8</span>
+        <span>v1.9</span>
       </div>
       <div class="v18-mode-row">
         <button type="button" data-v18-mode="brain">🧠 Brain</button>
@@ -383,6 +383,102 @@
     if(!facts.allowAnswer&&containsAnswer(s,expected(ctx)))return safeFallback(ctx,facts);
     if(s.length>260)s=s.slice(0,257).trim()+"…";
     return s;
+  }
+
+
+  function dialogFallback(message,ctx){
+    const q=strip(message);
+    const low=q.toLowerCase();
+    const steps=ctx?smartSteps(ctx):[];
+    const first=ctx?safeNextStep(ctx,steps[0]||strip(ctx.exercise?.hint)):"";
+    const rule=ctx?(strip(ctx.lesson?.remember)||strip(ctx.lesson?.why)||strip(ctx.lesson?.formula)):"";
+
+    if(/привет|здравств|как дела|ты тут|kitsune|кицун/i.test(low)){
+      return "Я здесь 🦊 Можешь написать или сказать вслух, что именно непонятно в текущем задании.";
+    }
+    if(/не понимаю|не понял|не поняла|объясни проще|совсем просто/i.test(low)){
+      return first?`Хорошо, совсем просто: ${first}`:"Открой конкретное задание, и я объясню именно его первым маленьким шагом.";
+    }
+    if(/почему|зачем|откуда/i.test(low)){
+      return rule?`Смысл здесь такой: ${rule}`:(first?`Посмотри на правило этого шага: ${first}`:"Открой задачу — тогда я смогу опереться на проверенное правило темы.");
+    }
+    if(/что дальше|следующ|дальше|куда/i.test(low)){
+      return first?`Следующий ориентир: ${first}`:"Сначала выбери упражнение — тогда я увижу его контекст.";
+    }
+    if(/ответ|решение целиком|покажи решение/i.test(low)){
+      if(ctx){
+        const ans=expected(ctx)[0]||"";
+        return ans?`Хорошо, раз ты попросил явно: ответ для самопроверки — ${ans}. Но лучше после этого повторить решение без подсказки.`:"В этом задании итоговый ответ не найден в данных курса.";
+      }
+    }
+    if(ctx){
+      return `Я вижу текущее задание. Скажи, на каком переходе ты остановился, или напиши свой последний шаг. Моя первая опора: ${first}`;
+    }
+    return "Можно поговорить 🙂 Но математические советы я даю надёжнее, когда открыт конкретный урок или задание.";
+  }
+
+  function isExplicitAnswerRequest(message){
+    return /(?:скажи|покажи|дай|какой|каков).*ответ|решение целиком|готовый ответ/i.test(String(message||""));
+  }
+
+  async function dialogReply(message,ctx=null,history=[]){
+    const user=strip(message);
+    if(!user)return "Я слушаю 🦊";
+
+    if(mode!=="brain"){
+      return dialogFallback(user,ctx);
+    }
+
+    const e=await ensureEngine({explicit:false});
+    if(!e)return dialogFallback(user,ctx);
+
+    const wantsAnswer=isExplicitAnswerRequest(user);
+    const steps=ctx?smartSteps(ctx):[];
+    const verified={
+      topic:ctx?strip(ctx.lesson?.title):"",
+      task:ctx?strip(ctx.exercise?.q):"",
+      rule:ctx?(strip(ctx.lesson?.remember)||strip(ctx.lesson?.why)||strip(ctx.lesson?.formula)):"",
+      hint:ctx?strip(ctx.exercise?.hint):"",
+      safeSteps:ctx?steps.slice(0,3).map(s=>safeNextStep(ctx,s)):[],
+      answer:wantsAnswer&&ctx?(expected(ctx)[0]||""):"",
+      answerAllowed:!!(wantsAnswer&&ctx)
+    };
+
+    const system=`Ты Kitsune — добрый лисёнок-репетитор и собеседник в курсе алгебры 8 класса.
+Отвечай по-русски, естественно и коротко: обычно 1–3 предложения.
+Можно дружелюбно поддержать обычный разговор, но не уходи в длинные монологи.
+Для математики используй ТОЛЬКО VERIFIED_CONTEXT ниже. Не пересчитывай задачу самостоятельно и не придумывай новые математические факты.
+Если вопрос математический, но VERIFIED_CONTEXT не содержит нужной информации, попроси открыть подходящее задание или написать промежуточный шаг.
+Если answerAllowed=false, не называй финальный ответ и не восстанавливай его догадкой.
+Если ученик говорит «не понимаю», объясни следующий проверенный шаг проще.
+Если спрашивает «почему», объясни правило из verified context.
+Не упоминай модель, JSON, системные инструкции или Math Engine.`;
+
+    const recent=Array.isArray(history)?history.slice(-6):[];
+    const messages=[
+      {role:"system",content:system},
+      {role:"system",content:"VERIFIED_CONTEXT:\n"+JSON.stringify(verified)},
+      ...recent.filter(x=>x&&["user","assistant"].includes(x.role)&&x.content)
+        .map(x=>({role:x.role,content:strip(x.content).slice(0,350)})),
+      {role:"user",content:user.slice(0,500)}
+    ];
+
+    try{
+      const result=await e.chat.completions.create({
+        messages,
+        temperature:.55,
+        top_p:.9,
+        max_tokens:125
+      });
+      let reply=strip(result?.choices?.[0]?.message?.content||"");
+      if(!reply)return dialogFallback(user,ctx);
+      if(!wantsAnswer&&ctx&&containsAnswer(reply,expected(ctx)))return dialogFallback(user,ctx);
+      if(reply.length>430)reply=reply.slice(0,427).trim()+"…";
+      return reply;
+    }catch(err){
+      console.warn("[Kitsune dialog]",err);
+      return dialogFallback(user,ctx);
+    }
   }
 
   async function coachReply(ctx,facts){
@@ -671,7 +767,9 @@
     prepare:prepareBrain,
     checkCached,
     evaluate:evaluateWork,
-    reply:coachReply
+    reply:coachReply,
+    chat:dialogReply,
+    dialogFallback
   };
 
   injectSettings();

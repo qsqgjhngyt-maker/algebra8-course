@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 с лисёнком Kitsune: локальный Kitsune Brain через WebGPU/WebLLM, проверяемый Math Engine, комиксные подсказки, Neural Voice, PWA и офлайн.",
+  "description": "Алгебра 8 v1.9: лисёнок Kitsune, локальный Brain, комиксный репетитор, разговор текстом и через микрофон с локальным Whisper, Neural Voice, PWA и офлайн.",
   "orientation": "any",
   "categories": [
     "education"
