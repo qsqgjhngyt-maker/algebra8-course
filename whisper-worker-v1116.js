@@ -1,4 +1,4 @@
-/* v1.11.6 · Same-origin Whisper module worker */
+/* v1.12.2 · Persistent Whisper module worker */
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
 
 const MODEL="onnx-community/whisper-tiny";
@@ -11,6 +11,11 @@ function post(type,data={}){ self.postMessage({type,...data}); }
 /* Mobile Safari is much more reliable with single-threaded WASM for Whisper.
    WebGPU remains available to Kitsune Brain independently. */
 try{
+  /* Explicitly keep downloaded model files in persistent browser CacheStorage.
+     A PWA code update must not force a model download again. */
+  env.useBrowserCache=true;
+  env.allowLocalModels=false;
+
   if(env?.backends?.onnx?.wasm){
     env.backends.onnx.wasm.numThreads=1;
     env.backends.onnx.wasm.proxy=false;

@@ -1,17 +1,21 @@
 
 /* =====================================================================
-   v1.12.1 · KITSUNE PWA UPDATE MANAGER
+   v1.12.2 · KITSUNE PWA UPDATE MANAGER
    One install, future releases are downloaded in background and activated
    only after the user presses "Обновить сейчас".
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.1";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.2";
   const UPDATE_CHECK_MS=15*60*1000;
   const VISIBILITY_CHECK_MS=5*60*1000;
   const JUST_UPDATED_KEY="a8_pwa_just_updated";
   const UPDATE_APPLYING_KEY="a8_pwa_update_applying";
+
+  let justUpdated=false;
+  try{justUpdated=sessionStorage.getItem(JUST_UPDATED_KEY)==="1"}catch(e){}
+  window.KITSUNE_JUST_UPDATED=justUpdated;
 
   let registration=null;
   let waitingWorker=null;
@@ -243,7 +247,12 @@
     },UPDATE_CHECK_MS);
 
     try{
-      if(sessionStorage.getItem(JUST_UPDATED_KEY)==="1"){
+      if(justUpdated){
+        /* Brain/Whisper listeners use this event to restore already-downloaded
+           local models into RAM after the Service Worker reload. */
+        window.dispatchEvent(new CustomEvent("kitsune-pwa-updated",{
+          detail:{version:VERSION}
+        }));
         sessionStorage.removeItem(JUST_UPDATED_KEY);
         setTimeout(()=>showToast(`✅ Kitsune обновлена до v${VERSION}.`,"ok"),650);
       }

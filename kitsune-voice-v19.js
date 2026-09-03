@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.12.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.12.2";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -97,6 +97,8 @@
     const mod=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm");
     window.__kitsuneTransformersModule=mod;
     try{
+      mod.env.useBrowserCache=true;
+      mod.env.allowLocalModels=false;
       if(mod.env?.backends?.onnx?.wasm){
         mod.env.backends.onnx.wasm.numThreads=1;
         mod.env.backends.onnx.wasm.proxy=false;
@@ -254,6 +256,43 @@
         setWhisperStatus("Ошибка запуска Whisper worker: "+String(err?.message||err).slice(0,220),"warn");
       }
     }
+  }
+
+  let restoreAfterUpdateStarted=false;
+  let restoreFallbackTimer=null;
+
+  function restoreWhisperAfterUpdate(){
+    if(restoreAfterUpdateStarted||!whisperReady)return;
+    restoreAfterUpdateStarted=true;
+
+    const start=()=>{
+      if(workerReady||workerLoading||mainThreadTranscriber)return;
+      setWhisperStatus("После обновления восстанавливаю Whisper из локального кэша…","busy");
+      prepareWhisper().catch(err=>{
+        console.warn("[Kitsune Whisper restore]",err);
+      });
+    };
+
+    /* On iPhone do not initialize Brain (~VRAM) and Whisper at exactly the
+       same moment. If Brain was enabled, wait for its restore first. */
+    const brainWasPrepared=!!window.KitsuneBrain?.isReady?.();
+    const brainMode=window.KitsuneBrain?.mode?.();
+
+    if(brainWasPrepared&&brainMode==="brain"){
+      const afterBrain=()=>{
+        clearTimeout(restoreFallbackTimer);
+        setTimeout(start,450);
+      };
+      window.addEventListener("kitsune-brain-runtime-ready",afterBrain,{once:true});
+      restoreFallbackTimer=setTimeout(start,18000);
+    }else{
+      setTimeout(start,1400);
+    }
+  }
+
+  function scheduleWhisperRestoreAfterUpdate(){
+    if(!window.KITSUNE_JUST_UPDATED)return;
+    restoreWhisperAfterUpdate();
   }
 
   function setWhisperStatus(text,kind=""){
@@ -760,6 +799,14 @@
   setTimeout(injectSettings,1000);
 
   if(whisperReady){
-    setWhisperStatus("Whisper подготовлен ранее. Голосовой ввод загрузится из кэша по первому нажатию микрофона.","ok");
+    setWhisperStatus(
+      window.KITSUNE_JUST_UPDATED
+        ?"Whisper сохранён. После обновления автоматически восстанавливаю его из локального кэша…"
+        :"Whisper подготовлен ранее. Голосовой ввод загрузится из локального кэша автоматически при необходимости.",
+      "ok"
+    );
   }
+
+  scheduleWhisperRestoreAfterUpdate();
+  window.addEventListener("kitsune-pwa-updated",scheduleWhisperRestoreAfterUpdate,{once:true});
 })();

@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.12.1: исправлен Privacy Center и синхронизация версии PWA; Privacy First без внешней аналитики.",
+  "description": "Алгебра 8 v1.12.2: Brain и Voice Dialogue автоматически восстанавливаются из локального кэша после PWA-обновления; модели не нужно подготавливать вручную заново.",
   "orientation": "any",
   "categories": [
     "education"

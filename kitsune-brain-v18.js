@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.12.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.12.2";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -339,6 +339,11 @@
         ready=true;mode="brain";lastBrainNotice=null;save();
         progress(null);
         setStatus("✅ Kitsune Brain готов. Модель работает прямо на устройстве.","ok");
+        try{
+          window.dispatchEvent(new CustomEvent("kitsune-brain-runtime-ready",{
+            detail:{ok:true,version:VERSION}
+          }));
+        }catch(e){}
         return engine;
       }catch(err){
         engine=null;
@@ -874,6 +879,59 @@
   // Переименовываем legacy API, не ломая внутреннюю совместимость.
   if(window.AlfiSmartTutor&&!window.KitsuneSmartTutor)window.KitsuneSmartTutor=window.AlfiSmartTutor;
 
+  let restoreAfterUpdateStarted=false;
+  async function restoreBrainAfterUpdate(){
+    if(restoreAfterUpdateStarted)return;
+    restoreAfterUpdateStarted=true;
+
+    if(!ready||mode!=="brain"){
+      try{
+        window.dispatchEvent(new CustomEvent("kitsune-brain-runtime-ready",{
+          detail:{ok:false,skipped:true,version:VERSION}
+        }));
+      }catch(e){}
+      return;
+    }
+
+    setStatus("После обновления восстанавливаю Kitsune Brain из локального кэша…","busy");
+    progress(4,"Локальный кэш");
+
+    let cached=ready;
+    try{cached=await checkCached()}catch(e){cached=ready}
+
+    if(!cached){
+      ready=false;save();progress(null);
+      setStatus("Локальная модель Brain не найдена. Потребуется подготовить её заново.","warn");
+      try{
+        window.dispatchEvent(new CustomEvent("kitsune-brain-runtime-ready",{
+          detail:{ok:false,cacheMissing:true,version:VERSION}
+        }));
+      }catch(e){}
+      return;
+    }
+
+    await ensureEngine({explicit:false});
+    if(!engine){
+      try{
+        window.dispatchEvent(new CustomEvent("kitsune-brain-runtime-ready",{
+          detail:{ok:false,version:VERSION}
+        }));
+      }catch(e){}
+    }
+  }
+
+  function scheduleBrainRestoreAfterUpdate(){
+    if(!window.KITSUNE_JUST_UPDATED)return;
+    const run=()=>restoreBrainAfterUpdate().catch(err=>{
+      console.warn("[Kitsune Brain restore]",err);
+    });
+    if("requestIdleCallback" in window){
+      requestIdleCallback(run,{timeout:2200});
+    }else{
+      setTimeout(run,900);
+    }
+  }
+
   window.KitsuneBrain={
     version:VERSION,
     modelId:MODEL_ID,
@@ -893,8 +951,11 @@
   setTimeout(injectSettings,900);
 
   if(ready){
-    // Модель отмечена как подготовленная, но WebLLM и GPU не трогаем до первого
-    // реального обращения или явного теста — быстрый старт курса важнее.
     setTimeout(()=>updateUi(),250);
   }
+
+  // После PWA-обновления восстанавливаем только уже скачанную модель.
+  // При обычном запуске сохраняется прежний lazy-start.
+  scheduleBrainRestoreAfterUpdate();
+  window.addEventListener("kitsune-pwa-updated",scheduleBrainRestoreAfterUpdate,{once:true});
 })();
