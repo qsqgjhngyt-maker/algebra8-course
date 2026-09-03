@@ -644,7 +644,7 @@ document.querySelector("#installBtn").onclick=async()=>{
   }catch(e){}
   installPrompt=null;
 };
-if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+/* v1.11.9: Service Worker registration is managed by pwa-update-v1119.js */
 
 function applyReveal(){
   const items = document.querySelectorAll(".reveal");

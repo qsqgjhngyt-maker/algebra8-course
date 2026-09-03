@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.8: Kitsune closes by tapping outside the assistant, matching mobile sidebar UX; current Brain, Voice and Child Safety preserved.",
+  "description": "Алгебра 8 v1.11.9: PWA Auto Update — приложение устанавливается один раз, новые версии скачиваются в фоне и применяются по кнопке без удаления прогресса и локальных данных.",
   "orientation": "any",
   "categories": [
     "education"

@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.8";
+  const VERSION="1.11.9";
   const CONSENT_KEY="a8_analytics_consent_v1111";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
@@ -28,7 +28,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.11.8</small>
+              <small>Kitsune · режим защиты ребёнка · v1.11.9</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>

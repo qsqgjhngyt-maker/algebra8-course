@@ -1,12 +1,12 @@
-const CACHE="algebra8-v1.11.8";
-const NEURAL_CACHE="algebra8-ai-runtime-v1.11.8";
+const CACHE="algebra8-v1.11.9";
+const NEURAL_CACHE="algebra8-ai-runtime-v1";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
   "./manifest.json","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
   "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
   "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
-  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js","./whisper-worker-v1114.js","./whisper-worker-v1116.js","./kitsune-live-v110.js","./privacy-v1111.js","./analytics-v111.js","./security-bootstrap-v1111.js"
+  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js","./whisper-worker-v1114.js","./whisper-worker-v1116.js","./kitsune-live-v110.js","./privacy-v1111.js","./analytics-v111.js","./security-bootstrap-v1111.js","./pwa-update.js"
 ];
 
 const CHILD_CSP=[
@@ -65,15 +65,29 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
+  /* v1.11.9: download the whole release in background, but do NOT replace
+     the currently running app until the user presses "Обновить". This avoids
+     interrupting a lesson or losing text that has not yet been submitted. */
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));
-  self.skipWaiting();
+});
+
+self.addEventListener("message",e=>{
+  const data=e.data||{};
+  if(data.type==="SKIP_WAITING"){
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate",e=>{
   e.waitUntil(
     caches.keys().then(keys=>Promise.all(
       keys
-        .filter(k=>k!==CACHE&&k!==NEURAL_CACHE)
+        /* Delete only obsolete caches owned by this course. Never wipe
+           unknown CacheStorage entries created by AI runtimes/model loaders. */
+        .filter(k=>
+          (k.startsWith("algebra8-v")&&k!==CACHE) ||
+          (k.startsWith("algebra8-ai-runtime-")&&k!==NEURAL_CACHE)
+        )
         .map(k=>caches.delete(k))
     )).then(()=>self.clients.claim())
   );

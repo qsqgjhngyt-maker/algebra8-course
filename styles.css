@@ -5283,3 +5283,157 @@ body.v15-assistant-open .v15-scrim{
 @media(prefers-reduced-motion:reduce){
   .v15-scrim{transition:none!important}
 }
+
+
+
+/* =====================================================================
+   v1.11.9 · PWA AUTO UPDATE
+   ===================================================================== */
+#updateBtn.pwa-update-available{
+  color:#b36b00!important;
+  border-color:color-mix(in srgb,#ffb020 50%,var(--line))!important;
+  background:color-mix(in srgb,#ffb020 10%,var(--card))!important;
+  animation:pwaUpdatePulse 1.8s ease-in-out infinite;
+}
+#updateBtn.pwa-update-checking{
+  opacity:.78;
+}
+
+.pwa-update-banner{
+  position:fixed;
+  left:50%;
+  bottom:max(18px,calc(12px + env(safe-area-inset-bottom,0px)));
+  z-index:5000;
+  width:min(720px,calc(100vw - 28px));
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  border:2px solid color-mix(in srgb,var(--primary) 34%,var(--line));
+  border-bottom-width:5px;
+  border-radius:18px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 24px 70px rgba(0,0,0,.22);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translate(-50%,18px) scale(.98);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s ease;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.pwa-update-banner.show{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translate(-50%,0) scale(1);
+}
+.pwa-update-icon{
+  width:42px;height:42px;
+  display:grid;place-items:center;
+  border-radius:13px;
+  background:var(--primary-soft);
+  font-size:23px;
+}
+.pwa-update-copy{min-width:0}
+.pwa-update-copy strong{
+  display:block;
+  font-size:12px;
+  font-weight:1000;
+}
+.pwa-update-copy span{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.4;
+}
+.pwa-update-actions{
+  display:flex;
+  gap:7px;
+}
+.pwa-update-actions button{
+  min-height:39px;
+  padding:8px 11px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  font-size:9.5px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+.pwa-update-later{
+  background:var(--card);
+  color:var(--muted);
+}
+.pwa-update-now{
+  background:var(--primary);
+  color:#fff;
+  border-color:color-mix(in srgb,var(--primary) 70%,#000)!important;
+}
+
+.pwa-update-toast{
+  position:fixed;
+  left:50%;
+  top:max(15px,calc(8px + env(safe-area-inset-top,0px)));
+  z-index:5100;
+  max-width:min(560px,calc(100vw - 24px));
+  padding:10px 13px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 14px 40px rgba(0,0,0,.18);
+  font-size:10px;
+  font-weight:850;
+  line-height:1.4;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translate(-50%,-10px);
+  transition:.18s ease;
+}
+.pwa-update-toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+}
+.pwa-update-toast.ok{
+  border-color:color-mix(in srgb,#2fae68 38%,var(--line));
+}
+.pwa-update-toast.warn{
+  border-color:color-mix(in srgb,#ffb020 48%,var(--line));
+}
+
+@keyframes pwaUpdatePulse{
+  0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,#ffb020 0%,transparent)}
+  50%{box-shadow:0 0 0 5px color-mix(in srgb,#ffb020 12%,transparent)}
+}
+
+@media(max-width:620px){
+  .pwa-update-banner{
+    grid-template-columns:auto minmax(0,1fr);
+    width:calc(100vw - 18px);
+    bottom:max(9px,calc(5px + env(safe-area-inset-bottom,0px)));
+    gap:8px;
+  }
+  .pwa-update-actions{
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .pwa-update-actions button{width:100%}
+}
+
+@media(max-width:380px){
+  .pwa-update-icon{display:none}
+  .pwa-update-banner{grid-template-columns:1fr}
+  .pwa-update-actions{grid-column:auto}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #updateBtn.pwa-update-available{animation:none!important}
+  .pwa-update-banner,.pwa-update-toast{transition:none!important}
+}
