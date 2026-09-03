@@ -2273,6 +2273,17 @@ html[data-design="classic"] .v15-assistant{display:none!important}
   color:var(--text);
   box-shadow:0 16px 42px rgba(25,45,25,.14);
   pointer-events:auto;
+
+  /* v1.7.2: окно Альфи никогда не может стать выше viewport.
+     100vh — fallback, 100dvh — реальная высота мобильного экрана с browser chrome. */
+  max-height:calc(100vh - 112px);
+  max-height:calc(100dvh - 112px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable;
+
   transform-origin:100% 100%;
   opacity:0;
   transform:translateY(8px) scale(.94);
@@ -2289,6 +2300,16 @@ html[data-design="classic"] .v15-assistant{display:none!important}
   align-items:center;
   gap:8px;
   margin-bottom:7px;
+
+  /* v1.7.2: имя, озвучка, настройки и × всегда доступны при прокрутке */
+  position:sticky;
+  top:-14px;
+  z-index:12;
+  margin-top:-14px;
+  padding-top:14px;
+  padding-bottom:7px;
+  background:var(--card);
+  border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);
 }
 .v15-speech-head strong{font-weight:1000}
 .v15-speech-status{
@@ -2444,6 +2465,13 @@ html[data-design="playful"] body.dark .v15-speech{
     min-width:0;
     width:min(310px,calc(100vw - 82px));
     padding:12px 12px 11px;
+    max-height:calc(100vh - 94px);
+    max-height:calc(100dvh - 94px);
+  }
+  .v15-speech-head{
+    top:-12px;
+    margin-top:-12px;
+    padding-top:12px;
   }
   .v15-message{font-size:13px}
   .v15-action{padding:8px 8px}
@@ -2454,6 +2482,8 @@ html[data-design="playful"] body.dark .v15-speech{
     right:20px;
     bottom:91px;
     width:calc(100vw - 38px);
+    max-height:calc(100vh - 116px);
+    max-height:calc(100dvh - 116px);
   }
 }
 
@@ -3163,4 +3193,24 @@ html[data-design="classic"] .v16-tutor-btn{display:none!important}
 @media(prefers-reduced-motion:reduce){
   .v17-neural-status.busy::before{animation:none!important}
   .v17-progress-track i{transition:none!important}
+}
+
+/* =====================================================================
+   v1.7.2 · SCROLL АЛЬФИ
+   ===================================================================== */
+.v15-speech{
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--primary) 38%,var(--line)) transparent;
+}
+.v15-speech::-webkit-scrollbar{width:7px}
+.v15-speech::-webkit-scrollbar-track{background:transparent}
+.v15-speech::-webkit-scrollbar-thumb{
+  border:2px solid transparent;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--primary) 38%,var(--line));
+  background-clip:padding-box;
+}
+.v15-speech::-webkit-scrollbar-thumb:hover{
+  background:color-mix(in srgb,var(--primary) 55%,var(--line));
+  background-clip:padding-box;
 }

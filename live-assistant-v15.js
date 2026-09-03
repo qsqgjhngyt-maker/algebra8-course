@@ -859,13 +859,19 @@ document.addEventListener("click",e=>{
   const text=(btn.textContent||"").trim();
   const onclick=btn.getAttribute("onclick")||"";
 
-  /* Пользователь сам просит подсказку */
-  if(/Подсказк|Разобрать идею|Хочу понять|Совет/i.test(text) || /toggleHint/i.test(onclick)){
-    if(v15Mode!=="off"){
-      const l=v15Lesson();
-      v15Message(l?v15TopicAdvice(l.id):"Посмотри на условие ещё раз и выдели один ключевой факт. Часто он прямо указывает на нужное правило.",{state:"think",open:v15Mode==="active"});
-      if(v15Mode==="advice")v15Chip("Подсказка готова 💡");
-    }
+  /* v1.7.2 — ВАЖНО:
+     штатные кнопки урока «Подсказка / Хочу понять / Разобрать идею»
+     принадлежат самому курсу. Альфи больше НЕ перехватывает их и не открывает
+     своё меню поверх учебной подсказки. Кнопки самого Альфи имеют собственные
+     прямые обработчики в v15Bind(). */
+  const insideAlfi=!!btn.closest("#v15Assistant");
+  if(insideAlfi)return;
+
+  const nativeLessonHelp=
+    /Подсказк|Разобрать идею|Хочу понять/i.test(text) ||
+    /toggleHint|#hint-|\.hint/.test(onclick);
+
+  if(nativeLessonHelp){
     return;
   }
 
