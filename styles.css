@@ -5241,3 +5241,45 @@ body.v1111-privacy-open{overflow:hidden}
 .v1111-toggle.on.blocked i{
   background:#e5a900;
 }
+
+
+
+/* =====================================================================
+   v1.11.8 · KITSUNE OUTSIDE-TAP CLOSE
+   ===================================================================== */
+.v15-scrim{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:1890;
+  background:rgba(7,12,10,.16);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+body.v15-assistant-open .v15-scrim{
+  display:block;
+  opacity:1;
+  pointer-events:auto;
+}
+/* Kitsune must stay above the outside-tap layer. */
+.v15-assistant{
+  z-index:1900!important;
+}
+/* Keep dialog overlays above the assistant scrim when opened from Kitsune. */
+.v19-dialog-backdrop{
+  z-index:2100!important;
+}
+.v1111-privacy-backdrop{
+  z-index:2200!important;
+}
+@media(max-width:620px){
+  .v15-scrim{
+    background:rgba(7,12,10,.24);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .v15-scrim{transition:none!important}
+}

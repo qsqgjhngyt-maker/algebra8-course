@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.7: Android Whisper WASM blob-module compatibility fix; iPhone Voice path and Child Safety preserved.",
+  "description": "Алгебра 8 v1.11.8: Kitsune closes by tapping outside the assistant, matching mobile sidebar UX; current Brain, Voice and Child Safety preserved.",
   "orientation": "any",
   "categories": [
     "education"

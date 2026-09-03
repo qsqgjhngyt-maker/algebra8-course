@@ -191,6 +191,14 @@ function v15Markup(){
 function v15Ensure(){
   let root=document.querySelector("#v15Assistant");
   if(root)return root;
+
+  if(!document.querySelector("#v15Scrim")){
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<div class="v15-scrim" id="v15Scrim" aria-hidden="true"></div>'
+    );
+  }
+
   document.body.insertAdjacentHTML("beforeend",v15Markup());
   root=document.querySelector("#v15Assistant");
   v15Bind();
@@ -248,10 +256,16 @@ function v15ApplyMode(mode){
 }
 function v15Open(){
   if(v15Mode==="off")return;
-  v15Ensure().classList.add("open");
+  const root=v15Ensure();
+  root.classList.add("open");
+  document.body.classList.add("v15-assistant-open");
+  const scrim=document.querySelector("#v15Scrim");
+  scrim?.setAttribute("aria-hidden","false");
 }
 function v15Close(){
   document.querySelector("#v15Assistant")?.classList.remove("open");
+  document.body.classList.remove("v15-assistant-open");
+  document.querySelector("#v15Scrim")?.setAttribute("aria-hidden","true");
 }
 function v15Chip(text){
   if(v15Mode==="off")return;
@@ -637,6 +651,16 @@ function v15ExplainSimple(){
 
 function v15Bind(){
   const root=document.querySelector("#v15Assistant");
+
+  /* v1.11.8: same UX as the mobile sidebar — tap outside Kitsune closes it. */
+  const scrim=document.querySelector("#v15Scrim");
+  scrim?.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    v15Close();
+  });
+  window.addEventListener("keydown",e=>{
+    if(e.key==="Escape"&&root.classList.contains("open"))v15Close();
+  });
   root.querySelector("#v15MascotBtn").addEventListener("click",()=>{
     if(root.classList.contains("open"))v15Close();
     else{

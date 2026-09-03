@@ -42,7 +42,7 @@
   };
 
   window.__KITSUNE_CHILD_SAFE__={
-    version:"1.11.7",
+    version:"1.11.8",
     analyticsAllowed,
     consentKey:CONSENT_KEY,
     ownerKey:OWNER_KEY
