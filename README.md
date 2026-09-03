@@ -1,6 +1,6 @@
 # Алгебра 8 — интерактивный курс
 
-Версия: **v1.11.2**
+Версия: **v1.11.3**
 
 Что добавлено в этой итерации:
 - живой фон из мягких частиц;
@@ -1133,3 +1133,24 @@ Service Worker cache: `algebra8-v1.11.1`.
 - добавлен safe-area снизу и сверху;
 - на очень низких экранах вертикальные интервалы слегка уменьшаются;
 - на desktop больше нет старого `overflow:hidden`, блокировавшего прокрутку.
+
+
+## v1.11.3 — iPhone Brain + Android Analytics Fix
+
+### iPhone / Kitsune Brain
+Child Safety CSP теперь явно разрешает только WebAssembly-компиляцию через `'wasm-unsafe-eval'`. Общий `'unsafe-eval'` НЕ включён.
+
+Добавлен отдельный WASM compatibility probe. Перед загрузкой WebLLM проверяются:
+- `navigator.gpu`;
+- доступность GPU adapter;
+- возможность компиляции WebAssembly;
+- HTTPS/runtime environment.
+
+Ошибка Brain теперь не исчезает после короткого мигания: причина остаётся видимой в интерфейсе.
+
+### Android / Analytics
+Privacy toggle больше не выглядит неработающим, если статистика заблокирована защитой.
+
+Если устройство помечено как `kitsune_owner`, UI явно сообщает об этом и взрослый может снять owner-исключение.
+
+Если браузер включил Do Not Track / Global Privacy Control, Kitsune показывает причину и НЕ обходит защиту браузера.

@@ -5153,3 +5153,25 @@ body.v1111-privacy-open{overflow:hidden}
     padding-top:8px!important;
   }
 }
+
+
+/* v1.11.3 · Android analytics diagnostics */
+.v1113-analytics-reason{
+  display:none;
+  margin:-2px 14px 10px;
+  padding:9px 11px;
+  border-radius:11px;
+  font-size:9px;
+  line-height:1.45;
+}
+.v1113-analytics-reason.show{display:block}
+.v1113-analytics-reason.owner{
+  border:1px solid color-mix(in srgb,#3b82f6 30%,var(--line));
+  background:color-mix(in srgb,#3b82f6 7%,var(--card));
+  color:var(--text);
+}
+.v1113-analytics-reason.blocked{
+  border:1px solid color-mix(in srgb,#ffca28 45%,var(--line));
+  background:color-mix(in srgb,#ffca28 8%,var(--card));
+  color:var(--text);
+}

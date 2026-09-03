@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.2: Child Safety Hardened + исправленная независимая прокрутка боковой панели на телефонах и низких экранах.",
+  "description": "Алгебра 8 v1.11.3: Child Safety + iPhone WebGPU/WebAssembly Brain compatibility fix + понятная диагностика аналитики на Android.",
   "orientation": "any",
   "categories": [
     "education"

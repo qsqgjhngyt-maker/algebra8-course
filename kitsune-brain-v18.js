@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.2";
+  const VERSION="1.11.3";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -22,6 +22,7 @@
   let engine=null;
   let enginePromise=null;
   let busy=false;
+  let lastBrainNotice=null;
   let memory={errors:{},topics:{},recent:[]};
 
   try{
@@ -108,12 +109,25 @@
     label.textContent=text?`${text} · ${Math.round(n)}%`:`${Math.round(n)}%`;
   }
 
+  async function wasmAllowed(){
+    try{
+      /* Minimal valid WASM module. This specifically catches CSP blocks. */
+      const bytes=new Uint8Array([0,97,115,109,1,0,0,0]);
+      await WebAssembly.compile(bytes);
+      return {ok:true,error:""};
+    }catch(e){
+      return {ok:false,error:String(e?.message||e).slice(0,180)};
+    }
+  }
+
   async function deviceInfo(){
     const info={
       webgpu:!!navigator.gpu,
       memory:Number(navigator.deviceMemory)||null,
       quota:null,usage:null,
-      adapter:false
+      adapter:false,
+      wasm:false,
+      wasmError:""
     };
     try{
       if(navigator.storage?.estimate){
@@ -124,6 +138,8 @@
     if(info.webgpu){
       try{info.adapter=!!(await navigator.gpu.requestAdapter())}catch(e){}
     }
+    const w=await wasmAllowed();
+    info.wasm=w.ok;info.wasmError=w.error;
     return info;
   }
 
@@ -144,9 +160,15 @@
     }
 
     if(!info.webgpu||!info.adapter){
-      box.innerHTML=`<b>⚠ WebGPU недоступен.</b><span>Kitsune автоматически использует Smart Tutor — курс продолжит работать.</span>`;
+      box.innerHTML=`<b>⚠ WebGPU недоступен.</b><span>На iPhone нужен iOS/Safari 26 или новее и совместимое устройство. Kitsune автоматически использует Smart Tutor.</span>`;
       box.className="v18-device-info warn";
-      if(mode==="brain"){mode="smart";save();updateUi()}
+      if(mode==="brain"){mode="smart";save();updateUi({preserveStatus:true})}
+      return info;
+    }
+
+    if(!info.wasm){
+      box.innerHTML=`<b>⚠ WebAssembly заблокирован политикой браузера.</b><span>${info.wasmError||"Проверь CSP/режим повышенной защиты браузера."}</span>`;
+      box.className="v18-device-info warn";
       return info;
     }
 
@@ -157,15 +179,22 @@
     return info;
   }
 
-  function updateUi(){
+  function updateUi({preserveStatus=false}={}){
     document.querySelectorAll("[data-v18-mode]").forEach(b=>b.classList.toggle("active",b.dataset.v18Mode===mode));
     const prep=document.querySelector("#v18PrepareBrain");
     const test=document.querySelector("#v18TestBrain");
     if(prep){
       prep.disabled=busy;
-      prep.textContent=ready?"✅ Мозг Kitsune подготовлен":"⬇ Подготовить мозг Kitsune";
+      prep.textContent=busy?"⏳ Подготавливаю Kitsune Brain…":ready?"✅ Мозг Kitsune подготовлен":"⬇ Подготовить мозг Kitsune";
     }
     if(test)test.disabled=busy||!ready;
+
+    if(preserveStatus)return;
+
+    if(lastBrainNotice){
+      setStatus(lastBrainNotice.text,lastBrainNotice.kind);
+      return;
+    }
     if(ready){
       setStatus(engine?"Kitsune Brain загружен в память и готов к диалогу.":"Модель подготовлена локально. Загрузится в память при первом обращении.","ok");
     }else{
@@ -183,7 +212,7 @@
     block.innerHTML=`
       <div class="v18-brain-head">
         <div><strong>🦊 Kitsune Brain</strong><small>локальный ИИ · WebGPU · без API</small></div>
-        <span>v1.11.2</span>
+        <span>v1.11.3</span>
       </div>
       <div class="v18-mode-row">
         <button type="button" data-v18-mode="brain">🧠 Brain</button>
@@ -274,12 +303,21 @@
 
     const info=await deviceInfo();
     if(!info.webgpu||!info.adapter){
-      mode="smart";save();updateUi();
+      mode="smart";save();
+      lastBrainNotice={text:"WebGPU недоступен на этом устройстве. На iPhone требуется Safari/iOS 26+; Smart Tutor продолжает работать.",kind:"warn"};
+      updateUi();
+      return null;
+    }
+    if(!info.wasm){
+      mode="smart";save();
+      lastBrainNotice={text:"WebAssembly заблокирован браузером или CSP: "+(info.wasmError||"неизвестная причина"),kind:"warn"};
+      updateUi();
       return null;
     }
 
     enginePromise=(async()=>{
-      busy=true;updateUi();
+      busy=true;lastBrainNotice=null;updateUi({preserveStatus:true});
+      setStatus("Проверка WebGPU и WebAssembly пройдена. Загружаю WebLLM…","busy");
       try{
         const lib=await loadWebLLM();
         const cfg=appConfig(lib);
@@ -298,18 +336,20 @@
           {context_window_size:2048,temperature:.48,top_p:.88,repetition_penalty:1.05}
         );
 
-        ready=true;mode="brain";save();
+        ready=true;mode="brain";lastBrainNotice=null;save();
         progress(null);
         setStatus("✅ Kitsune Brain готов. Модель работает прямо на устройстве.","ok");
         return engine;
       }catch(err){
         engine=null;
         progress(null);
-        setStatus("Brain не запустился — автоматически использую Smart Tutor. "+String(err?.message||err).slice(0,120),"warn");
+        const msg=String(err?.message||err).slice(0,220);
+        lastBrainNotice={text:"Brain не запустился — Smart Tutor остаётся активным. Причина: "+msg,kind:"warn"};
+        setStatus(lastBrainNotice.text,lastBrainNotice.kind);
         console.warn("[Kitsune Brain]",err);
         return null;
       }finally{
-        busy=false;enginePromise=null;updateUi();
+        busy=false;enginePromise=null;updateUi({preserveStatus:!!lastBrainNotice});
       }
     })();
 
@@ -318,7 +358,16 @@
 
   async function prepareBrain(){
     if(busy)return;
-    await ensureEngine({explicit:true});
+    lastBrainNotice=null;
+    setStatus("Проверяю совместимость iPhone/Android: WebGPU + WebAssembly…","busy");
+    progress(2,"Проверка устройства");
+    try{
+      await ensureEngine({explicit:true});
+    }finally{
+      if(!busy&&document.querySelector("#v18BrainProgress")?.classList.contains("show")&&!engine){
+        progress(null);
+      }
+    }
   }
 
   function rememberError(ctx,type){

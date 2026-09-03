@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.2";
+  const VERSION="1.11.3";
   const CONSENT_KEY="a8_analytics_consent_v1111";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
@@ -28,7 +28,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.11.2</small>
+              <small>Kitsune · режим защиты ребёнка · v1.11.3</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>
@@ -66,6 +66,7 @@
               <i></i><span>Выкл.</span>
             </button>
           </section>
+          <div class="v1113-analytics-reason" id="v1113AnalyticsReason"></div>
 
           <div class="v1111-analytics-details">
             <b>Если взрослый включит статистику, Umami получит только:</b>
@@ -134,22 +135,28 @@
 
     const stored=analyticsStoredEnabled();
     const api=window.KitsuneAnalytics;
-    const blocked=api?.privacySignalBlocks?.()||api?.ownerOptedOut?.();
-    const enabled=stored&&!blocked;
+    const owner=!!api?.ownerOptedOut?.();
+    const privacyBlocked=!!api?.privacySignalBlocks?.();
+    const enabled=stored&&!owner&&!privacyBlocked;
 
     btn.classList.toggle("on",enabled);
     btn.setAttribute("aria-pressed",enabled?"true":"false");
+    btn.disabled=false; // Never look "broken" on Android; explain the protection on click.
     const span=btn.querySelector("span");
     if(span)span.textContent=enabled?"Вкл.":"Выкл.";
 
-    if(blocked){
-      btn.disabled=true;
-      btn.title=api?.ownerOptedOut?.()
-        ?"Это устройство владельца исключено из аналитики."
-        :"Браузер запросил запрет отслеживания (DNT/GPC).";
-    }else{
-      btn.disabled=false;
-      btn.title="";
+    const reason=document.querySelector("#v1113AnalyticsReason");
+    if(reason){
+      if(owner){
+        reason.innerHTML="<b>ℹ Это устройство отмечено как устройство владельца.</b> Его тестовые посещения исключены из статистики. Нажми переключатель, если хочешь снять исключение.";
+        reason.className="v1113-analytics-reason show owner";
+      }else if(privacyBlocked){
+        reason.innerHTML="<b>🛡 Браузер включил DNT/GPC.</b> Kitsune уважает этот запрет и не будет обходить его. Чтобы разрешить статистику, взрослому нужно изменить настройку приватности самого браузера.";
+        reason.className="v1113-analytics-reason show blocked";
+      }else{
+        reason.textContent="";
+        reason.className="v1113-analytics-reason";
+      }
     }
 
     const side=document.querySelector("#privacyBtn");
@@ -159,6 +166,34 @@
   }
 
   async function toggleAnalytics(){
+    const api=window.KitsuneAnalytics;
+    const owner=!!api?.ownerOptedOut?.();
+    const privacyBlocked=!!api?.privacySignalBlocks?.();
+
+    if(owner){
+      const remove=confirm(
+        "На этом устройстве включено исключение владельца: его тестовые посещения не попадают в статистику.\n\n"+
+        "Снять исключение владельца и включить анонимную статистику на ЭТОМ устройстве?"
+      );
+      if(!remove)return;
+      api?.setOwnerOptOut?.(false);
+      if(api?.setConsent)await api.setConsent(true);
+      else{
+        try{localStorage.setItem(CONSENT_KEY,"1")}catch(e){}
+      }
+      sync();
+      return;
+    }
+
+    if(privacyBlocked){
+      alert(
+        "Браузер включил Do Not Track / Global Privacy Control.\n\n"+
+        "Kitsune не будет обходить защиту браузера. Если статистика действительно нужна, взрослому нужно сначала отключить этот запрет в настройках браузера."
+      );
+      sync();
+      return;
+    }
+
     const currently=analyticsStoredEnabled();
     const next=!currently;
 
@@ -172,8 +207,8 @@
       if(!ok)return;
     }
 
-    if(window.KitsuneAnalytics?.setConsent){
-      await window.KitsuneAnalytics.setConsent(next);
+    if(api?.setConsent){
+      await api.setConsent(next);
     }else{
       try{localStorage.setItem(CONSENT_KEY,next?"1":"0")}catch(e){}
     }
