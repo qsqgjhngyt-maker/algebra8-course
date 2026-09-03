@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.9.0";
+  const VERSION="1.9.1";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -249,7 +249,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.9</span>
+        <span>v1.9.1</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
@@ -280,6 +280,15 @@
       b.textContent=recording?"■ Стоп":"🎙️ Говорить";
       b.setAttribute("aria-pressed",recording?"true":"false");
     });
+  }
+
+  function syncVisualViewport(){
+    const vv=window.visualViewport;
+    const w=Math.round(vv?.width||window.innerWidth||document.documentElement.clientWidth||0);
+    const h=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||0);
+    const root=document.documentElement;
+    if(w>0)root.style.setProperty("--v19-visual-w",`${w}px`);
+    if(h>0)root.style.setProperty("--v19-visual-h",`${h}px`);
   }
 
   function dialogMarkup(){
@@ -357,13 +366,17 @@
 
   function openDialog(ctx=null){
     activeCtx=ctx?.exercise?ctx:currentCtx();
+    syncVisualViewport();
     const root=ensureDialog();
     root.classList.add("show");
     document.body.classList.add("v19-dialog-open");
     const label=root.querySelector("#v19DialogContext");
     if(label)label.textContent=contextLabel(activeCtx);
     renderHistory();
-    setTimeout(()=>root.querySelector("textarea")?.focus(),80);
+    setTimeout(()=>{
+      syncVisualViewport();
+      root.querySelector("textarea")?.focus();
+    },80);
   }
 
   function closeDialog(){
@@ -647,6 +660,11 @@
       };tick();
     });
   }
+
+  window.addEventListener("resize",syncVisualViewport,{passive:true});
+  window.visualViewport?.addEventListener("resize",syncVisualViewport,{passive:true});
+  window.visualViewport?.addEventListener("scroll",syncVisualViewport,{passive:true});
+  syncVisualViewport();
 
   // Public API.
   window.KitsuneVoiceDialogue={

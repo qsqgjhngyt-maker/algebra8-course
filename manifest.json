@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.9: лисёнок Kitsune, локальный Brain, комиксный репетитор, разговор текстом и через микрофон с локальным Whisper, Neural Voice, PWA и офлайн.",
+  "description": "Алгебра 8 v1.9.1: Kitsune Voice Dialogue с исправленным мобильным чатом, локальным Whisper, Kitsune Brain, Neural Voice и PWA.",
   "orientation": "any",
   "categories": [
     "education"

@@ -1,5 +1,5 @@
-const CACHE="algebra8-v1.9.0";
-const NEURAL_CACHE="algebra8-ai-runtime-v1.9.0";
+const CACHE="algebra8-v1.9.1";
+const NEURAL_CACHE="algebra8-ai-runtime-v1.9.1";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
   "./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png",

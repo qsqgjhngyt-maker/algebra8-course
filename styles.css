@@ -4099,3 +4099,222 @@ body.v19-dialog-open{overflow:hidden}
   .v19-mic-btn.recording{animation:none!important}
   .v19-whisper-progress i{transition:none!important}
 }
+
+
+
+/* =====================================================================
+   v1.9.1 · MOBILE CHAT FIX
+   Жёстко удерживаем диалог Kitsune внутри ширины телефона.
+   ===================================================================== */
+body.v19-dialog-open{
+  overflow:hidden!important;
+  max-width:100vw;
+  overscroll-behavior:none;
+}
+
+.v19-dialog-backdrop,
+.v19-dialog-card,
+.v19-dialog-card *,
+.v19-dialog-head,
+.v19-dialog-log,
+.v19-dialog-compose,
+.v19-compose-actions{
+  box-sizing:border-box;
+}
+
+.v19-dialog-backdrop{
+  width:100vw;
+  max-width:100vw;
+  overflow:hidden;
+}
+
+.v19-dialog-card{
+  min-width:0;
+  max-width:min(720px,100vw);
+  overflow-x:hidden;
+}
+
+.v19-dialog-card > *,
+.v19-dialog-head > *,
+.v19-dialog-compose > *,
+.v19-msg,
+.v19-msg > div{
+  min-width:0;
+}
+
+.v19-dialog-head{
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+}
+
+.v19-dialog-head>div:nth-child(2){
+  min-width:0;
+  overflow:hidden;
+}
+
+.v19-dialog-log{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+.v19-msg{
+  width:100%;
+  max-width:100%;
+}
+
+.v19-msg>div{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+.v19-dialog-compose{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+.v19-dialog-compose textarea{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+.v19-compose-actions{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+
+.v19-mic-btn,
+.v19-send-btn{
+  width:100%;
+  max-width:100%;
+  min-width:0!important;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:620px){
+  .v19-dialog-backdrop{
+    inset:0;
+    width:100vw;
+    max-width:100vw;
+    padding:0!important;
+    align-items:end;
+    justify-items:stretch;
+    overflow:hidden;
+  }
+
+  .v19-dialog-card{
+    width:100vw!important;
+    min-width:0!important;
+    max-width:100vw!important;
+    max-height:calc(var(--v19-visual-h,100dvh) - env(safe-area-inset-top,0px));
+    margin:0!important;
+    border-left:0;
+    border-right:0;
+    border-bottom:0;
+    border-radius:18px 18px 0 0;
+    overflow-x:hidden!important;
+  }
+
+  .v19-dialog-head{
+    gap:7px;
+    padding:
+      10px
+      max(10px,env(safe-area-inset-right,0px))
+      10px
+      max(10px,env(safe-area-inset-left,0px));
+  }
+
+  .v19-dialog-avatar{
+    width:36px;
+    height:36px;
+    font-size:21px;
+  }
+
+  .v19-dialog-head strong{
+    font-size:13px;
+  }
+
+  .v19-dialog-head small{
+    max-width:100%;
+    font-size:8.5px;
+  }
+
+  .v19-dialog-log{
+    padding:
+      11px
+      max(9px,env(safe-area-inset-right,0px))
+      11px
+      max(9px,env(safe-area-inset-left,0px));
+  }
+
+  .v19-msg>div{
+    max-width:calc(100% - 38px)!important;
+  }
+
+  .v19-msg.user>div{
+    max-width:88%!important;
+  }
+
+  .v19-dialog-live{
+    padding-left:max(10px,env(safe-area-inset-left,0px));
+    padding-right:max(10px,env(safe-area-inset-right,0px));
+  }
+
+  .v19-dialog-compose{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:7px;
+    padding:
+      9px
+      max(9px,env(safe-area-inset-right,0px))
+      calc(9px + env(safe-area-inset-bottom,0px))
+      max(9px,env(safe-area-inset-left,0px));
+  }
+
+  .v19-compose-actions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:6px;
+  }
+
+  .v19-mic-btn,
+  .v19-send-btn{
+    min-height:42px;
+    padding:7px 5px;
+    font-size:9.5px;
+  }
+
+  .v19-dialog-foot{
+    display:none;
+  }
+}
+
+@media(max-width:380px){
+  .v19-dialog-head{
+    padding-left:8px;
+    padding-right:8px;
+  }
+  .v19-dialog-avatar{
+    width:32px;
+    height:32px;
+    font-size:19px;
+  }
+  .v19-dialog-close{
+    width:31px;
+    height:31px;
+  }
+  .v19-msg>div,
+  .v19-msg.user>div{
+    max-width:86%!important;
+  }
+  .v19-compose-actions{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
