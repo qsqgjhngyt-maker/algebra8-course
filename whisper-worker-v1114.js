@@ -1,4 +1,4 @@
-/* v1.11.4 · Same-origin Whisper module worker */
+/* v1.11.5 · Same-origin Whisper module worker */
 import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
 
 const MODEL="onnx-community/whisper-tiny";
@@ -38,11 +38,16 @@ async function createPipeline(backend){
   const options=progressOptions();
   if(backend==="webgpu"){
     options.device="webgpu";
-    options.dtype={encoder_model:"fp16",decoder_model_merged:"q4"};
+    /* Whisper's encoder is accuracy-sensitive; fp32+q4 is the stable
+       Transformers.js configuration for the merged decoder. */
+    options.dtype={encoder_model:"fp32",decoder_model_merged:"q4"};
   }else{
-    /* Explicit WASM/CPU path. q8 keeps memory lower on mobile. */
     options.device="wasm";
-    options.dtype={encoder_model:"q8",decoder_model_merged:"q8"};
+    /* v1.11.5: do NOT use q8/q8 here. With Transformers.js 4.2 / current
+       ONNX Runtime some Whisper q8 merged decoders fail session creation
+       in TransposeDQWeightsForMatMulNBits because required scale tensors
+       are missing. fp32+q4 uses the current model exports and works on WASM. */
+    options.dtype={encoder_model:"fp32",decoder_model_merged:"q4"};
   }
   return pipeline("automatic-speech-recognition",MODEL,options);
 }

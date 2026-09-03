@@ -5227,3 +5227,17 @@ body.v1111-privacy-open{overflow:hidden}
   }
   body.sidebar-mobile-open{overflow:hidden}
 }
+
+/* v1.11.5 · analytics consent switch
+   ON state is visible even if DNT/GPC prevents network analytics. */
+.v1111-toggle.on i{
+  transform:translate(28px,-50%)!important;
+}
+.v1111-toggle.on.blocked{
+  border-color:color-mix(in srgb,#ffca28 52%,var(--line));
+  background:color-mix(in srgb,#ffca28 10%,var(--card));
+  color:var(--text);
+}
+.v1111-toggle.on.blocked i{
+  background:#e5a900;
+}

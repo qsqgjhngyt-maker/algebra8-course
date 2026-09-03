@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.4";
+  const VERSION="1.11.5";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -152,7 +152,7 @@
     setWhisperStatus("Проверяю устройство и локальный backend…","busy");
     const preferred=await preferredWhisperBackend();
     if(isIOSLike()&&preferred==="wasm"){
-      setWhisperStatus("iPhone/iPad: использую более совместимый локальный WASM-режим Whisper…","busy");
+      setWhisperStatus("iPhone/iPad: запускаю совместимый WASM Whisper (fp32 + q4)…","busy");
     }
     ensureWorker().postMessage({type:"load",preferred});
   }
@@ -186,7 +186,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.11.4</span>
+        <span>v1.11.5</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>

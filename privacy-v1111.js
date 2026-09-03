@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.4";
+  const VERSION="1.11.5";
   const CONSENT_KEY="a8_analytics_consent_v1111";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
@@ -28,7 +28,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.11.4</small>
+              <small>Kitsune · режим защиты ребёнка · v1.11.5</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>
@@ -133,25 +133,36 @@
     const btn=document.querySelector("#v1111AnalyticsToggle");
     if(!btn)return;
 
-    const stored=analyticsStoredEnabled();
+    const consent=analyticsStoredEnabled();
     const api=window.KitsuneAnalytics;
     const owner=!!api?.ownerOptedOut?.();
     const privacyBlocked=!!api?.privacySignalBlocks?.();
-    const enabled=stored&&!owner&&!privacyBlocked;
+    const effective=consent&&!owner&&!privacyBlocked;
 
-    btn.classList.toggle("on",enabled);
-    btn.setAttribute("aria-pressed",enabled?"true":"false");
-    btn.disabled=false; // Never look "broken" on Android; explain the protection on click.
+    /* The switch represents the adult's consent, not network availability.
+       This means it visibly moves on Android even when DNT/GPC is active. */
+    btn.classList.toggle("on",consent);
+    btn.classList.toggle("blocked",consent&&!effective);
+    btn.setAttribute("aria-pressed",consent?"true":"false");
+    btn.disabled=false;
     const span=btn.querySelector("span");
-    if(span)span.textContent=enabled?"Вкл.":"Выкл.";
+    if(span){
+      span.textContent=consent
+        ? (effective?"Вкл.":"Вкл. · защита")
+        : "Выкл.";
+    }
 
     const reason=document.querySelector("#v1113AnalyticsReason");
     if(reason){
       if(owner){
-        reason.innerHTML="<b>ℹ Это устройство отмечено как устройство владельца.</b> Его тестовые посещения исключены из статистики. Нажми переключатель, если хочешь снять исключение.";
+        reason.innerHTML=consent
+          ? "<b>ℹ Согласие включено, но это устройство отмечено как устройство владельца.</b> Тестовые посещения пока не отправляются."
+          : "<b>ℹ Это устройство отмечено как устройство владельца.</b> Его тестовые посещения исключены из статистики.";
         reason.className="v1113-analytics-reason show owner";
       }else if(privacyBlocked){
-        reason.innerHTML="<b>🛡 Браузер включил DNT/GPC.</b> Kitsune уважает этот запрет и не будет обходить его. Чтобы разрешить статистику, взрослому нужно изменить настройку приватности самого браузера.";
+        reason.innerHTML=consent
+          ? "<b>🛡 Согласие взрослого включено, но браузер блокирует аналитику через DNT/GPC.</b> Ползунок показывает сохранённое согласие; данные не отправляются, пока защита браузера активна."
+          : "<b>🛡 Браузер включил DNT/GPC.</b> Можно сохранить согласие взрослого переключателем, но данные всё равно не будут отправляться, пока защита браузера активна.";
         reason.className="v1113-analytics-reason show blocked";
       }else{
         reason.textContent="";
@@ -161,37 +172,16 @@
 
     const side=document.querySelector("#privacyBtn");
     if(side){
-      side.textContent=enabled?"🔒 Приватность · статистика вкл.":"🔒 Приватность · защита";
+      side.textContent=effective
+        ?"🔒 Приватность · статистика вкл."
+        : consent
+          ?"🔒 Приватность · статистика заблокирована"
+          :"🔒 Приватность · защита";
     }
   }
 
   async function toggleAnalytics(){
     const api=window.KitsuneAnalytics;
-    const owner=!!api?.ownerOptedOut?.();
-    const privacyBlocked=!!api?.privacySignalBlocks?.();
-
-    if(owner){
-      const remove=confirm(
-        "На этом устройстве включено исключение владельца: его тестовые посещения не попадают в статистику.\n\n"+
-        "Снять исключение владельца и включить анонимную статистику на ЭТОМ устройстве?"
-      );
-      if(!remove)return;
-      api?.setOwnerOptOut?.(false);
-      try{localStorage.setItem(CONSENT_KEY,"1")}catch(e){}
-      sync();
-      api?.setConsent?.(true).then(()=>sync()).catch(()=>sync());
-      return;
-    }
-
-    if(privacyBlocked){
-      alert(
-        "Браузер включил Do Not Track / Global Privacy Control.\n\n"+
-        "Kitsune не будет обходить защиту браузера. Если статистика действительно нужна, взрослому нужно сначала отключить этот запрет в настройках браузера."
-      );
-      sync();
-      return;
-    }
-
     const currently=analyticsStoredEnabled();
     const next=!currently;
 
@@ -205,9 +195,30 @@
       if(!ok)return;
     }
 
-    /* Save/paint immediately. Umami network startup must not freeze Android UI. */
+    /* Save consent immediately so the Android switch responds instantly.
+       Browser DNT/GPC remains authoritative inside analytics-v111.js. */
     try{localStorage.setItem(CONSENT_KEY,next?"1":"0")}catch(e){}
     sync();
+
+    if(next&&api?.ownerOptedOut?.()){
+      const remove=confirm(
+        "Это устройство отмечено как устройство владельца и исключено из статистики.\n\n"+
+        "Снять owner-исключение на этом устройстве?"
+      );
+      if(remove)api?.setOwnerOptOut?.(false);
+      sync();
+    }
+
+    if(next&&api?.privacySignalBlocks?.()){
+      alert(
+        "Согласие взрослого сохранено, поэтому ползунок включён.\n\n"+
+        "Но браузер сейчас использует Do Not Track / Global Privacy Control, поэтому Kitsune НЕ отправляет статистику. "+
+        "Это ограничение браузера мы не обходим."
+      );
+      sync();
+      return;
+    }
+
     if(api?.setConsent){
       api.setConsent(next).then(()=>sync()).catch(()=>sync());
     }

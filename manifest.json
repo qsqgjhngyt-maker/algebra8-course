@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.4: Child Safety + совместимый Whisper на iPhone/Android, мгновенный переключатель аналитики и закрытие мобильного меню тапом вне панели.",
+  "description": "Алгебра 8 v1.11.5: исправлен Whisper WASM fp32+q4, Android consent switch при DNT/GPC, сохранены Child Safety и mobile sidebar UX.",
   "orientation": "any",
   "categories": [
     "education"
