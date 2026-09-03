@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.7.3: Smart Inline Tutor Альфи с конкретным пошаговым разбором прямо под заданием, Neural Voice, PWA и офлайн-работой.",
+  "description": "Алгебра 8 с лисёнком Kitsune: локальный Kitsune Brain через WebGPU/WebLLM, проверяемый Math Engine, комиксные подсказки, Neural Voice, PWA и офлайн.",
   "orientation": "any",
   "categories": [
     "education"

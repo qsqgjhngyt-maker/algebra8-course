@@ -309,7 +309,7 @@
     p.className="v173-inline-tutor";
     p.innerHTML=`
       <div class="v173-inline-head">
-        <div><strong>🤖 Альфи разбирает это задание</strong><small>Конкретные шаги · прямо здесь</small></div>
+        <div><strong>🦊 Kitsune разбирает это задание</strong><small>Конкретные шаги · прямо здесь</small></div>
         <button type="button" class="v173-close" aria-label="Скрыть разбор">×</button>
       </div>
       <div class="v173-diagnosis"></div>
@@ -429,7 +429,7 @@
     if(opts.reason==="wrong"){
       const fb=ctx.box.querySelector(".feedback");
       if(fb&&fb.classList.contains("bad")){
-        fb.textContent="Пока не так. Ниже Альфи показал конкретный первый шаг именно для этого задания.";
+        fb.textContent="Пока не так. Ниже Kitsune показал конкретный первый шаг именно для этого задания.";
       }
     }
     render(ctx,opts);
@@ -459,7 +459,7 @@
   // Replace exercise button label after v16 created it.
   function relabel(){
     document.querySelectorAll(".v16-tutor-btn").forEach(b=>{
-      b.innerHTML="🤖 Разобрать с Альфи";
+      b.innerHTML="🦊 Разобрать с Kitsune";
       b.title="Показать конкретный разбор прямо под этим заданием";
     });
   }

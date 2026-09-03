@@ -3413,3 +3413,322 @@ html[data-design="classic"] .v16-tutor-btn{display:none!important}
 }
 
 html[data-design="classic"] .v173-inline-tutor{display:none!important}
+
+
+
+/* =====================================================================
+   v1.8 · KITSUNE — оригинальный лисёнок-помощник
+   ===================================================================== */
+.kitsune-mascot .fox-body{
+  fill:#f47a35;
+  stroke:#a74a22;
+}
+.kitsune-mascot .fox-head{
+  fill:#f47a35;
+  stroke:#a74a22;
+}
+.kitsune-mascot .fox-ear{
+  fill:#f47a35;
+  stroke:#a74a22;
+  stroke-width:2.4;
+  stroke-linejoin:round;
+}
+.kitsune-mascot .fox-ear-inner{
+  fill:#ef9a9a;
+  opacity:.72;
+}
+.kitsune-mascot .fox-cheek-white,
+.kitsune-mascot .fox-muzzle,
+.kitsune-mascot .fox-tail-tip{
+  fill:#fff7ec;
+}
+.kitsune-mascot .fox-tail{
+  fill:#f47a35;
+  stroke:#a74a22;
+  stroke-width:2.2;
+}
+.kitsune-mascot .fox-nose{fill:#2d2a2a}
+.kitsune-mascot .fox-paw{
+  stroke:#f47a35;
+}
+.kitsune-mascot .fox-hand{fill:#f47a35}
+.kitsune-mascot .mascot-badge{
+  fill:#fff7ec;
+  stroke:#b65b2b;
+}
+.kitsune-mascot .mascot-badge-text{
+  fill:#c75b27;
+  font-weight:1000;
+}
+.kitsune-mascot .cheek{
+  fill:#f6a7a4;
+  opacity:.55;
+}
+.v15-mascot-button:hover .kitsune-mascot .fox-tail{
+  transform-box:fill-box;
+  transform-origin:15% 55%;
+  animation:kitsuneTailWag .34s ease-in-out 2 alternate;
+}
+.v15-assistant[data-state="happy"] .kitsune-mascot .fox-tail,
+.v15-assistant[data-state="cheer"] .kitsune-mascot .fox-tail,
+.v15-assistant[data-state="celebrate"] .kitsune-mascot .fox-tail{
+  transform-box:fill-box;
+  transform-origin:15% 55%;
+  animation:kitsuneTailWag .26s ease-in-out 4 alternate;
+}
+.v15-assistant[data-state="think"] .kitsune-mascot .fox-ear:first-of-type{
+  transform-box:fill-box;
+  transform-origin:bottom center;
+  animation:kitsuneEarThink .7s ease-in-out infinite alternate;
+}
+@keyframes kitsuneTailWag{
+  from{transform:rotate(-8deg)}
+  to{transform:rotate(10deg)}
+}
+@keyframes kitsuneEarThink{
+  from{transform:rotate(0)}
+  to{transform:rotate(-7deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  .kitsune-mascot .fox-tail,
+  .kitsune-mascot .fox-ear{animation:none!important}
+}
+
+
+
+/* =====================================================================
+   v1.8 · KITSUNE BRAIN + COMIC TUTOR
+   ===================================================================== */
+.v18-brain-settings{
+  margin:12px 0 10px;
+  padding:11px;
+  border:2px solid color-mix(in srgb,#f47a35 36%,var(--line));
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(244,122,53,.12),transparent 48%),
+    var(--bg);
+}
+.v18-brain-head{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:9px;
+}
+.v18-brain-head>div{flex:1;min-width:0}
+.v18-brain-head strong{
+  display:block;
+  font-size:12px;
+  font-weight:1000;
+}
+.v18-brain-head small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:850;
+}
+.v18-brain-head>span{
+  padding:4px 7px;
+  border-radius:999px;
+  background:#f47a35;
+  color:white;
+  font-size:9px;
+  font-weight:1000;
+}
+.v18-mode-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-bottom:8px;
+}
+.v18-mode-row button{
+  min-height:42px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:6px 4px;
+  font-size:9px;
+  line-height:1.2;
+  font-weight:1000;
+}
+.v18-mode-row button.active{
+  border-color:#f47a35;
+  background:rgba(244,122,53,.10);
+  color:#c65b27;
+}
+.v18-device-info,
+.v18-brain-status{
+  display:grid;
+  gap:2px;
+  margin:7px 0;
+  padding:8px 9px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--card);
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.35;
+}
+.v18-device-info b{color:var(--text)}
+.v18-device-info.ok,.v18-brain-status.ok{
+  border-color:color-mix(in srgb,var(--good) 40%,var(--line));
+  background:color-mix(in srgb,var(--good) 6%,var(--card));
+}
+.v18-device-info.warn,.v18-brain-status.warn{
+  border-color:color-mix(in srgb,#ffca28 50%,var(--line));
+  background:color-mix(in srgb,#ffca28 8%,var(--card));
+}
+.v18-brain-status.busy{
+  border-color:color-mix(in srgb,#f47a35 45%,var(--line));
+}
+.v18-brain-progress{
+  display:none;
+  gap:5px;
+  margin:7px 0 9px;
+}
+.v18-brain-progress.show{display:grid}
+.v18-brain-progress>div{
+  height:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line);
+}
+.v18-brain-progress i{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#f47a35,#ffb24c);
+  transition:width .18s ease;
+}
+.v18-brain-progress span{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:850;
+}
+.v18-brain-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.v18-brain-actions #v18PrepareBrain{grid-column:1/-1}
+.v18-brain-note{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:8.5px;
+  line-height:1.35;
+}
+
+/* Comic row inside the exercise */
+.v18-kitsune-comic .v173-diagnosis{
+  margin-top:8px;
+  border-left-color:#f47a35;
+  font-size:10px;
+  opacity:.82;
+}
+.v18-comic-row{
+  display:grid;
+  grid-template-columns:58px minmax(0,1fr);
+  align-items:end;
+  gap:9px;
+  margin:7px 0 10px;
+}
+.v18-comic-fox{
+  width:58px;
+  height:58px;
+  align-self:end;
+  filter:drop-shadow(0 6px 7px rgba(142,70,31,.15));
+}
+.v18-comic-fox svg{display:block;width:100%;height:100%;overflow:visible}
+.v18-comic-fox .kc-tail,.v18-comic-fox .kc-head,.v18-comic-fox .kc-ear{fill:#f47a35;stroke:#a74a22;stroke-width:1.7}
+.v18-comic-fox .kc-ear-in{fill:#ef9a9a}
+.v18-comic-fox .kc-white,.v18-comic-fox .kc-muzzle{fill:#fff7ec}
+.v18-comic-fox .kc-eye{fill:#fff}
+.v18-comic-fox .kc-pupil,.v18-comic-fox .kc-nose{fill:#2d2a2a}
+.v18-comic-fox .kc-smile{fill:none;stroke:#3d302c;stroke-width:1.7;stroke-linecap:round}
+.v18-comic-bubble{
+  position:relative;
+  min-height:68px;
+  padding:10px 12px;
+  border:2px solid color-mix(in srgb,#f47a35 43%,var(--line));
+  border-bottom-width:4px;
+  border-radius:15px 15px 15px 5px;
+  background:var(--card);
+  box-shadow:0 8px 18px rgba(76,53,35,.07);
+}
+.v18-comic-bubble::before{
+  content:"";
+  position:absolute;
+  left:-10px;
+  bottom:12px;
+  width:17px;
+  height:17px;
+  background:var(--card);
+  border-left:2px solid color-mix(in srgb,#f47a35 43%,var(--line));
+  border-bottom:2px solid color-mix(in srgb,#f47a35 43%,var(--line));
+  transform:rotate(45deg);
+}
+.v18-comic-name{
+  position:relative;
+  z-index:1;
+  color:#c65b27;
+  font-size:10px;
+  font-weight:1000;
+}
+.v18-comic-name span{
+  margin-left:4px;
+  color:var(--muted);
+  font-size:8.5px;
+  font-weight:800;
+}
+.v18-comic-text{
+  position:relative;
+  z-index:1;
+  margin-top:5px;
+  color:var(--text);
+  font-size:12px;
+  line-height:1.48;
+  font-weight:760;
+}
+.v18-comic-thinking{
+  display:none;
+  position:relative;
+  z-index:1;
+  gap:3px;
+  margin-top:5px;
+}
+.v18-comic-thinking.show{display:flex}
+.v18-comic-thinking i{
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#f47a35;
+  animation:v18ThinkDot .65s ease-in-out infinite alternate;
+}
+.v18-comic-thinking i:nth-child(2){animation-delay:.13s}
+.v18-comic-thinking i:nth-child(3){animation-delay:.26s}
+@keyframes v18ThinkDot{
+  from{transform:translateY(0);opacity:.4}
+  to{transform:translateY(-4px);opacity:1}
+}
+.v18-kitsune-comic .v173-inline-head strong{color:#c65b27}
+.v18-kitsune-comic .v173-step b{color:#c65b27}
+.v18-kitsune-comic .v173-btn.primary{
+  background:#f47a35;
+  border-color:#a74a22;
+}
+.v18-kitsune-comic .v173-why-box{
+  border-left:4px solid #f47a35;
+  background:rgba(244,122,53,.08);
+}
+@media(max-width:620px){
+  .v18-comic-row{grid-template-columns:48px minmax(0,1fr);gap:7px}
+  .v18-comic-fox{width:48px;height:48px}
+  .v18-comic-text{font-size:11px}
+  .v18-mode-row{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .v18-comic-thinking i{animation:none!important}
+  .v18-brain-progress i{transition:none!important}
+}

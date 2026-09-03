@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION="1.7.3";
+  const V17_VERSION="1.8.0";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -81,7 +81,7 @@
     const dl=document.querySelector("#v17Download");
     const test=document.querySelector("#v17TestNeural");
     const del=document.querySelector("#v17DeleteNeural");
-    if(dl)dl.textContent=modelReady?"✅ Голос скачан":"⬇ Скачать голос Альфи (~63 МБ)";
+    if(dl)dl.textContent=modelReady?"✅ Голос скачан":"⬇ Скачать голос Kitsune (~63 МБ)";
     if(dl)dl.disabled=neuralBusy||modelReady;
     if(test)test.disabled=neuralBusy||!modelReady;
     if(del)del.disabled=neuralBusy||!modelReady;
@@ -107,10 +107,10 @@
     block.innerHTML=`
       <div class="v17-neural-head">
         <div>
-          <strong>🎭 Neural Voice Альфи</strong>
+          <strong>🎭 Neural Voice Kitsune</strong>
           <small>Локальный нейро-TTS · без API</small>
         </div>
-        <span class="v17-neural-badge">v1.7.3</span>
+        <span class="v17-neural-badge">v1.8</span>
       </div>
 
       <div class="v17-engine-row">
@@ -132,7 +132,7 @@
       </div>
 
       <div class="v17-neural-actions">
-        <button type="button" class="v15-action primary-action" id="v17Download">⬇ Скачать голос Альфи (~63 МБ)</button>
+        <button type="button" class="v15-action primary-action" id="v17Download">⬇ Скачать голос Kitsune (~63 МБ)</button>
         <button type="button" class="v15-action" id="v17TestNeural">▶ Тест нейроголоса</button>
         <button type="button" class="v15-action" id="v17Recover">🔎 Проверить модель</button>
         <button type="button" class="v15-action danger-soft" id="v17DeleteNeural">🗑 Удалить модель</button>
@@ -140,7 +140,7 @@
 
       <p class="v17-neural-note">
         Модель скачивается один раз и хранится локально в браузере. Если Neural Voice недоступен,
-        Альфи автоматически использует системный голос.
+        Kitsune автоматически использует системный голос.
       </p>`;
 
     const autoRow=host.querySelector(".v151-auto-row");
@@ -152,7 +152,7 @@
         mode=btn.dataset.v17Engine==="system"?"system":"neural";
         save();updateUi();
         if(mode==="neural"&&!modelReady){
-          setStatus("Выбран Neural Voice. Сначала нажми «Скачать голос Альфи».","warn");
+          setStatus("Выбран Neural Voice. Сначала нажми «Скачать голос Kitsune».","warn");
         }
       });
     });
@@ -235,7 +235,7 @@
       if(found){
         setStatus("✅ Нашёл уже скачанную модель! Повторно 63 МБ качать не нужно. Нажми «Тест нейроголоса».","ok");
       }else if(announce){
-        setStatus("В локальном хранилище модели нет. Нажми «Скачать голос Альфи».","warn");
+        setStatus("В локальном хранилище модели нет. Нажми «Скачать голос Kitsune».","warn");
       }
       return found;
     }catch(err){
@@ -348,7 +348,7 @@
         setStatus(
           "✅ Модель скачана. Но первый запуск движка не удался: "+
           String(warmErr?.message||warmErr).slice(0,115)+
-          ". Нажми «Тест нейроголоса» — если повторится, Альфи автоматически включит системный голос.",
+          ". Нажми «Тест нейроголоса» — если повторится, Kitsune автоматически включит системный голос.",
           "warn"
         );
         console.warn("[Alfi Neural Voice warm-up]",warmErr);
@@ -388,7 +388,7 @@
   }
   async function deleteModel(){
     if(neuralBusy||!modelReady)return;
-    if(!confirm("Удалить нейроголос Альфи из памяти браузера? Системный голос останется работать."))return;
+    if(!confirm("Удалить нейроголос Kitsune из памяти браузера? Системный голос останется работать."))return;
 
     neuralBusy=true;updateUi();
     try{
@@ -397,7 +397,7 @@
       modelReady=false;
       mode="auto";
       save();
-      setStatus("Нейроголос удалён. Альфи снова использует системную озвучку.","");
+      setStatus("Нейроголос удалён. Kitsune снова использует системную озвучку.","");
     }catch(err){
       setStatus(friendlyError(err),"error");
     }finally{
@@ -413,7 +413,7 @@
     }catch(e){}
     return s
       .replace(/\s+/g," ")
-      .replace(/\bAI Tutor Lite\b/gi,"тьютор Альфи")
+      .replace(/\bKitsune Smart Tutor\b/gi,"тьютор Kitsune")
       .trim();
   }
 
@@ -526,7 +526,7 @@
       const phrase=cleanText(text);
       if(!phrase)throw new Error("Пустая реплика.");
 
-      setStatus("Альфи готовит нейроречь…","busy");
+      setStatus("Kitsune готовит нейроречь…","busy");
 
       const wav=await tts.predict({
         text:phrase,
@@ -555,11 +555,11 @@
 
   async function v17Test(){
     if(!modelReady){
-      setStatus("Сначала скачай голос Альфи.","warn");
+      setStatus("Сначала скачай голос Kitsune.","warn");
       return;
     }
     v17SpeakNeural(
-      "Привет! Я Альфи. Смотри: сначала найдём один понятный шаг. Отлично! А теперь двигаемся дальше.",
+      "Привет! Я Kitsune. Смотри: сначала найдём один понятный шаг. Отлично! А теперь двигаемся дальше.",
       {state:"happy",force:true}
     );
   }
@@ -604,7 +604,7 @@
     mode:()=>mode
   };
 
-  /* Альфи уже создаётся предыдущим скриптом. Если браузер медленный —
+  /* Kitsune уже создаётся предыдущим скриптом. Если браузер медленный —
      повторяем внедрение несколько раз без побочных эффектов. */
   injectUi();
   setTimeout(injectUi,180);

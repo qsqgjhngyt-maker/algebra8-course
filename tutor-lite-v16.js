@@ -283,10 +283,10 @@ function v16DiagnosisText(ctx,value){
 function v16TutorPanel(){
   return `<div class="v16-tutor" id="v16Tutor">
     <div class="v16-tutor-head">
-      <strong>🧠 AI Tutor Lite</strong>
+      <strong>🧠 Kitsune Smart Tutor</strong>
       <span class="v16-offline-badge">● офлайн · без API</span>
     </div>
-    <div class="v16-context" id="v16Context">Открой задание кнопкой «Альфи Tutor».</div>
+    <div class="v16-context" id="v16Context">Открой задание кнопкой «Kitsune Tutor».</div>
     <div class="v16-help-row">
       <button type="button" class="v16-help-btn primary" id="v16NextHint">💡 Подсказка</button>
       <button type="button" class="v16-help-btn" id="v16Why">❓ Почему?</button>
@@ -343,7 +343,7 @@ function v16UpdatePanel(){
   if(!panel)return;
   const ctx=v16Active||v16CurrentContext();
   if(!ctx){
-    panel.querySelector("#v16Context").textContent="Сейчас нет выбранного упражнения. Открой урок и нажми «🧠 Альфи Tutor» возле задания.";
+    panel.querySelector("#v16Context").textContent="Сейчас нет выбранного упражнения. Открой урок и нажми «🧠 Kitsune Tutor» возле задания.";
     return;
   }
   v16Active=ctx;
@@ -371,13 +371,13 @@ function v16OpenTutor(ctx){
   v16Active=ctx;
 
   /* v1.7.3: помощь по упражнению открывается ВНУТРИ самого задания,
-     а не в огромном меню Альфи. */
+     а не в огромном меню Kitsune. */
   if(typeof window.v173OpenInline==="function"){
     window.v173OpenInline(ctx,{reason:"manual"});
     return;
   }
 
-  /* fallback для старого движка, но без автоматического открытия Альфи */
+  /* fallback для старого движка, но без автоматического открытия Kitsune */
   v16EnsurePanel()?.classList.add("show");
   v16UpdatePanel();
 }
@@ -442,7 +442,7 @@ function v16DecorateExercises(){
     const btn=document.createElement("button");
     btn.type="button";
     btn.className="v16-tutor-btn";
-    btn.innerHTML="🧠 Альфи Tutor";
+    btn.innerHTML="🧠 Kitsune Tutor";
     btn.title="Локальная помощь по этому заданию";
     btn.addEventListener("click",()=>v16OpenTutor(v16ParseExercise(box)));
     row.appendChild(btn);
@@ -464,7 +464,7 @@ function v16OnWrong(ctx){
     btn.classList.remove("v16-repeat");void btn.offsetWidth;btn.classList.add("v16-repeat");
     setTimeout(()=>btn.classList.remove("v16-repeat"),800);
   }
-  /* v1.7.3: никакого открытия меню Альфи после «Проверить».
+  /* v1.7.3: никакого открытия меню Kitsune после «Проверить».
      Сразу показываем конкретный inline-разбор этого примера. */
   v16Active=ctx;
   if(typeof window.v173OpenInline==="function"){
@@ -517,12 +517,14 @@ if(v16Content){
     },60);
   }).observe(v16Content,{childList:true,subtree:true});
 }
-/* v1.7.3: старую большую панель Tutor внутри меню Альфи больше не создаём. */
+/* v1.7.3: старую большую панель Tutor внутри меню Kitsune больше не создаём. */
 v16DecorateExercises();
 
 /* Экспортируем минимум для диагностики и будущего онлайн-слоя. */
+window.v16ErrorText=v16ErrorText;
+window.KitsuneTutorLite=window.AlfiTutorLite||null;
 window.AlfiTutorLite={
-  version:"1.7.3",
+  version:"1.8.0",
   offline:true,
   classify:(lessonId,index,value)=>{
     try{
@@ -533,3 +535,4 @@ window.AlfiTutorLite={
   memory:()=>JSON.parse(JSON.stringify(v16Memory)),
   openCurrent:()=>v16OpenTutor(v16CurrentContext())
 };
+window.KitsuneTutorLite=window.AlfiTutorLite;

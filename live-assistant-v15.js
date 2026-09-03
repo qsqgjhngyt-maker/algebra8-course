@@ -15,7 +15,7 @@ if(!v15Modes.includes(v15Mode))v15Mode="active";
 
 let v15State="idle";
 
-/* v1.6.1 · Живая озвучка Альфи */
+/* v1.6.1 · Живая озвучка Kitsune */
 const v151VoiceEnabledKey="a8_alfi_voice_enabled";
 const v151VoiceAutoKey="a8_alfi_voice_auto";
 const v151VoiceProfileKey="a8_alfi_voice_profile";
@@ -110,38 +110,60 @@ function v15MistakeAdvice(id){
 
 function v15Svg(){
   return `
-  <svg class="v15-mascot" viewBox="0 0 100 105" role="img" aria-label="Альфи, помощник курса">
-    <path class="antenna" d="M50 16 C50 10 56 8 56 4"/>
-    <circle class="antenna-dot" cx="57" cy="4" r="4"/>
-    <ellipse class="body-shadow" cx="50" cy="83" rx="31" ry="14"/>
-    <rect class="body" x="18" y="25" width="64" height="64" rx="25"/>
-    <path class="arm arm-left" d="M22 57 C12 61 12 72 18 76"/>
-    <circle class="hand" cx="18" cy="77" r="5"/>
-    <path class="arm arm-right" d="M78 57 C88 61 88 72 82 76"/>
-    <circle class="hand" cx="82" cy="77" r="5"/>
-    <rect class="face" x="27" y="34" width="46" height="35" rx="15"/>
+  <svg class="v15-mascot kitsune-mascot" viewBox="0 0 100 108" role="img" aria-label="Kitsune, лисёнок-помощник курса">
+    <!-- хвост -->
+    <path class="fox-tail" d="M76 78 C98 69 99 90 83 96 C91 98 93 104 77 101 C68 99 65 92 67 86 Z"/>
+    <path class="fox-tail-tip" d="M84 91 C94 89 94 97 84 100 C89 101 89 104 78 101 C80 98 82 95 84 91 Z"/>
+
+    <!-- тело -->
+    <ellipse class="body-shadow" cx="49" cy="91" rx="27" ry="8"/>
+    <path class="body fox-body" d="M27 69 C29 59 38 55 50 55 C62 55 71 59 73 69 L70 92 C64 100 36 100 30 92 Z"/>
+
+    <!-- лапки -->
+    <path class="arm arm-left fox-paw" d="M31 69 C20 72 18 81 24 85"/>
+    <circle class="hand fox-hand" cx="24" cy="85" r="4.5"/>
+    <path class="arm arm-right fox-paw" d="M69 69 C79 72 82 80 76 85"/>
+    <circle class="hand fox-hand" cx="76" cy="85" r="4.5"/>
+
+    <!-- ушки -->
+    <path class="fox-ear" d="M27 35 L30 9 L45 29 Z"/>
+    <path class="fox-ear" d="M73 35 L70 9 L55 29 Z"/>
+    <path class="fox-ear-inner" d="M31 29 L32 16 L40 29 Z"/>
+    <path class="fox-ear-inner" d="M69 29 L68 16 L60 29 Z"/>
+
+    <!-- голова -->
+    <path class="face fox-head" d="M23 36 C25 25 35 20 50 20 C65 20 75 25 77 36 C80 50 73 66 61 72 C55 76 45 76 39 72 C27 66 20 50 23 36 Z"/>
+    <path class="fox-cheek-white" d="M25 47 C31 55 37 59 50 59 C63 59 69 55 75 47 C73 63 64 72 50 74 C36 72 27 63 25 47 Z"/>
+    <ellipse class="fox-muzzle" cx="50" cy="58" rx="15" ry="11"/>
+
+    <!-- глаза -->
     <g class="eye-group">
-      <ellipse class="eye-white" cx="41" cy="48" rx="7" ry="8"/>
-      <ellipse class="eye-white" cx="59" cy="48" rx="7" ry="8"/>
-      <circle class="pupil pupil-left" cx="42" cy="49" r="3.5"/>
-      <circle class="pupil pupil-right" cx="60" cy="49" r="3.5"/>
-      <circle class="eye-glint" cx="43" cy="47.5" r="1"/>
-      <circle class="eye-glint" cx="61" cy="47.5" r="1"/>
+      <ellipse class="eye-white" cx="39" cy="43" rx="7" ry="7.5"/>
+      <ellipse class="eye-white" cx="61" cy="43" rx="7" ry="7.5"/>
+      <circle class="pupil pupil-left" cx="40" cy="44" r="3.3"/>
+      <circle class="pupil pupil-right" cx="62" cy="44" r="3.3"/>
+      <circle class="eye-glint" cx="41" cy="42.5" r="1"/>
+      <circle class="eye-glint" cx="63" cy="42.5" r="1"/>
     </g>
-    <path class="sleep-eye" d="M35 49 Q41 45 47 49 M53 49 Q59 45 65 49"/>
-    <circle class="cheek" cx="34" cy="58" r="3"/>
-    <circle class="cheek" cx="66" cy="58" r="3"/>
-    <path class="mouth" d="M43 57 Q50 62 57 57"/>
-    <circle class="mascot-badge" cx="50" cy="78" r="9"/>
-    <text class="mascot-badge-text" x="50" y="81">A8</text>
-    <text class="symbol" x="50" y="22">√</text>
+    <path class="sleep-eye" d="M33 44 Q39 40 45 44 M55 44 Q61 40 67 44"/>
+
+    <!-- нос, щёки, рот -->
+    <path class="fox-nose" d="M46 53 Q50 50 54 53 Q53 57 50 58 Q47 57 46 53 Z"/>
+    <circle class="cheek" cx="32" cy="56" r="3"/>
+    <circle class="cheek" cx="68" cy="56" r="3"/>
+    <path class="mouth" d="M43 59 Q50 64 57 59"/>
+
+    <!-- значок курса -->
+    <circle class="mascot-badge" cx="50" cy="84" r="8.5"/>
+    <text class="mascot-badge-text" x="50" y="87">K</text>
+    <text class="symbol" x="50" y="17">√</text>
   </svg>`;
 }
 function v15Markup(){
   return `<div class="v15-assistant" id="v15Assistant" data-mode="${v15Mode}" data-state="idle" aria-live="polite">
     <div class="v15-speech" id="v15Speech">
       <div class="v15-speech-head">
-        <strong>🤖 Альфи</strong><span class="v15-speech-status" id="v15SpeechStatus">помощник</span>
+        <strong>🦊 Kitsune</strong><span class="v15-speech-status" id="v15SpeechStatus">помощник</span>
         <span class="v15-speech-spacer"></span>
         <button class="v15-round-btn" id="v15SpeakBtn" title="Прочитать совет вслух" aria-label="Прочитать совет вслух">🔊</button>
         <button class="v15-round-btn" id="v15SettingsBtn" title="Настройки помощника" aria-label="Настройки помощника">⚙</button>
@@ -153,7 +175,7 @@ function v15Markup(){
         <button class="v15-action" id="v15SimpleBtn">🌱 Объясни проще</button>
       </div>
       <div class="v15-settings" id="v15Settings">
-        <span class="v15-settings-label">Как часто Альфи вмешивается</span>
+        <span class="v15-settings-label">Как часто Kitsune вмешивается</span>
         <div class="v15-mode-row">
           <button class="v15-mode-btn" data-mode-choice="active">✨ Активный</button>
           <button class="v15-mode-btn" data-mode-choice="advice">💡 Советы</button>
@@ -162,7 +184,7 @@ function v15Markup(){
 
         <div class="v151-voice-settings" id="v151VoiceSettings">
           <div class="v151-voice-title">
-            <span>🎙️ Голос Альфи</span>
+            <span>🎙️ Голос Kitsune</span>
             <button class="v151-toggle" id="v151VoiceEnabledBtn" type="button" aria-pressed="true">Вкл.</button>
           </div>
           <div class="v151-profile-row" id="v151ProfileRow">
@@ -177,17 +199,17 @@ function v15Markup(){
           </label>
           <label class="v151-voice-field">
             <span>Голос устройства</span>
-            <select id="v151VoiceSelect" aria-label="Голос Альфи">
+            <select id="v151VoiceSelect" aria-label="Голос Kitsune">
               <option value="">Автовыбор лучшего русского голоса</option>
             </select>
           </label>
           <button type="button" class="v151-compare-btn" id="v161CompareVoices">🎧 Сравнить лучшие голоса</button>
           <label class="v151-auto-row">
             <input type="checkbox" id="v151AutoVoice">
-            <span><b>Автоозвучка</b><small>Альфи сам читает важные советы и реакции.</small></span>
+            <span><b>Автоозвучка</b><small>Kitsune сам читает важные советы и реакции.</small></span>
           </label>
           <div class="v151-voice-actions">
-            <button type="button" class="v15-action primary-action" id="v151TestVoice">▶ Послушать Альфи</button>
+            <button type="button" class="v15-action primary-action" id="v151TestVoice">▶ Послушать Kitsune</button>
             <span class="v151-voice-note" id="v151VoiceNote">На телефоне используется лучший доступный русский голос.</span>
           </div>
         </div>
@@ -195,7 +217,7 @@ function v15Markup(){
     </div>
     <div class="v15-tip-chip" id="v15TipChip"></div>
     <div class="v15-streak-pop" id="v15StreakPop"></div>
-    <button class="v15-mascot-button" id="v15MascotBtn" aria-label="Открыть помощника Альфи">
+    <button class="v15-mascot-button" id="v15MascotBtn" aria-label="Открыть помощника Kitsune">
       ${v15Svg()}
     </button>
     <span class="v15-status-dot" aria-hidden="true"></span>
@@ -240,7 +262,7 @@ function v15SetMode(mode,save=true){
     v15Close();
   }else{
     v15SetState("wave");
-    v15Chip(mode==="active"?"Альфи снова с нами 👋":"Советы включены 💡");
+    v15Chip(mode==="active"?"Kitsune снова с нами 👋":"Советы включены 💡");
     setTimeout(()=>v15SetState("idle"),900);
   }
 }
@@ -251,10 +273,10 @@ function v15ApplyMode(mode){
   const sidebar=document.querySelector("#assistantModeBtn");
   if(sidebar){
     sidebar.dataset.assistantMode=mode;
-    sidebar.textContent=mode==="active"?"🤖 Помощник: активный":mode==="advice"?"💡 Помощник: советы":"🙈 Помощник: выкл.";
+    sidebar.textContent=mode==="active"?"🦊 Kitsune: активный":mode==="advice"?"💡 Kitsune: советы":"🙈 Kitsune: выкл.";
     sidebar.title=document.documentElement.dataset.design==="classic"
-      ?"Режим Альфи (персонаж показывается в игровом дизайне)"
-      :"Переключить режим Альфи";
+      ?"Режим Kitsune (персонаж показывается в игровом дизайне)"
+      :"Переключить режим Kitsune";
   }
   const st=root.querySelector("#v15SpeechStatus");
   if(st)st.textContent=mode==="active"?"активный помощник":mode==="advice"?"только по запросу":"выключен";
@@ -387,7 +409,7 @@ function v161CleanSpeechText(text){
 
   /* Не заставляем TTS произносить эмодзи и технические символы. */
   try{s=s.replace(/\p{Extended_Pictographic}/gu,"")}catch(e){}
-  s=s.replace(/[⭐🌟🔥🎯💡🧠🚀✅❌🙂🤖✨🌱📘🏆🎓]/g,"");
+  s=s.replace(/[⭐🌟🔥🎯💡🧠🚀✅❌🙂🦊✨🌱📘🏆🎓]/g,"");
 
   /* Небольшой математический словарь делает учебные реплики на порядок понятнее. */
   s=s
@@ -552,7 +574,7 @@ function v161CompareVoices(){
   if(!v151Voices.length)v151RefreshVoices();
   const candidates=v151Voices.slice(0,Math.min(3,v151Voices.length));
   if(!candidates.length){
-    v151Speak("Привет! Я Альфи. Давай попробуем мой голос.",{state:"happy",force:true});
+    v151Speak("Привет! Я Kitsune. Давай попробуем мой голос.",{state:"happy",force:true});
     return;
   }
 
@@ -571,7 +593,7 @@ function v161CompareVoices(){
     const voice=candidates[i];
     if(note)note.textContent=`🎧 Вариант ${i+1}/${candidates.length}: ${voice.name}`;
     v151Speak(
-      `Вариант ${i+1}. Привет! Я Альфи. Смотри, сейчас попробуем решить задачу вместе.`,
+      `Вариант ${i+1}. Привет! Я Kitsune. Смотри, сейчас попробуем решить задачу вместе.`,
       {state:i===0?"happy":i===1?"explain":"wave",force:true,voiceOverride:voice,onDone:()=>{
         i++;
         setTimeout(play,340);
@@ -672,7 +694,7 @@ function v15Bind(){
     btn.addEventListener("click",()=>v15SetMode(btn.dataset.modeChoice));
   });
 
-  /* Голос Альфи */
+  /* Голос Kitsune */
   const voiceEnabled=root.querySelector("#v151VoiceEnabledBtn");
   voiceEnabled?.addEventListener("click",()=>{
     v151VoiceEnabled=!v151VoiceEnabled;
@@ -696,7 +718,7 @@ function v15Bind(){
     v151VoiceName=voiceSelect.value;
     v151SaveVoice();v151UpdateVoiceUi();
     v151SpeechUnlocked=true;
-    v151Speak("Отлично. Этот голос выбран для Альфи.",{state:"happy",force:true});
+    v151Speak("Отлично. Этот голос выбран для Kitsune.",{state:"happy",force:true});
   });
 
   const energy=root.querySelector("#v161Energy");
@@ -722,7 +744,7 @@ function v15Bind(){
   });
   root.querySelector("#v151TestVoice")?.addEventListener("click",()=>{
     v151SpeechUnlocked=true;
-    v151Speak("Привет! Я Альфи. Отлично, что ты здесь! Смотри: сложную задачу не будем брать штурмом. Сначала найдём один понятный шаг, а дальше всё сложится.",{state:"happy",force:true});
+    v151Speak("Привет! Я Kitsune. Отлично, что ты здесь! Смотри: сложную задачу не будем брать штурмом. Сначала найдём один понятный шаг, а дальше всё сложится.",{state:"happy",force:true});
   });
   v151RefreshVoices();
   v151UpdateVoiceUi();
@@ -758,7 +780,7 @@ if(v15SidebarModeBtn){
   });
 }
 
-/* Контекст: Альфи понимает, какой экран открылся. */
+/* Контекст: Kitsune понимает, какой экран открылся. */
 function v15ContextKey(){
   const title=document.querySelector("#pageTitle")?.textContent||"";
   const lesson=v15CurrentLessonId();
@@ -861,8 +883,8 @@ document.addEventListener("click",e=>{
 
   /* v1.7.2 — ВАЖНО:
      штатные кнопки урока «Подсказка / Хочу понять / Разобрать идею»
-     принадлежат самому курсу. Альфи больше НЕ перехватывает их и не открывает
-     своё меню поверх учебной подсказки. Кнопки самого Альфи имеют собственные
+     принадлежат самому курсу. Kitsune больше НЕ перехватывает их и не открывает
+     своё меню поверх учебной подсказки. Кнопки самого Kitsune имеют собственные
      прямые обработчики в v15Bind(). */
   const insideAlfi=!!btn.closest("#v15Assistant");
   if(insideAlfi)return;
@@ -894,9 +916,9 @@ document.addEventListener("click",e=>{
     const container=btn.closest(".exercise,.v13-task,.v13-advanced-card,.v12-trap,.v11-visual-check,.test-question");
     if(!container)return;
 
-    /* v1.7.3: кнопка «Проверить» НИКОГДА не открывает окно Альфи.
+    /* v1.7.3: кнопка «Проверить» НИКОГДА не открывает окно Kitsune.
        При ошибке разбор показывается локально под заданием (Smart Tutor).
-       Альфи может только дать короткий ненавязчивый chip возле персонажа. */
+       Kitsune может только дать короткий ненавязчивый chip возле персонажа. */
     setTimeout(()=>{
       if(v15LooksCorrect(container)){
         v15ReactCorrect();
@@ -965,12 +987,12 @@ function v15Greeting(){
   const h=now.getHours();
   const hello=h<12?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
   setTimeout(()=>{
-    v15Message(`${hello}! Я Альфи — твой помощник по алгебре. Буду подсказывать только там, где это действительно полезно.`,{state:"wave",open:true});
+    v15Message(`${hello}! Я Kitsune — твой помощник по алгебре. Буду подсказывать только там, где это действительно полезно.`,{state:"wave",open:true});
     setTimeout(()=>{if(document.querySelector("#v15Assistant")?.classList.contains("open"))v15Close();v15SetState("idle")},5200);
   },1100);
 }
 
-/* При смене дизайна в игровой режим Альфи появляется без перезагрузки. */
+/* При смене дизайна в игровой режим Kitsune появляется без перезагрузки. */
 const v15DesignObserver=new MutationObserver(()=>{
   if(document.documentElement.dataset.design==="playful"&&v15Mode!=="off"){
     v15Ensure();
@@ -982,7 +1004,7 @@ const v15DesignObserver=new MutationObserver(()=>{
 });
 v15DesignObserver.observe(document.documentElement,{attributes:true,attributeFilter:["data-design"]});
 
-/* Полный сброс курса также сбрасывает персональные счётчики Альфи, но режим сохраняем. */
+/* Полный сброс курса также сбрасывает персональные счётчики Kitsune, но режим сохраняем. */
 const v15ResetButton=document.querySelector("#resetBtn");
 if(v15ResetButton){
   /* Реальный сброс localStorage выполняется существующим кодом курса. */
