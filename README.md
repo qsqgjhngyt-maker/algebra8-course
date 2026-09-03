@@ -1,6 +1,6 @@
 # Алгебра 8 — интерактивный курс
 
-Версия: **v1.12.2**
+Версия: **v1.12.3**
 
 Что добавлено в этой итерации:
 - живой фон из мягких частиц;
@@ -1309,3 +1309,20 @@ PWA Auto Update, Kitsune Brain, Whisper, Neural Voice, Voice Dialogue и Child S
 - обычный запуск без обновления сохраняет lazy-loading и не грузит тяжёлые модели без необходимости.
 
 Service Worker по-прежнему не очищает сторонние/model CacheStorage, IndexedDB или OPFS при обновлении.
+
+
+## v1.12.3 — iPhone Voice Unlock Fix
+
+Исправлена озвучка на iPhone/iPad PWA.
+
+Причина:
+- iOS может потерять user activation, если `speechSynthesis.speak()` запускается через timer после `cancel()`;
+- Web Audio `AudioContext.resume()` может быть вызван слишком поздно — уже после асинхронной генерации Neural Voice.
+
+Исправления:
+- на iOS системный SpeechSynthesis запускается сразу в стеке пользовательского жеста;
+- на первом tap/touch заранее создаётся и разблокируется AudioContext Neural Voice;
+- выполняется тихий one-sample playback для устойчивого iOS audio unlock;
+- при возвращении PWA на экран выполняется `speechSynthesis.resume()` / `AudioContext.resume()`;
+- если iOS всё же блокирует Web Audio, интерфейс выдаёт понятное сообщение вместо «молчания»;
+- Android/Chrome сохраняет прежнюю схему с микропаузой после `speechSynthesis.cancel()`.

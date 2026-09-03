@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.2";
+  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.3";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -24,6 +24,52 @@
   let audioCtx=null;
   let audioSource=null;
   let neuralBusy=false;
+
+  let iosAudioUnlocked=false;
+
+  function isIOSLike(){
+    const ua=String(navigator.userAgent||"");
+    const platform=String(navigator.platform||"");
+    return /iPhone|iPad|iPod/i.test(ua) ||
+      (platform==="MacIntel"&&Number(navigator.maxTouchPoints)>1);
+  }
+
+  async function unlockNeuralAudio(){
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return false;
+    try{
+      if(!audioCtx||audioCtx.state==="closed")audioCtx=new AC();
+      if(audioCtx.state==="suspended")await audioCtx.resume();
+
+      /* A one-sample silent source keeps the unlock inside the user's gesture. */
+      const buffer=audioCtx.createBuffer(1,1,audioCtx.sampleRate||44100);
+      const src=audioCtx.createBufferSource();
+      const gain=audioCtx.createGain();
+      gain.gain.value=0;
+      src.buffer=buffer;
+      src.connect(gain);
+      gain.connect(audioCtx.destination);
+      src.start(0);
+
+      iosAudioUnlocked=audioCtx.state==="running";
+      return iosAudioUnlocked;
+    }catch(e){
+      return false;
+    }
+  }
+
+  function bindIOSAudioUnlock(){
+    const unlock=()=>{unlockNeuralAudio().catch(()=>{})};
+    document.addEventListener("pointerdown",unlock,{once:true,passive:true,capture:true});
+    document.addEventListener("touchend",unlock,{once:true,passive:true,capture:true});
+    window.addEventListener("kitsune-audio-unlock",unlock);
+    document.addEventListener("visibilitychange",()=>{
+      if(document.visibilityState==="visible"&&audioCtx?.state==="suspended"){
+        audioCtx.resume().catch(()=>{});
+      }
+    });
+  }
+
 
   try{
     mode=localStorage.getItem(KEY_MODE)||"auto";
@@ -436,7 +482,14 @@
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC)throw new Error("Web Audio API не поддерживается.");
     if(!audioCtx||audioCtx.state==="closed")audioCtx=new AC();
-    if(audioCtx.state==="suspended")await audioCtx.resume();
+
+    if(audioCtx.state==="suspended"){
+      try{await audioCtx.resume()}catch(e){}
+    }
+    if(isIOSLike()&&audioCtx.state!=="running"){
+      throw new Error("iPhone заблокировал воспроизведение. Коснись экрана один раз и повтори озвучку.");
+    }
+
     const arr=await blob.arrayBuffer();
     return await audioCtx.decodeAudioData(arr.slice(0));
   }
@@ -603,6 +656,8 @@
       return systemStop.apply(this,arguments);
     };
   }
+
+  bindIOSAudioUnlock();
 
   /* Публичный мини-API для будущих версий курса. */
   window.AlfiNeuralVoice={

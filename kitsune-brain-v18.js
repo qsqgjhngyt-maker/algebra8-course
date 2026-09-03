@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.12.2";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.12.3";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 

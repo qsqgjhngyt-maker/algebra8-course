@@ -37,6 +37,13 @@ let v161VoiceEnergy=72;
 let v151Voices=[];
 let v151SpeechUnlocked=false;
 let v151Speaking=false;
+
+function v151IsIOSLike(){
+  const ua=String(navigator.userAgent||"");
+  const platform=String(navigator.platform||"");
+  return /iPhone|iPad|iPod/i.test(ua) ||
+    (platform==="MacIntel"&&Number(navigator.maxTouchPoints)>1);
+}
 let v161SpeechRun=0;
 let v161SpeechTimer=null;
 try{
@@ -529,9 +536,14 @@ function v151Speak(text=v15LastSpoken,{state=v15State,force=false,voiceOverride=
     }
   };
 
-  /* После cancel() мобильный Chrome/Samsung стабильнее начинает новую очередь
-     с микропаузой, чем в том же синхронном стеке. */
-  v161SpeechTimer=setTimeout(next,34);
+  /* iOS Safari/PWA can lose user activation if speech starts after a timer.
+     Start immediately there; keep the micro-delay for Chrome/Samsung. */
+  try{speechSynthesis.resume()}catch(e){}
+  if(v151IsIOSLike()){
+    next();
+  }else{
+    v161SpeechTimer=setTimeout(next,34);
+  }
   return true;
 }
 function v15Speak(){
@@ -758,7 +770,18 @@ if("speechSynthesis" in window){
   setTimeout(v151RefreshVoices,1200);
 }
 /* Первый осознанный тап разблокирует озвучку в мобильных браузерах. */
-document.addEventListener("pointerdown",()=>{v151SpeechUnlocked=true},{once:true,passive:true});
+function v151UnlockSpeech(){
+  v151SpeechUnlocked=true;
+  try{speechSynthesis.resume()}catch(e){}
+  try{window.dispatchEvent(new CustomEvent("kitsune-audio-unlock"))}catch(e){}
+}
+document.addEventListener("pointerdown",v151UnlockSpeech,{once:true,passive:true,capture:true});
+document.addEventListener("touchend",v151UnlockSpeech,{once:true,passive:true,capture:true});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    try{speechSynthesis.resume()}catch(e){}
+  }
+});
 
 /* Sidebar режим: циклически Active -> Advice -> Off -> Active */
 const v15SidebarModeBtn=document.querySelector("#assistantModeBtn");
