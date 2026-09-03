@@ -567,12 +567,22 @@ document.addEventListener("click",e=>{
 const appShell=document.querySelector(".app-shell");
 const sidebar=document.querySelector("#sidebar");
 const desktopSidebarMedia=window.matchMedia("(min-width: 981px)");
+const sidebarScrim=document.querySelector("#sidebarScrim");
+
+function setMobileSidebar(open){
+  if(desktopSidebarMedia.matches)return;
+  sidebar.classList.toggle("open",!!open);
+  document.body.classList.toggle("sidebar-mobile-open",!!open);
+  sidebarScrim?.setAttribute("aria-hidden",open?"false":"true");
+}
+function closeMobileSidebar(){setMobileSidebar(false)}
 
 function applySidebarPreference(){
   if(desktopSidebarMedia.matches){
     const collapsed=localStorage.getItem("a8_sidebar_collapsed")==="1";
     appShell.classList.toggle("sidebar-collapsed",collapsed);
     sidebar.classList.remove("open");
+    document.body.classList.remove("sidebar-mobile-open");
   }else{
     appShell.classList.remove("sidebar-collapsed");
   }
@@ -583,7 +593,7 @@ function toggleSidebar(){
     appShell.classList.toggle("sidebar-collapsed",next);
     localStorage.setItem("a8_sidebar_collapsed",next?"1":"0");
   }else{
-    sidebar.classList.toggle("open");
+    setMobileSidebar(!sidebar.classList.contains("open"));
   }
 }
 document.querySelector("#menuBtn").onclick=toggleSidebar;
@@ -592,9 +602,20 @@ document.querySelector("#hideSidebarBtn").onclick=()=>{
     appShell.classList.add("sidebar-collapsed");
     localStorage.setItem("a8_sidebar_collapsed","1");
   }else{
-    sidebar.classList.remove("open");
+    closeMobileSidebar();
   }
 };
+sidebarScrim?.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  closeMobileSidebar();
+});
+/* Also close after choosing a navigation item on phones. */
+document.querySelectorAll(".sidebar .nav-btn").forEach(btn=>btn.addEventListener("click",()=>{
+  if(!desktopSidebarMedia.matches)closeMobileSidebar();
+}));
+window.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!desktopSidebarMedia.matches)closeMobileSidebar();
+});
 desktopSidebarMedia.addEventListener?.("change",applySidebarPreference);
 applySidebarPreference();
 

@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.3: Child Safety + iPhone WebGPU/WebAssembly Brain compatibility fix + понятная диагностика аналитики на Android.",
+  "description": "Алгебра 8 v1.11.4: Child Safety + совместимый Whisper на iPhone/Android, мгновенный переключатель аналитики и закрытие мобильного меню тапом вне панели.",
   "orientation": "any",
   "categories": [
     "education"

@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.3";
+  const VERSION="1.11.4";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -212,7 +212,7 @@
     block.innerHTML=`
       <div class="v18-brain-head">
         <div><strong>🦊 Kitsune Brain</strong><small>локальный ИИ · WebGPU · без API</small></div>
-        <span>v1.11.3</span>
+        <span>v1.11.4</span>
       </div>
       <div class="v18-mode-row">
         <button type="button" data-v18-mode="brain">🧠 Brain</button>

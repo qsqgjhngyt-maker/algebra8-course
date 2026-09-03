@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.3";
+  const VERSION="1.11.4";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -76,96 +76,19 @@
     return `${strip(ctx.lesson?.title||"Текущий урок")} · ${strip(ctx.exercise?.q||"").slice(0,90)}`;
   }
 
-  function workerSource(){
-    return `
-      const LIB=${JSON.stringify(TRANSFORMERS_URL)};
-      const MODEL=${JSON.stringify(WHISPER_MODEL)};
-      let transcriber=null;
-      let loading=null;
-
-      function post(type,data={}){ self.postMessage({type,...data}); }
-
-      async function load(useWebGPU){
-        if(transcriber)return transcriber;
-        if(loading)return loading;
-        loading=(async()=>{
-          try{
-            post("status",{text:"Загружаю Transformers.js…"});
-            const {pipeline}=await import(LIB);
-            const options={
-              progress_callback:(p)=>{
-                let progress=null;
-                if(Number.isFinite(Number(p?.progress))){
-                  const raw=Number(p.progress);
-                  progress=raw<=1?raw*100:raw;
-                }
-                post("progress",{
-                  progress,
-                  status:String(p?.status||""),
-                  file:String(p?.file||p?.name||"").split("/").pop()
-                });
-              }
-            };
-            if(useWebGPU){
-              options.device="webgpu";
-              options.dtype={encoder_model:"fp16",decoder_model_merged:"q4"};
-            }else{
-              options.dtype={encoder_model:"q8",decoder_model_merged:"q8"};
-            }
-
-            post("status",{text:useWebGPU
-              ?"Подготавливаю Whisper на WebGPU…"
-              :"WebGPU недоступен: подготавливаю более медленный WASM-режим…"});
-            transcriber=await pipeline(
-              "automatic-speech-recognition",
-              MODEL,
-              options
-            );
-            post("ready",{backend:useWebGPU?"WebGPU":"WASM"});
-            return transcriber;
-          }catch(err){
-            transcriber=null;
-            post("error",{message:String(err?.message||err)});
-            throw err;
-          }finally{
-            loading=null;
-          }
-        })();
-        return loading;
-      }
-
-      self.onmessage=async(e)=>{
-        const m=e.data||{};
-        if(m.type==="load"){
-          try{await load(!!m.useWebGPU)}catch(e){}
-          return;
-        }
-        if(m.type==="transcribe"){
-          const id=m.id;
-          try{
-            const pipe=await load(!!m.useWebGPU);
-            post("transcribing",{id});
-            const samples=new Float32Array(m.samples);
-            const result=await pipe(samples,{
-              language:"russian",
-              task:"transcribe",
-              return_timestamps:false
-            });
-            post("result",{id,text:String(result?.text||"").trim()});
-          }catch(err){
-            post("resultError",{id,message:String(err?.message||err)});
-          }
-        }
-      };
-    `;
+  function isIOSLike(){
+    const ua=String(navigator.userAgent||"");
+    const platform=String(navigator.platform||"");
+    return /iPhone|iPad|iPod/i.test(ua) ||
+      (platform==="MacIntel"&&Number(navigator.maxTouchPoints)>1);
   }
 
   function ensureWorker(){
     if(worker)return worker;
-    const blob=new Blob([workerSource()],{type:"text/javascript"});
-    const url=URL.createObjectURL(blob);
-    worker=new Worker(url,{type:"module"});
-    URL.revokeObjectURL(url);
+
+    /* v1.11.4: same-origin module worker. Blob module workers caused Safari/
+       ONNX dynamic-import failures (ort *.jsep.mjs) under strict CSP. */
+    worker=new Worker("./whisper-worker-v1114.js",{type:"module",name:"kitsune-whisper"});
 
     worker.onmessage=e=>{
       const m=e.data||{};
@@ -182,7 +105,7 @@
       }else if(m.type==="error"){
         workerReady=false;workerLoading=false;
         setWhisperProgress(null);
-        setWhisperStatus("Whisper не запустился: "+String(m.message||"ошибка").slice(0,140),"warn");
+        setWhisperStatus("Whisper не запустился: "+String(m.message||"ошибка").slice(0,240),"warn");
         updateVoiceUi();
       }else if(m.type==="transcribing"){
         dialogState("🧠 Распознаю речь локально…","thinking");
@@ -196,8 +119,11 @@
       }
     };
     worker.onerror=e=>{
-      workerLoading=false;
-      setWhisperStatus("Ошибка локального Whisper worker: "+String(e.message||"").slice(0,120),"warn");
+      workerLoading=false;workerReady=false;
+      setWhisperProgress(null);
+      const msg=String(e?.message||"Module Worker error").slice(0,220);
+      setWhisperStatus("Ошибка загрузки локального Whisper worker: "+msg,"warn");
+      updateVoiceUi();
     };
     return worker;
   }
@@ -207,6 +133,14 @@
     try{return !!(await navigator.gpu.requestAdapter())}catch(e){return false}
   }
 
+  async function preferredWhisperBackend(){
+    /* Safari/iOS WebGPU is useful for Brain, but ONNX Whisper's WebGPU JSEP
+       module path remains less reliable there. Prefer single-thread WASM. */
+    if(isIOSLike())return "wasm";
+    return (await useWebGPU())?"webgpu":"wasm";
+  }
+
+
   async function prepareWhisper(){
     if(workerLoading||workerReady)return;
     if(location.protocol==="file:"){
@@ -215,9 +149,12 @@
     }
     workerLoading=true;
     updateVoiceUi();
-    setWhisperStatus("Проверяю устройство…","busy");
-    const gpu=await useWebGPU();
-    ensureWorker().postMessage({type:"load",useWebGPU:gpu});
+    setWhisperStatus("Проверяю устройство и локальный backend…","busy");
+    const preferred=await preferredWhisperBackend();
+    if(isIOSLike()&&preferred==="wasm"){
+      setWhisperStatus("iPhone/iPad: использую более совместимый локальный WASM-режим Whisper…","busy");
+    }
+    ensureWorker().postMessage({type:"load",preferred});
   }
 
   function setWhisperStatus(text,kind=""){
@@ -249,7 +186,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.11.3</span>
+        <span>v1.11.4</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
@@ -478,8 +415,8 @@
     if(!workerReady){
       dialogState("Загружаю Whisper из локального кэша…","thinking");
       workerLoading=true;updateVoiceUi();
-      const gpu=await useWebGPU();
-      ensureWorker().postMessage({type:"load",useWebGPU:gpu});
+      const preferred=await preferredWhisperBackend();
+      ensureWorker().postMessage({type:"load",preferred});
       const ok=await waitWorkerReady(120000);
       if(!ok){
         dialogState("Whisper не успел загрузиться. Нажми «Подготовить Whisper» в настройках и попробуй снова.","warn");
@@ -632,7 +569,7 @@
   }
 
   async function transcribe(samples){
-    const gpu=await useWebGPU();
+    const preferred=await preferredWhisperBackend();
     const w=ensureWorker();
     const id=++seq;
     const promise=new Promise((resolve,reject)=>{
@@ -645,7 +582,7 @@
         }
       },90000);
     });
-    w.postMessage({type:"transcribe",id,useWebGPU:gpu,samples:samples.buffer},[samples.buffer]);
+    w.postMessage({type:"transcribe",id,preferred,samples:samples.buffer},[samples.buffer]);
     return promise;
   }
 

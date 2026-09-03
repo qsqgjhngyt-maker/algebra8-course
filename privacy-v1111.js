@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.3";
+  const VERSION="1.11.4";
   const CONSENT_KEY="a8_analytics_consent_v1111";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
@@ -28,7 +28,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.11.3</small>
+              <small>Kitsune · режим защиты ребёнка · v1.11.4</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>
@@ -177,11 +177,9 @@
       );
       if(!remove)return;
       api?.setOwnerOptOut?.(false);
-      if(api?.setConsent)await api.setConsent(true);
-      else{
-        try{localStorage.setItem(CONSENT_KEY,"1")}catch(e){}
-      }
+      try{localStorage.setItem(CONSENT_KEY,"1")}catch(e){}
       sync();
+      api?.setConsent?.(true).then(()=>sync()).catch(()=>sync());
       return;
     }
 
@@ -207,12 +205,12 @@
       if(!ok)return;
     }
 
-    if(api?.setConsent){
-      await api.setConsent(next);
-    }else{
-      try{localStorage.setItem(CONSENT_KEY,next?"1":"0")}catch(e){}
-    }
+    /* Save/paint immediately. Umami network startup must not freeze Android UI. */
+    try{localStorage.setItem(CONSENT_KEY,next?"1":"0")}catch(e){}
     sync();
+    if(api?.setConsent){
+      api.setConsent(next).then(()=>sync()).catch(()=>sync());
+    }
   }
 
   function clearPrivateMemory(){
@@ -235,6 +233,8 @@
 
     ensure();
     sync();
+    window.addEventListener("kitsune-analytics-consent",sync);
+    window.addEventListener("kitsune-analytics-runtime",sync);
 
     try{
       if(localStorage.getItem(FIRST_SEEN_KEY)!=="1"){

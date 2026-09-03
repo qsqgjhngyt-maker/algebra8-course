@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.3";
+  const VERSION="1.11.4";
   const WEBSITE_ID="1a59caa5-62af-44bc-a583-fa4b3c8fe80a";
   const PROD_HOST="qsqgjhngyt-maker.github.io";
   const CONSENT_KEY="a8_analytics_consent_v1111";
@@ -68,12 +68,20 @@
     if(loadingPromise)return loadingPromise;
 
     loadingPromise=new Promise(resolve=>{
+      let settled=false;
+      const finish=value=>{
+        if(settled)return;
+        settled=true;
+        clearTimeout(timer);
+        resolve(!!value);
+      };
+      const timer=setTimeout(()=>finish(false),6000);
+
       let s=document.getElementById(SCRIPT_ID);
       if(s){
-        const done=()=>resolve(typeof window.umami?.track==="function");
-        if(typeof window.umami?.track==="function")return done();
-        s.addEventListener("load",done,{once:true});
-        s.addEventListener("error",()=>resolve(false),{once:true});
+        if(typeof window.umami?.track==="function")return finish(true);
+        s.addEventListener("load",()=>finish(typeof window.umami?.track==="function"),{once:true});
+        s.addEventListener("error",()=>finish(false),{once:true});
         return;
       }
 
@@ -87,8 +95,8 @@
       s.dataset.excludeSearch="true";
       s.dataset.performance="true";
       s.dataset.beforeSend="kitsuneAnalyticsBeforeSend";
-      s.onload=()=>resolve(typeof window.umami?.track==="function");
-      s.onerror=()=>resolve(false);
+      s.onload=()=>finish(typeof window.umami?.track==="function");
+      s.onerror=()=>finish(false);
       document.head.appendChild(s);
     }).finally(()=>{
       setTimeout(()=>{loadingPromise=null},0);
@@ -260,21 +268,26 @@
     }catch(e){}
 
     queue.length=0;
+    window.dispatchEvent(new CustomEvent("kitsune-analytics-consent",{detail:{enabled:!!value}}));
 
     if(!value){
       const s=document.getElementById(SCRIPT_ID);
       if(s)s.remove();
-      return false;
+      return true;
     }
 
     if(privacySignalBlocks()||ownerOptedOut())return false;
 
-    const ok=await createTracker();
-    if(ok){
-      track("analytics_enabled",{source:"privacy_settings"});
-      trackLaunch();
-    }
-    return ok;
+    /* UI consent is local and immediate. Network initialization happens
+       asynchronously and is never allowed to freeze the Android toggle. */
+    createTracker().then(ok=>{
+      if(ok){
+        track("analytics_enabled",{source:"privacy_settings"});
+        trackLaunch();
+      }
+      window.dispatchEvent(new CustomEvent("kitsune-analytics-runtime",{detail:{ready:!!ok}}));
+    });
+    return true;
   }
 
   function init(){
