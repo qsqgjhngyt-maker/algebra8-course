@@ -1,8 +1,8 @@
-const CACHE="algebra8-v1.9.1";
-const NEURAL_CACHE="algebra8-ai-runtime-v1.9.1";
+const CACHE="algebra8-v1.9.2";
+const NEURAL_CACHE="algebra8-ai-runtime-v1.9.2";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
-  "./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png",
+  "./manifest.json","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
   "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
   "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js"
