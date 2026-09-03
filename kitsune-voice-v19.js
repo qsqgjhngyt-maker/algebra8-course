@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.9.2";
+  const VERSION="1.10.1";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -249,7 +249,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.9.2</span>
+        <span>v1.10.1</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
@@ -295,7 +295,7 @@
     return `<div class="v19-dialog-backdrop" id="v19Dialog">
       <section class="v19-dialog-card" role="dialog" aria-modal="true" aria-labelledby="v19DialogTitle">
         <header class="v19-dialog-head">
-          <div class="v19-dialog-avatar">🦊</div>
+          <div class="v19-dialog-avatar"><img src="./assets/kitsune/idle.png" alt="Kitsune" draggable="false"></div>
           <div>
             <strong id="v19DialogTitle">Разговор с Kitsune</strong>
             <small id="v19DialogContext">Текущий урок</small>
@@ -402,12 +402,12 @@
     if(!log)return;
     const shown=history.slice(-14);
     if(!shown.length){
-      log.innerHTML=`<div class="v19-empty-chat"><b>🦊 Kitsune готов слушать.</b><span>Можно написать или нажать «🎙️ Говорить» и спросить, например: «Почему здесь меняется знак?»</span></div>`;
+      log.innerHTML=`<div class="v19-empty-chat"><b>🦊 Kitsune готова слушать.</b><span>Можно написать или нажать «🎙️ Говорить» и спросить, например: «Почему здесь меняется знак?»</span></div>`;
       return;
     }
     log.innerHTML=shown.map(m=>`
       <div class="v19-msg ${m.role==="user"?"user":"kitsune"}">
-        ${m.role==="assistant"?'<span class="v19-msg-avatar">🦊</span>':""}
+        ${m.role==="assistant"?'<span class="v19-msg-avatar"><img src="./assets/kitsune/idle.png" alt=""></span>':""}
         <div><small>${m.role==="user"?"Ты":"Kitsune"}</small><p>${escapeHtml(m.content)}</p></div>
       </div>`).join("");
     log.scrollTop=log.scrollHeight;
@@ -565,7 +565,7 @@
       const type=recorder?.mimeType||chunks[0]?.type||"audio/webm";
       const blob=new Blob(chunks,{type});
       if(blob.size<800){
-        dialogState("Я почти ничего не услышал. Нажми микрофон и попробуй ещё раз.","warn");
+        dialogState("Я почти ничего не услышала. Нажми микрофон и попробуй ещё раз.","warn");
         cleanupRecorder();return;
       }
       const samples=await blobTo16k(blob);
@@ -583,7 +583,7 @@
 
       const input=document.querySelector("#v19DialogInput");
       if(input)input.value=text;
-      dialogState(`🎙️ Я услышал: «${text}»`,"ok");
+      dialogState(`🎙️ Я услышала: «${text}»`,"ok");
       setTimeout(()=>sendCurrentInput(text),240);
     }catch(err){
       cleanupRecorder();

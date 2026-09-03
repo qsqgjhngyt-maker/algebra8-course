@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.9.2";
+  const VERSION="1.10.1";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -86,22 +86,7 @@
   }
 
   function miniFox(){
-    return `<svg viewBox="0 0 70 70" aria-hidden="true">
-      <path class="kc-tail" d="M51 48 C68 43 68 58 56 61 C62 63 60 67 51 64 Z"/>
-      <path class="kc-ear" d="M17 25 L20 5 L31 23 Z"/>
-      <path class="kc-ear" d="M53 25 L50 5 L39 23 Z"/>
-      <path class="kc-ear-in" d="M21 20 L22 10 L28 21 Z"/>
-      <path class="kc-ear-in" d="M49 20 L48 10 L42 21 Z"/>
-      <path class="kc-head" d="M13 27 C15 17 23 13 35 13 C47 13 55 17 57 27 C59 40 50 53 35 56 C20 53 11 40 13 27 Z"/>
-      <path class="kc-white" d="M15 36 C22 43 27 45 35 45 C43 45 48 43 55 36 C52 49 45 55 35 57 C25 55 18 49 15 36 Z"/>
-      <ellipse class="kc-muzzle" cx="35" cy="43" rx="10" ry="8"/>
-      <ellipse class="kc-eye" cx="27" cy="31" rx="4.5" ry="5"/>
-      <ellipse class="kc-eye" cx="43" cy="31" rx="4.5" ry="5"/>
-      <circle class="kc-pupil" cx="28" cy="32" r="2.2"/>
-      <circle class="kc-pupil" cx="44" cy="32" r="2.2"/>
-      <path class="kc-nose" d="M32 39 Q35 37 38 39 Q37 42 35 43 Q33 42 32 39 Z"/>
-      <path class="kc-smile" d="M30 45 Q35 50 40 45"/>
-    </svg>`;
+    return `<img class="v110-mini-kitsune" src="./assets/kitsune/idle.png" alt="" draggable="false" decoding="async">`;
   }
 
   function statusEl(){return document.querySelector("#v18BrainStatus")}
@@ -198,7 +183,7 @@
     block.innerHTML=`
       <div class="v18-brain-head">
         <div><strong>🦊 Kitsune Brain</strong><small>локальный ИИ · WebGPU · без API</small></div>
-        <span>v1.9.2</span>
+        <span>v1.10.1</span>
       </div>
       <div class="v18-mode-row">
         <button type="button" data-v18-mode="brain">🧠 Brain</button>

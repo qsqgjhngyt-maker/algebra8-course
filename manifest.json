@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.9.2: Kitsune Voice Dialogue, локальный Whisper/Kitsune Brain и новая фирменная иконка приложения Kitsune.",
+  "description": "Алгебра 8 v1.10.1: Kitsune Live с безопасным единым sprite, плавной анимацией без исчезновения персонажа, локальным Brain/Whisper и Neural Voice.",
   "orientation": "any",
   "categories": [
     "education"

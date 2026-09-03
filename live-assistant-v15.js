@@ -109,55 +109,20 @@ function v15MistakeAdvice(id){
 }
 
 function v15Svg(){
+  /* v1.10: вместо примитивного SVG — полноценный арт Kitsune.
+     Два слоя позволяют плавно crossfade'ить разговорные/эмоциональные кадры
+     без резкого «прыгающего рта». */
   return `
-  <svg class="v15-mascot kitsune-mascot" viewBox="0 0 100 108" role="img" aria-label="Kitsune, лисёнок-помощник курса">
-    <!-- хвост -->
-    <path class="fox-tail" d="M76 78 C98 69 99 90 83 96 C91 98 93 104 77 101 C68 99 65 92 67 86 Z"/>
-    <path class="fox-tail-tip" d="M84 91 C94 89 94 97 84 100 C89 101 89 104 78 101 C80 98 82 95 84 91 Z"/>
-
-    <!-- тело -->
-    <ellipse class="body-shadow" cx="49" cy="91" rx="27" ry="8"/>
-    <path class="body fox-body" d="M27 69 C29 59 38 55 50 55 C62 55 71 59 73 69 L70 92 C64 100 36 100 30 92 Z"/>
-
-    <!-- лапки -->
-    <path class="arm arm-left fox-paw" d="M31 69 C20 72 18 81 24 85"/>
-    <circle class="hand fox-hand" cx="24" cy="85" r="4.5"/>
-    <path class="arm arm-right fox-paw" d="M69 69 C79 72 82 80 76 85"/>
-    <circle class="hand fox-hand" cx="76" cy="85" r="4.5"/>
-
-    <!-- ушки -->
-    <path class="fox-ear" d="M27 35 L30 9 L45 29 Z"/>
-    <path class="fox-ear" d="M73 35 L70 9 L55 29 Z"/>
-    <path class="fox-ear-inner" d="M31 29 L32 16 L40 29 Z"/>
-    <path class="fox-ear-inner" d="M69 29 L68 16 L60 29 Z"/>
-
-    <!-- голова -->
-    <path class="face fox-head" d="M23 36 C25 25 35 20 50 20 C65 20 75 25 77 36 C80 50 73 66 61 72 C55 76 45 76 39 72 C27 66 20 50 23 36 Z"/>
-    <path class="fox-cheek-white" d="M25 47 C31 55 37 59 50 59 C63 59 69 55 75 47 C73 63 64 72 50 74 C36 72 27 63 25 47 Z"/>
-    <ellipse class="fox-muzzle" cx="50" cy="58" rx="15" ry="11"/>
-
-    <!-- глаза -->
-    <g class="eye-group">
-      <ellipse class="eye-white" cx="39" cy="43" rx="7" ry="7.5"/>
-      <ellipse class="eye-white" cx="61" cy="43" rx="7" ry="7.5"/>
-      <circle class="pupil pupil-left" cx="40" cy="44" r="3.3"/>
-      <circle class="pupil pupil-right" cx="62" cy="44" r="3.3"/>
-      <circle class="eye-glint" cx="41" cy="42.5" r="1"/>
-      <circle class="eye-glint" cx="63" cy="42.5" r="1"/>
-    </g>
-    <path class="sleep-eye" d="M33 44 Q39 40 45 44 M55 44 Q61 40 67 44"/>
-
-    <!-- нос, щёки, рот -->
-    <path class="fox-nose" d="M46 53 Q50 50 54 53 Q53 57 50 58 Q47 57 46 53 Z"/>
-    <circle class="cheek" cx="32" cy="56" r="3"/>
-    <circle class="cheek" cx="68" cy="56" r="3"/>
-    <path class="mouth" d="M43 59 Q50 64 57 59"/>
-
-    <!-- значок курса -->
-    <circle class="mascot-badge" cx="50" cy="84" r="8.5"/>
-    <text class="mascot-badge-text" x="50" y="87">K</text>
-    <text class="symbol" x="50" y="17">√</text>
-  </svg>`;
+  <span class="v110-kitsune-stage" id="v110KitsuneStage" aria-hidden="true">
+    <span class="v110-kitsune-glow"></span>
+    <img class="v110-kitsune-fallback" src="./assets/kitsune/idle.png" alt="" draggable="false" decoding="async">
+    <span class="v110-kitsune-frame is-active" id="v110KitsuneFrameA" data-frame="idle"></span>
+    <span class="v110-kitsune-frame" id="v110KitsuneFrameB" data-frame="idle"></span>
+    <span class="v110-kitsune-emote" id="v110KitsuneEmote"></span>
+    <span class="v110-kitsune-sparkles" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
+    </span>
+  </span>`;
 }
 function v15Markup(){
   return `<div class="v15-assistant" id="v15Assistant" data-mode="${v15Mode}" data-state="idle" aria-live="polite">

@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION="1.9.2";
+  const V17_VERSION="1.10.1";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -110,7 +110,7 @@
           <strong>🎭 Neural Voice Kitsune</strong>
           <small>Локальный нейро-TTS · без API</small>
         </div>
-        <span class="v17-neural-badge">v1.9.2</span>
+        <span class="v17-neural-badge">v1.10.1</span>
       </div>
 
       <div class="v17-engine-row">
@@ -492,18 +492,28 @@
     const gain=audioCtx.createGain();
     gain.gain.value=.96;
 
+    /* v1.10: анализатор реальной амплитуды Neural Voice.
+       Kitsune Live использует его только для мягкого выбора разговорного кадра,
+       поэтому рот реагирует на настоящую речь, а не прыгает по таймеру. */
+    const visualAnalyser=audioCtx.createAnalyser();
+    visualAnalyser.fftSize=512;
+    visualAnalyser.smoothingTimeConstant=.58;
+
     source.connect(warmth);
     warmth.connect(body);
     body.connect(sparkle);
     sparkle.connect(comp);
     comp.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(visualAnalyser);
+    visualAnalyser.connect(audioCtx.destination);
 
+    try{window.KitsuneLive?.attachAnalyser?.(visualAnalyser)}catch(e){}
     try{window.v161MarkSpeaking?.(true,state)}catch(e){}
 
     source.onended=()=>{
       if(audioSource===source)audioSource=null;
       neuralBusy=false;
+      try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
       try{window.v161MarkSpeaking?.(false,state)}catch(e){}
       onDone?.();
     };
@@ -514,8 +524,9 @@
     const myRun=++neuralRun;
     neuralBusy=true;
     try{systemStop?.()}catch(e){}
-    try{window.v161MarkSpeaking?.(true,state)}catch(e){}
 
+    /* v1.10: во время генерации WAV Kitsune НЕ двигает ртом.
+       Разговорная анимация начинается только когда реально стартует audio source. */
     try{
       const tts=await loadModule();
       if(myRun!==neuralRun)return false;
@@ -542,8 +553,9 @@
 
     }catch(err){
       neuralBusy=false;
+      try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
       try{window.v161MarkSpeaking?.(false,state)}catch(e){}
-      console.warn("[Alfi Neural Voice fallback]",err);
+      console.warn("[Kitsune Neural Voice fallback]",err);
       if(modelReady)setStatus("Нейроголос временно недоступен — включён системный fallback.","warn");
 
       if(systemSpeak){
