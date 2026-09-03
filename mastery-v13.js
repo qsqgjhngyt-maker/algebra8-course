@@ -324,7 +324,7 @@ if(v13ResetBtn){
   v13ResetBtn.onclick=()=>{
     if(confirm("Сбросить весь учебный прогресс, результаты диагностик и контрольных?")){
       ["a8_completed","a8_attempts","a8_correct","a8_mistakes","a8_solved","a8_lastLesson","a8_streak","a8_last_active",
-       "a8_ch1_test_best","a8_ch1_control_best","a8_v1_best","a8_v1_course_best","a8_v11_control_best",v13StorageKey].forEach(k=>localStorage.removeItem(k));
+       "a8_ch1_test_best","a8_ch1_control_best","a8_v1_best","a8_v1_course_best","a8_v11_control_best",v13StorageKey,"a8_game_xp","a8_game_rewards","a8_tutor_memory_v16","a8_tutor_help_v16"].forEach(k=>localStorage.removeItem(k));
       location.reload();
     }
   };

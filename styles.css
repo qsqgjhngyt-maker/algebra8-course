@@ -1089,3 +1089,2078 @@ body.reduced-motion *{animation-duration:.001ms!important;animation-iteration-co
   .lesson-panel{border:0;box-shadow:none;background:white}
   .exercise{break-inside:avoid}
 }
+
+
+
+/* =====================================================================
+   v1.4 · ДВА ДИЗАЙНА
+   playful — основной игровой учебный стиль
+   classic — исходный утверждённый интерфейс без изменений
+   ===================================================================== */
+
+html[data-design="playful"]{
+  --game-green:#49b447;
+  --game-green-dark:#318d32;
+  --game-green-soft:#eaf8e9;
+  --game-blue:#2499e8;
+  --game-yellow:#ffca28;
+  --game-red:#ef5656;
+  --game-ink:#3c3c3c;
+  --game-muted:#777;
+  --game-border:#e5e5e5;
+  --game-bg:#f7f9fb;
+}
+
+/* Игровой светлый режим */
+html[data-design="playful"] body:not(.dark){
+  --bg:#f7f9fb;
+  --card:#fff;
+  --card-strong:#fff;
+  --text:#3c3c3c;
+  --muted:#777;
+  --line:#e5e5e5;
+  --primary:#49b447;
+  --primary-2:#3aa63e;
+  --primary-soft:#eaf8e9;
+  --good:#49b447;
+  --warn:#e8a317;
+  --danger:#e95353;
+  --shadow:none;
+  --shadow-soft:none;
+  --radius:22px;
+  --radius-sm:16px;
+  --canvas-opacity:0;
+  background:#f7f9fb;
+}
+
+/* Игровой тёмный режим */
+html[data-design="playful"] body.dark{
+  --bg:#151719;
+  --card:#202326;
+  --card-strong:#202326;
+  --text:#f2f2f2;
+  --muted:#a7aaad;
+  --line:#34383c;
+  --primary:#69d15d;
+  --primary-2:#55bf4f;
+  --primary-soft:#243b25;
+  --good:#69d15d;
+  --warn:#f1bd3a;
+  --danger:#ff7373;
+  --shadow:none;
+  --shadow-soft:none;
+  --canvas-opacity:0;
+  background:#151719;
+}
+
+html[data-design="playful"] .particles-canvas,
+html[data-design="playful"] .bg-orb{display:none!important}
+
+html[data-design="playful"] body{
+  font-family:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  letter-spacing:.005em;
+}
+
+/* Общая оболочка — чистая, без glassmorphism */
+html[data-design="playful"] .glass-panel,
+html[data-design="playful"] .hero-left,
+html[data-design="playful"] .hero-card,
+html[data-design="playful"] .card,
+html[data-design="playful"] .lesson-panel,
+html[data-design="playful"] .trainer-card,
+html[data-design="playful"] .progress-card,
+html[data-design="playful"] .chapter-card,
+html[data-design="playful"] .lesson-nav,
+html[data-design="playful"] .stat,
+html[data-design="playful"] .home-continue{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+  box-shadow:none;
+  background:var(--card);
+  border:2px solid var(--line);
+}
+html[data-design="playful"] .glass-topbar{
+  background:color-mix(in srgb,var(--bg) 97%,transparent);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+
+/* Sidebar */
+html[data-design="playful"] .app-shell{grid-template-columns:270px 1fr}
+html[data-design="playful"] .sidebar{
+  background:var(--card);
+  border:0;
+  border-right:2px solid var(--line);
+  padding:22px 16px;
+}
+html[data-design="playful"] .brand{margin-bottom:22px}
+html[data-design="playful"] .brand-mark{
+  width:52px;height:52px;border-radius:17px;
+  background:var(--primary);
+  border:0;
+  box-shadow:inset 0 -4px 0 color-mix(in srgb,var(--primary) 72%,#000);
+  font-size:18px;
+}
+html[data-design="playful"] .brand strong{font-size:20px;font-weight:950}
+html[data-design="playful"] .brand small{font-weight:700}
+html[data-design="playful"] .main-nav{gap:6px}
+html[data-design="playful"] .nav-btn,
+html[data-design="playful"] .ghost{
+  border:2px solid transparent;
+  padding:11px 13px;
+  border-radius:13px;
+  font-weight:850;
+  color:var(--text);
+  box-shadow:none;
+}
+html[data-design="playful"] .nav-btn:hover,
+html[data-design="playful"] .ghost:hover{
+  transform:none;
+  background:color-mix(in srgb,var(--primary-soft) 72%,var(--card));
+  color:var(--primary);
+}
+html[data-design="playful"] .nav-btn.active{
+  background:var(--primary-soft);
+  border-color:color-mix(in srgb,var(--primary) 40%,var(--line));
+  color:var(--primary);
+  box-shadow:none;
+}
+html[data-design="playful"] .sidebar-footer{
+  padding-top:12px;
+  border-top:2px solid var(--line);
+}
+
+/* Topbar */
+html[data-design="playful"] .topbar{
+  background:var(--bg);
+  border-bottom:2px solid var(--line);
+  padding:16px 28px;
+}
+html[data-design="playful"] .topbar h1{font-size:23px;font-weight:950}
+html[data-design="playful"] .eyebrow{
+  letter-spacing:.08em;
+  font-size:11px;
+  font-weight:950;
+}
+html[data-design="playful"] .badge,
+html[data-design="playful"] .pill,
+html[data-design="playful"] .status-chip{
+  border-radius:11px;
+  padding:7px 10px;
+  font-weight:900;
+  border:1px solid color-mix(in srgb,var(--primary) 25%,var(--line));
+}
+html[data-design="playful"] .icon-btn{
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  background:var(--card);
+  border-radius:13px;
+  box-shadow:none;
+}
+html[data-design="playful"] .icon-btn:hover{transform:translateY(1px);border-bottom-width:3px}
+
+/* Главная */
+html[data-design="playful"] .content{max-width:1180px;padding:26px 30px 44px}
+html[data-design="playful"] .hero{grid-template-columns:1.25fr .75fr;gap:18px}
+html[data-design="playful"] .hero-left,
+html[data-design="playful"] .hero-card{
+  border-radius:24px;
+}
+html[data-design="playful"] .hero-left{padding:34px 36px}
+html[data-design="playful"] .hero-left:after{
+  content:"★  x²  √";
+  right:2px;bottom:-12px;
+  color:color-mix(in srgb,var(--primary) 8%,transparent);
+  font-size:70px;
+}
+html[data-design="playful"] .hero h2{
+  font-size:clamp(36px,5vw,56px);
+  line-height:1.05;
+  font-weight:950;
+  letter-spacing:-.035em;
+}
+html[data-design="playful"] .gradient-text{
+  background:none;
+  color:var(--primary);
+}
+html[data-design="playful"] .hero p{font-size:17px;line-height:1.58}
+html[data-design="playful"] .hero-benefits span{
+  background:var(--bg);
+  border:2px solid var(--line);
+  border-radius:12px;
+  font-weight:850;
+}
+html[data-design="playful"] .hero-card{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:26px;
+}
+html[data-design="playful"] .ring{
+  background:conic-gradient(var(--primary) calc(var(--p)*1%),var(--line) 0);
+  width:105px;height:105px;
+}
+html[data-design="playful"] .ring:after{inset:11px}
+html[data-design="playful"] .ring span{font-size:20px}
+
+/* Тяжёлые tactile-кнопки */
+html[data-design="playful"] .primary,
+html[data-design="playful"] .check-btn{
+  background:var(--primary);
+  color:#fff;
+  border:0;
+  border-bottom:5px solid color-mix(in srgb,var(--primary) 68%,#000);
+  border-radius:14px;
+  box-shadow:none;
+  text-transform:none;
+  font-weight:950;
+  letter-spacing:.01em;
+}
+html[data-design="playful"] .primary:hover,
+html[data-design="playful"] .check-btn:hover{
+  transform:translateY(1px);
+  border-bottom-width:4px;
+}
+html[data-design="playful"] .primary:active,
+html[data-design="playful"] .check-btn:active{
+  transform:translateY(4px);
+  border-bottom-width:1px;
+}
+html[data-design="playful"] .secondary{
+  background:var(--card);
+  color:var(--primary);
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  border-radius:14px;
+  font-weight:900;
+}
+html[data-design="playful"] .secondary:hover{
+  transform:translateY(1px);
+  border-bottom-width:3px;
+  background:var(--primary-soft);
+}
+html[data-design="playful"] .glow-btn:after{display:none}
+
+/* Карточки глав */
+html[data-design="playful"] .section{margin-top:28px}
+html[data-design="playful"] .section h3{font-weight:950}
+html[data-design="playful"] .chapter-overview,
+html[data-design="playful"] .v13-hub-card,
+html[data-design="playful"] .v13-module-card,
+html[data-design="playful"] .v13-exam-card{
+  border:2px solid var(--line);
+  border-bottom-width:5px;
+  border-radius:20px;
+  background:var(--card);
+  box-shadow:none;
+}
+html[data-design="playful"] .chapter-overview:hover,
+html[data-design="playful"] .v13-hub-card:hover,
+html[data-design="playful"] .v13-module-card:hover,
+html[data-design="playful"] .v13-exam-card:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb,var(--primary) 30%,var(--line));
+}
+html[data-design="playful"] .chapter-overview .chapter-icon{
+  display:grid;place-items:center;
+  width:52px;height:52px;
+  border-radius:16px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  border:2px solid color-mix(in srgb,var(--primary) 24%,var(--line));
+  font-size:25px;
+}
+html[data-design="playful"] .progress-bar{
+  height:12px;
+  border:0;
+  background:var(--line);
+}
+html[data-design="playful"] .progress-bar span{
+  background:var(--primary);
+}
+
+/* Карта курса */
+html[data-design="playful"] .chapter-card{
+  border-bottom-width:5px;
+  border-radius:20px;
+}
+html[data-design="playful"] .chapter-head{padding:20px 22px}
+html[data-design="playful"] .topic-row{
+  border-bottom:2px solid var(--line);
+  padding:14px 18px;
+}
+html[data-design="playful"] .topic-row button{
+  background:var(--card);
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  color:var(--primary);
+  font-weight:900;
+  border-radius:11px;
+}
+html[data-design="playful"] .topic-number{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+
+/* Урок */
+html[data-design="playful"] .lesson-layout{gap:17px}
+html[data-design="playful"] .lesson-panel{
+  padding:28px 30px;
+  border-bottom-width:5px;
+}
+html[data-design="playful"] .lesson-panel h2{font-weight:950}
+html[data-design="playful"] .lesson-nav{
+  border-bottom-width:5px;
+  top:92px;
+}
+html[data-design="playful"] .lesson-nav .lesson-mini{
+  border:2px solid color-mix(in srgb,var(--primary) 25%,var(--line));
+}
+html[data-design="playful"] .lesson-intro-grid>div,
+html[data-design="playful"] .objective,
+html[data-design="playful"] .formula-card,
+html[data-design="playful"] .example-card,
+html[data-design="playful"] .cheat-card{
+  border:2px solid var(--line);
+  background:var(--card);
+  box-shadow:none;
+}
+html[data-design="playful"] .level-switch button,
+html[data-design="playful"] .micro-check button,
+html[data-design="playful"] .trainer-mode{
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  border-radius:12px;
+  background:var(--card);
+  font-weight:900;
+}
+html[data-design="playful"] .level-switch button.active,
+html[data-design="playful"] .trainer-mode.active{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 40%,var(--line));
+}
+html[data-design="playful"] .step{
+  border:2px solid var(--line);
+  background:var(--card);
+}
+html[data-design="playful"] .step:before{
+  background:var(--primary);
+}
+html[data-design="playful"] .callout{
+  border:2px solid var(--line);
+  border-left-width:6px;
+  background:var(--card);
+}
+html[data-design="playful"] .exercise,
+html[data-design="playful"] .v13-task,
+html[data-design="playful"] .v13-exam-task,
+html[data-design="playful"] .v13-advanced-card{
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  background:var(--card);
+  border-radius:18px;
+}
+html[data-design="playful"] .exercise:before{
+  width:6px;
+  background:var(--primary);
+}
+html[data-design="playful"] .answer-row input,
+html[data-design="playful"] .v13-answer-row input,
+html[data-design="playful"] .v13-exam-task input,
+html[data-design="playful"] .control-answer,
+html[data-design="playful"] .fc-control-answer{
+  border:2px solid var(--line);
+  background:var(--bg);
+  border-radius:13px;
+}
+html[data-design="playful"] .answer-row input:focus,
+html[data-design="playful"] .v13-answer-row input:focus,
+html[data-design="playful"] .v13-exam-task input:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 12%,transparent);
+}
+
+/* Педагогические блоки v1.2 */
+html[data-design="playful"] .v12-coach,
+html[data-design="playful"] .v12-slow,
+html[data-design="playful"] .v12-alt,
+html[data-design="playful"] .v12-rescue,
+html[data-design="playful"] .v12-trap,
+html[data-design="playful"] .v12-path{
+  box-shadow:none;
+  border-width:2px;
+  background:var(--card);
+}
+html[data-design="playful"] .v12-mental{
+  background:var(--primary-soft);
+  border:2px solid color-mix(in srgb,var(--primary) 22%,var(--line));
+}
+
+/* Раздел Закрепление */
+html[data-design="playful"] .v13-hero{
+  border:2px solid var(--line);
+  border-bottom-width:5px;
+  background:var(--card);
+  box-shadow:none;
+}
+html[data-design="playful"] .v13-score-box,
+html[data-design="playful"] .v13-diagnostic-compare,
+html[data-design="playful"] .v13-result{
+  border-width:2px;
+  background:var(--card);
+}
+html[data-design="playful"] .v13-diag-q,
+html[data-design="playful"] .v13-option{
+  border-width:2px;
+}
+html[data-design="playful"] .v13-option:hover{background:var(--primary-soft)}
+
+/* Статистика, финалы, тренажёр */
+html[data-design="playful"] .stat,
+html[data-design="playful"] .trainer-card,
+html[data-design="playful"] .progress-card,
+html[data-design="playful"] .final-hero,
+html[data-design="playful"] .final-score,
+html[data-design="playful"] .test-question{
+  border:2px solid var(--line);
+  box-shadow:none;
+  background:var(--card);
+}
+html[data-design="playful"] .trainer-card,
+html[data-design="playful"] .progress-card,
+html[data-design="playful"] .final-hero{
+  border-bottom-width:5px;
+}
+html[data-design="playful"] .test-option{
+  border:2px solid var(--line);
+  border-radius:13px;
+}
+html[data-design="playful"] .test-option:hover{background:var(--primary-soft)}
+
+/* Небольшая игровая микродинамика */
+@keyframes gamePop{
+  0%{transform:scale(.98)}
+  55%{transform:scale(1.015)}
+  100%{transform:scale(1)}
+}
+html[data-design="playful"] .exercise.success-flash,
+html[data-design="playful"] .v13-task.solved{
+  animation:gamePop .35s ease;
+}
+
+/* Переключатель дизайна заметнее */
+html[data-design="playful"] #designBtn{
+  color:var(--primary);
+  background:var(--primary-soft);
+  border-color:color-mix(in srgb,var(--primary) 30%,var(--line));
+}
+html[data-design="classic"] #designBtn{
+  color:var(--primary);
+}
+
+/* Мобильная версия */
+@media(max-width:900px){
+  html[data-design="playful"] .sidebar{
+    border-right:2px solid var(--line);
+    box-shadow:none;
+  }
+  html[data-design="playful"] .content{padding:20px 18px 38px}
+  html[data-design="playful"] .hero{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  html[data-design="playful"] .hero-left{padding:26px 22px}
+  html[data-design="playful"] .hero h2{font-size:38px}
+  html[data-design="playful"] .lesson-panel{padding:22px 18px}
+  html[data-design="playful"] .topbar{padding:14px 16px}
+}
+
+html[data-design="playful"] #effectsBtn:disabled{
+  opacity:.62;
+  cursor:default;
+  color:var(--muted);
+  background:transparent;
+}
+
+
+html[data-design="playful"] .app-shell.sidebar-collapsed{grid-template-columns:0 1fr}
+@media(max-width:980px){
+  html[data-design="playful"] .app-shell,
+  html[data-design="playful"] .app-shell.sidebar-collapsed{grid-template-columns:1fr}
+}
+
+
+
+/* =====================================================================
+   v1.4.1 · GAME FX для переключателя «Дизайн: игровой»
+   ===================================================================== */
+html[data-design="playful"] #designBtn{
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+  color:var(--primary);
+  background:
+    linear-gradient(var(--primary-soft),var(--primary-soft)) padding-box,
+    linear-gradient(115deg,
+      color-mix(in srgb,var(--primary) 28%,transparent),
+      color-mix(in srgb,var(--game-yellow) 64%,transparent),
+      color-mix(in srgb,var(--game-blue) 45%,transparent),
+      color-mix(in srgb,var(--primary) 28%,transparent)
+    ) border-box;
+  border:2px solid transparent;
+  box-shadow:
+    0 0 0 0 color-mix(in srgb,var(--primary) 0%,transparent),
+    inset 0 -3px 0 color-mix(in srgb,var(--primary) 16%,transparent);
+  animation:v141GameBreath 2.8s ease-in-out infinite;
+  transition:transform .18s ease,box-shadow .22s ease,background .22s ease;
+}
+
+/* Бегущий блик */
+html[data-design="playful"] #designBtn::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:3px;
+  border-radius:10px;
+  overflow:hidden;
+  background:
+    linear-gradient(105deg,
+      transparent 0 34%,
+      rgba(255,255,255,0) 38%,
+      rgba(255,255,255,.78) 47%,
+      rgba(255,255,255,.14) 55%,
+      transparent 62% 100%);
+  transform:translateX(-145%);
+  animation:v141Shimmer 4.2s cubic-bezier(.2,.7,.2,1) infinite;
+  pointer-events:none;
+  mix-blend-mode:soft-light;
+}
+
+/* Светящиеся мини-искры */
+html[data-design="playful"] #designBtn::after{
+  content:"✦  ·  ✧";
+  position:absolute;
+  z-index:4;
+  right:9px;
+  top:-9px;
+  white-space:pre;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--game-yellow);
+  text-shadow:
+    0 0 8px color-mix(in srgb,var(--game-yellow) 70%,transparent),
+    0 0 14px color-mix(in srgb,var(--primary) 30%,transparent);
+  opacity:.72;
+  pointer-events:none;
+  animation:v141SparkFloat 2.6s ease-in-out infinite;
+}
+
+/* Иконка 🎮 чуть оживает */
+html[data-design="playful"] #designBtn .v141-game-icon{
+  display:inline-block;
+  transform-origin:center 65%;
+  filter:drop-shadow(0 2px 2px color-mix(in srgb,var(--primary) 22%,transparent));
+  animation:v141ControllerIdle 2.25s ease-in-out infinite;
+}
+
+/* Скрытые частицы, которые вылетают при клике */
+html[data-design="playful"] #designBtn .v141-particle{
+  position:absolute;
+  z-index:8;
+  left:50%;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--game-yellow);
+  pointer-events:none;
+  opacity:0;
+}
+html[data-design="playful"] #designBtn.v141-burst .v141-particle{
+  animation:v141ParticleBurst .72s cubic-bezier(.1,.8,.2,1) forwards;
+}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(1){--dx:-38px;--dy:-25px;background:var(--game-yellow)}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(2){--dx: 42px;--dy:-20px;background:var(--game-blue)}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(3){--dx:-44px;--dy: 18px;background:var(--primary)}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(4){--dx: 38px;--dy: 24px;background:#ff7ab6}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(5){--dx:  0px;--dy:-37px;background:#fff07a}
+html[data-design="playful"] #designBtn .v141-particle:nth-of-type(6){--dx:  3px;--dy: 38px;background:#70e7ff}
+
+/* Hover: кнопка становится заметно «живее» */
+html[data-design="playful"] #designBtn:hover{
+  transform:translateY(-2px) scale(1.018);
+  color:color-mix(in srgb,var(--primary) 82%,#103b11);
+  box-shadow:
+    0 10px 26px color-mix(in srgb,var(--primary) 18%,transparent),
+    0 0 0 4px color-mix(in srgb,var(--primary) 8%,transparent),
+    inset 0 -3px 0 color-mix(in srgb,var(--primary) 20%,transparent);
+}
+html[data-design="playful"] #designBtn:hover .v141-game-icon{
+  animation:v141ControllerHover .52s ease-in-out infinite alternate;
+}
+html[data-design="playful"] #designBtn:active{
+  transform:translateY(1px) scale(.985);
+}
+html[data-design="playful"] #designBtn:focus-visible{
+  outline:none;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb,var(--primary) 18%,transparent),
+    0 10px 28px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+
+/* В классическом режиме никакой игровой анимации */
+html[data-design="classic"] #designBtn::before,
+html[data-design="classic"] #designBtn::after,
+html[data-design="classic"] #designBtn .v141-particle{display:none!important}
+html[data-design="classic"] #designBtn .v141-game-icon{
+  animation:none!important;
+  filter:none;
+}
+
+/* Кнопка коротко «празднует» выбор игрового режима */
+html[data-design="playful"] #designBtn.v141-celebrate{
+  animation:v141Celebrate .65s cubic-bezier(.16,.9,.3,1);
+}
+
+@keyframes v141GameBreath{
+  0%,100%{
+    box-shadow:
+      0 0 0 0 color-mix(in srgb,var(--primary) 0%,transparent),
+      inset 0 -3px 0 color-mix(in srgb,var(--primary) 16%,transparent)
+  }
+  50%{
+    box-shadow:
+      0 7px 22px color-mix(in srgb,var(--primary) 14%,transparent),
+      0 0 0 3px color-mix(in srgb,var(--primary) 7%,transparent),
+      inset 0 -3px 0 color-mix(in srgb,var(--primary) 20%,transparent)
+  }
+}
+@keyframes v141Shimmer{
+  0%,62%{transform:translateX(-145%);opacity:0}
+  68%{opacity:1}
+  88%{transform:translateX(145%);opacity:.95}
+  100%{transform:translateX(145%);opacity:0}
+}
+@keyframes v141SparkFloat{
+  0%,100%{transform:translate3d(0,0,0) rotate(-3deg) scale(.9);opacity:.52}
+  50%{transform:translate3d(-3px,-4px,0) rotate(6deg) scale(1.12);opacity:1}
+}
+@keyframes v141ControllerIdle{
+  0%,100%{transform:rotate(0deg) translateY(0)}
+  35%{transform:rotate(-5deg) translateY(-1px)}
+  70%{transform:rotate(4deg) translateY(0)}
+}
+@keyframes v141ControllerHover{
+  from{transform:rotate(-7deg) translateY(-1px) scale(1.05)}
+  to{transform:rotate(7deg) translateY(-2px) scale(1.13)}
+}
+@keyframes v141ParticleBurst{
+  0%{transform:translate(-50%,-50%) scale(.3);opacity:0}
+  18%{opacity:1}
+  100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(0);opacity:0}
+}
+@keyframes v141Celebrate{
+  0%{transform:scale(.94) rotate(-1deg)}
+  45%{transform:scale(1.06) rotate(1deg)}
+  70%{transform:scale(.99)}
+  100%{transform:scale(1)}
+}
+
+/* Уважение системной настройки «уменьшение движения» */
+@media(prefers-reduced-motion:reduce){
+  html[data-design="playful"] #designBtn,
+  html[data-design="playful"] #designBtn::before,
+  html[data-design="playful"] #designBtn::after,
+  html[data-design="playful"] #designBtn .v141-game-icon,
+  html[data-design="playful"] #designBtn .v141-particle{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+
+
+/* =====================================================================
+   v1.4.2 · GAME LEARNING FX
+   Только для игрового дизайна. Классический интерфейс не меняется.
+   ===================================================================== */
+
+/* Прогресс «доезжает» до нового значения, а не прыгает */
+html[data-design="playful"] .progress-bar span,
+html[data-design="playful"] .chapter-progress-strip span,
+html[data-design="playful"] #masteryBar{
+  transition:
+    width .68s cubic-bezier(.2,.8,.2,1),
+    background-color .35s ease,
+    transform .35s ease,
+    opacity .35s ease;
+}
+html[data-design="playful"] .progress-bar{
+  position:relative;
+  overflow:hidden;
+}
+html[data-design="playful"] .progress-bar span{
+  position:relative;
+  overflow:hidden;
+}
+html[data-design="playful"] .progress-bar span::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(105deg,transparent 15%,rgba(255,255,255,.34) 47%,transparent 78%);
+  transform:translateX(-125%);
+}
+html[data-design="playful"] .progress-bar.v142-progress-live span::after{
+  animation:v142ProgressShine .75s ease;
+}
+
+/* Правильный ответ: карточка коротко подпрыгивает и светится */
+html[data-design="playful"] .v142-answer-success{
+  position:relative;
+  z-index:1;
+  animation:v142AnswerPop .48s cubic-bezier(.16,.9,.3,1);
+  border-color:color-mix(in srgb,var(--good) 64%,var(--line))!important;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb,var(--good) 9%,transparent),
+    0 8px 24px color-mix(in srgb,var(--good) 10%,transparent)!important;
+}
+html[data-design="playful"] .v142-answer-success::after{
+  content:"✓";
+  position:absolute;
+  right:15px;
+  top:13px;
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--good);
+  color:#fff;
+  font-weight:1000;
+  font-size:19px;
+  box-shadow:inset 0 -3px 0 color-mix(in srgb,var(--good) 66%,#000);
+  animation:v142CheckPop .5s cubic-bezier(.16,.9,.3,1);
+  pointer-events:none;
+}
+
+/* Маленькая XP-награда рядом с задачей */
+.v142-xp{
+  position:absolute;
+  z-index:80;
+  right:12px;
+  top:10px;
+  padding:6px 9px;
+  border-radius:999px;
+  color:#fff;
+  background:var(--primary);
+  border-bottom:3px solid color-mix(in srgb,var(--primary) 67%,#000);
+  font-size:12px;
+  line-height:1;
+  font-weight:1000;
+  pointer-events:none;
+  opacity:0;
+}
+html[data-design="playful"] .v142-xp{
+  animation:v142XpFloat 1.15s cubic-bezier(.1,.8,.2,1) forwards;
+}
+html[data-design="classic"] .v142-xp{display:none!important}
+
+/* Мини-частицы именно вокруг решённой карточки */
+.v142-local-particle{
+  position:absolute;
+  z-index:75;
+  width:7px;height:7px;
+  left:50%;top:50%;
+  border-radius:50%;
+  pointer-events:none;
+  opacity:0;
+}
+html[data-design="playful"] .v142-local-particle{
+  animation:v142LocalBurst .62s cubic-bezier(.1,.8,.2,1) forwards;
+}
+html[data-design="classic"] .v142-local-particle{display:none!important}
+
+/* Полноэкранная, но короткая награда за урок/главу */
+.v142-celebration-layer{
+  position:fixed;
+  inset:0;
+  z-index:2200;
+  display:grid;
+  place-items:center;
+  pointer-events:none;
+  opacity:0;
+}
+html[data-design="playful"] .v142-celebration-layer.show{
+  opacity:1;
+}
+.v142-celebration-card{
+  position:relative;
+  width:min(440px,calc(100vw - 34px));
+  padding:24px 22px 21px;
+  border-radius:25px;
+  border:2px solid var(--line);
+  border-bottom-width:6px;
+  background:var(--card);
+  color:var(--text);
+  text-align:center;
+  box-shadow:0 25px 70px rgba(25,45,25,.18);
+  transform:scale(.78) translateY(18px);
+  opacity:0;
+}
+html[data-design="playful"] .v142-celebration-layer.show .v142-celebration-card{
+  animation:v142RewardCard .72s cubic-bezier(.16,.9,.3,1) forwards;
+}
+.v142-celebration-icon{
+  width:78px;height:78px;
+  display:grid;place-items:center;
+  margin:-57px auto 9px;
+  border-radius:50%;
+  background:var(--primary);
+  border:6px solid var(--bg);
+  box-shadow:inset 0 -6px 0 color-mix(in srgb,var(--primary) 67%,#000);
+  color:#fff;
+  font-size:38px;
+  animation:v142RewardIcon .8s cubic-bezier(.16,.9,.3,1);
+}
+.v142-celebration-card h3{
+  margin:8px 0 5px;
+  font-size:27px;
+  font-weight:1000;
+}
+.v142-celebration-card p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.48;
+  font-weight:750;
+}
+.v142-reward-xp{
+  display:inline-flex;
+  margin-top:12px;
+  padding:7px 11px;
+  border-radius:11px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  border:2px solid color-mix(in srgb,var(--primary) 24%,var(--line));
+  font-weight:1000;
+}
+.v142-confetti{
+  position:fixed;
+  z-index:2199;
+  left:50%;top:45%;
+  width:9px;height:15px;
+  border-radius:3px;
+  pointer-events:none;
+  opacity:0;
+}
+html[data-design="playful"] .v142-celebration-layer.show .v142-confetti{
+  animation:v142Confetti var(--dur,.9s) cubic-bezier(.1,.7,.2,1) forwards;
+  animation-delay:var(--delay,0s);
+}
+.v142-celebration-layer.chapter .v142-celebration-card{
+  border-color:color-mix(in srgb,var(--game-yellow) 58%,var(--line));
+}
+.v142-celebration-layer.chapter .v142-celebration-icon{
+  background:var(--game-yellow);
+  color:#5b4300;
+  box-shadow:inset 0 -6px 0 color-mix(in srgb,var(--game-yellow) 70%,#7a5700);
+}
+
+/* Классический режим: награда не вмешивается вообще */
+html[data-design="classic"] .v142-celebration-layer{display:none!important}
+
+/* Микропульс процента/счётчика после изменения */
+html[data-design="playful"] .v142-number-pop{
+  animation:v142NumberPop .42s cubic-bezier(.16,.9,.3,1);
+}
+
+@keyframes v142AnswerPop{
+  0%{transform:scale(.985)}
+  48%{transform:scale(1.018)}
+  100%{transform:scale(1)}
+}
+@keyframes v142CheckPop{
+  0%{transform:scale(.2) rotate(-20deg);opacity:0}
+  55%{transform:scale(1.15) rotate(5deg);opacity:1}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes v142XpFloat{
+  0%{opacity:0;transform:translateY(8px) scale(.75)}
+  18%{opacity:1;transform:translateY(0) scale(1.08)}
+  70%{opacity:1;transform:translateY(-20px) scale(1)}
+  100%{opacity:0;transform:translateY(-34px) scale(.9)}
+}
+@keyframes v142LocalBurst{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}
+  18%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(0)}
+}
+@keyframes v142ProgressShine{
+  from{transform:translateX(-125%)}
+  to{transform:translateX(125%)}
+}
+@keyframes v142RewardCard{
+  0%{opacity:0;transform:scale(.78) translateY(18px)}
+  55%{opacity:1;transform:scale(1.035) translateY(-2px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+@keyframes v142RewardIcon{
+  0%{transform:scale(.4) rotate(-18deg)}
+  55%{transform:scale(1.13) rotate(7deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes v142Confetti{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.5)}
+  14%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--rot,220deg)) scale(.9)}
+}
+@keyframes v142NumberPop{
+  0%{transform:scale(.88)}
+  55%{transform:scale(1.13)}
+  100%{transform:scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html[data-design="playful"] .v142-answer-success,
+  html[data-design="playful"] .v142-answer-success::after,
+  html[data-design="playful"] .v142-xp,
+  html[data-design="playful"] .v142-local-particle,
+  html[data-design="playful"] .v142-celebration-layer.show .v142-celebration-card,
+  html[data-design="playful"] .v142-celebration-icon,
+  html[data-design="playful"] .v142-confetti,
+  html[data-design="playful"] .v142-number-pop,
+  html[data-design="playful"] .progress-bar span{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+
+/* Счётчик настоящих игровых XP: виден только в игровом дизайне */
+#v142XpBadge{
+  display:none;
+  align-items:center;
+  gap:5px;
+  padding:7px 10px;
+  border-radius:11px;
+  font-size:12px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+html[data-design="playful"] #v142XpBadge{
+  display:inline-flex;
+  background:#fff7d8;
+  color:#8a6500;
+  border:2px solid #f1d873;
+  border-bottom-width:4px;
+}
+html[data-design="playful"] body.dark #v142XpBadge{
+  background:#443b19;
+  color:#ffe27a;
+  border-color:#6f5d1e;
+}
+html[data-design="classic"] #v142XpBadge{display:none!important}
+.v142-xp{right:57px}
+@media(max-width:620px){
+  html[data-design="playful"] #v142XpBadge{
+    padding:6px 8px;
+    font-size:11px;
+  }
+}
+
+
+
+/* =====================================================================
+   v1.5 · «АЛЬФИ» — ЖИВОЙ ПОМОЩНИК
+   Собственный SVG-персонаж курса. В игровом дизайне активен, в классическом
+   скрыт, чтобы утверждённый исходный интерфейс оставался нетронутым.
+   ===================================================================== */
+.v15-assistant{
+  --a-accent:var(--primary);
+  --a-ink:#263238;
+  --a-face:#f9fffa;
+  --a-soft:color-mix(in srgb,var(--primary) 13%,#fff);
+  position:fixed;
+  right:22px;
+  bottom:20px;
+  z-index:1900;
+  width:92px;
+  height:112px;
+  display:none;
+  pointer-events:none;
+  user-select:none;
+}
+html[data-design="playful"] .v15-assistant[data-mode]:not([data-mode="off"]){
+  display:block;
+}
+html[data-design="classic"] .v15-assistant{display:none!important}
+
+.v15-mascot-button{
+  position:absolute;
+  right:0;
+  bottom:0;
+  width:86px;
+  height:92px;
+  padding:0;
+  border:0;
+  background:transparent;
+  pointer-events:auto;
+  cursor:pointer;
+  filter:drop-shadow(0 9px 12px rgba(31,77,35,.16));
+  transform-origin:50% 88%;
+  transition:transform .18s ease,filter .18s ease;
+}
+.v15-mascot-button:hover{
+  transform:translateY(-3px) scale(1.035);
+  filter:drop-shadow(0 12px 15px rgba(31,77,35,.20));
+}
+.v15-mascot-button:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--primary) 34%,transparent);
+  outline-offset:3px;
+  border-radius:25px;
+}
+.v15-mascot{
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+.v15-mascot .body{
+  fill:var(--a-accent);
+  stroke:color-mix(in srgb,var(--a-accent) 72%,#183619);
+  stroke-width:2.5;
+}
+.v15-mascot .body-shadow{fill:color-mix(in srgb,var(--a-accent) 74%,#173d19)}
+.v15-mascot .face{
+  fill:var(--a-face);
+  stroke:color-mix(in srgb,var(--a-accent) 36%,#6b7b6d);
+  stroke-width:2;
+}
+.v15-mascot .eye-white{fill:#fff}
+.v15-mascot .pupil{fill:#263238}
+.v15-mascot .eye-glint{fill:#fff}
+.v15-mascot .mouth{
+  fill:none;
+  stroke:#31403a;
+  stroke-width:2.5;
+  stroke-linecap:round;
+}
+.v15-mascot .cheek{
+  fill:#ff95a8;
+  opacity:.58;
+}
+.v15-mascot .arm{
+  fill:none;
+  stroke:var(--a-accent);
+  stroke-width:8;
+  stroke-linecap:round;
+  transform-box:fill-box;
+  transform-origin:center;
+}
+.v15-mascot .hand{fill:var(--a-accent)}
+.v15-mascot .antenna{
+  fill:none;
+  stroke:color-mix(in srgb,var(--a-accent) 72%,#183619);
+  stroke-width:3;
+  stroke-linecap:round;
+}
+.v15-mascot .antenna-dot{
+  fill:#ffca28;
+  stroke:#9b7610;
+  stroke-width:1.4;
+}
+.v15-mascot .mascot-badge{
+  fill:#fff;
+  stroke:color-mix(in srgb,var(--a-accent) 50%,#456647);
+  stroke-width:1.4;
+}
+.v15-mascot .mascot-badge-text{
+  fill:color-mix(in srgb,var(--a-accent) 80%,#1d4a20);
+  font:900 9px/1 system-ui,sans-serif;
+  text-anchor:middle;
+}
+.v15-mascot .symbol{
+  fill:#fff;
+  font:900 15px/1 "Cambria Math",serif;
+  text-anchor:middle;
+  opacity:0;
+}
+.v15-assistant[data-state="think"] .v15-mascot .symbol,
+.v15-assistant[data-state="explain"] .v15-mascot .symbol{
+  opacity:1;
+}
+
+/* Глаза и мимика */
+.v15-mascot .pupil{
+  transform-box:fill-box;
+  transform-origin:center;
+  transition:transform .14s ease;
+}
+.v15-assistant[data-state="happy"] .eye-group,
+.v15-assistant[data-state="cheer"] .eye-group,
+.v15-assistant[data-state="celebrate"] .eye-group{
+  transform:scaleY(.72);
+  transform-origin:center;
+}
+.v15-assistant[data-state="oops"] .mouth{
+  d:path("M 42 59 Q 50 53 58 59");
+}
+.v15-assistant[data-state="happy"] .mouth,
+.v15-assistant[data-state="cheer"] .mouth,
+.v15-assistant[data-state="celebrate"] .mouth{
+  d:path("M 40 55 Q 50 66 60 55");
+}
+.v15-assistant[data-state="focus"] .mouth{
+  d:path("M 43 58 L 57 58");
+}
+.v15-assistant[data-state="sleep"] .eye-white,
+.v15-assistant[data-state="sleep"] .pupil,
+.v15-assistant[data-state="sleep"] .eye-glint{
+  opacity:0;
+}
+.v15-assistant[data-state="sleep"] .sleep-eye{opacity:1}
+.v15-mascot .sleep-eye{
+  opacity:0;
+  fill:none;
+  stroke:#31403a;
+  stroke-width:2.2;
+  stroke-linecap:round;
+}
+
+/* 9 состояний движения */
+.v15-assistant[data-state="idle"] .v15-mascot-button{animation:v15Float 3.2s ease-in-out infinite}
+.v15-assistant[data-state="wave"] .v15-mascot-button{animation:v15Hello .72s cubic-bezier(.2,.8,.2,1)}
+.v15-assistant[data-state="wave"] .arm-right{animation:v15WaveArm .46s ease-in-out 2}
+.v15-assistant[data-state="think"] .v15-mascot-button{animation:v15Think 1.4s ease-in-out infinite}
+.v15-assistant[data-state="explain"] .arm-left{animation:v15ExplainArm .7s ease-in-out infinite alternate}
+.v15-assistant[data-state="happy"] .v15-mascot-button{animation:v15Happy .55s cubic-bezier(.16,.9,.3,1)}
+.v15-assistant[data-state="oops"] .v15-mascot-button{animation:v15Oops .46s ease}
+.v15-assistant[data-state="focus"] .v15-mascot-button{animation:v15Focus 2.4s ease-in-out infinite}
+.v15-assistant[data-state="cheer"] .v15-mascot-button,
+.v15-assistant[data-state="celebrate"] .v15-mascot-button{animation:v15Cheer .6s cubic-bezier(.16,.9,.3,1)}
+.v15-assistant[data-state="cheer"] .arm-left,
+.v15-assistant[data-state="celebrate"] .arm-left{transform:rotate(45deg) translateY(-5px)}
+.v15-assistant[data-state="cheer"] .arm-right,
+.v15-assistant[data-state="celebrate"] .arm-right{transform:rotate(-45deg) translateY(-5px)}
+.v15-assistant[data-state="sleep"] .v15-mascot-button{animation:v15Sleep 3.4s ease-in-out infinite}
+
+/* Статус-точка */
+.v15-status-dot{
+  position:absolute;
+  right:3px;
+  bottom:5px;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  border:3px solid var(--bg);
+  background:var(--good);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--good) 28%,transparent);
+  pointer-events:none;
+}
+.v15-assistant[data-mode="advice"] .v15-status-dot{background:#ffca28}
+
+/* Речевая карточка */
+.v15-speech{
+  position:absolute;
+  right:72px;
+  bottom:74px;
+  width:min(345px,calc(100vw - 116px));
+  min-width:285px;
+  padding:14px 15px 13px;
+  border:2px solid var(--line);
+  border-bottom-width:5px;
+  border-radius:19px 19px 6px 19px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 16px 42px rgba(25,45,25,.14);
+  pointer-events:auto;
+  transform-origin:100% 100%;
+  opacity:0;
+  transform:translateY(8px) scale(.94);
+  visibility:hidden;
+  transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+}
+.v15-assistant.open .v15-speech{
+  opacity:1;
+  transform:none;
+  visibility:visible;
+}
+.v15-speech-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:7px;
+}
+.v15-speech-head strong{font-weight:1000}
+.v15-speech-status{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.v15-speech-spacer{flex:1}
+.v15-round-btn{
+  width:32px;height:32px;
+  display:grid;place-items:center;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:0;
+  font-weight:900;
+}
+.v15-round-btn:hover{background:var(--primary-soft);color:var(--primary)}
+.v15-message{
+  min-height:42px;
+  font-size:14px;
+  line-height:1.48;
+  font-weight:720;
+}
+.v15-message.typing::after{
+  content:"▋";
+  color:var(--primary);
+  animation:v15Caret .65s steps(1) infinite;
+}
+.v15-actions{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-top:11px;
+}
+.v15-action{
+  border:2px solid var(--line);
+  border-bottom-width:4px;
+  border-radius:11px;
+  background:var(--card);
+  color:var(--text);
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:900;
+}
+.v15-action:hover{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 30%,var(--line));
+}
+.v15-action.primary-action{
+  background:var(--primary);
+  color:#fff;
+  border-color:color-mix(in srgb,var(--primary) 68%,#000);
+}
+.v15-settings{
+  display:none;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:2px solid var(--line);
+}
+.v15-settings.show{display:block}
+.v15-settings-label{
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+}
+.v15-mode-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+}
+.v15-mode-btn{
+  min-height:42px;
+  border:2px solid var(--line);
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:6px 5px;
+  font-size:11px;
+  line-height:1.2;
+  font-weight:900;
+}
+.v15-mode-btn.active{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 45%,var(--line));
+}
+.v15-tip-chip{
+  position:absolute;
+  right:73px;
+  bottom:37px;
+  max-width:180px;
+  padding:7px 9px;
+  border-radius:11px 11px 3px 11px;
+  background:var(--primary);
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  line-height:1.25;
+  opacity:0;
+  transform:translateY(6px) scale(.94);
+  pointer-events:none;
+}
+.v15-tip-chip.show{
+  animation:v15Chip 3.2s ease forwards;
+}
+
+/* Маленький индикатор серии */
+.v15-streak-pop{
+  position:absolute;
+  right:4px;
+  top:-8px;
+  padding:5px 7px;
+  border-radius:999px;
+  background:#ffca28;
+  color:#674b00;
+  border:2px solid #dfb31c;
+  font-size:10px;
+  font-weight:1000;
+  opacity:0;
+  pointer-events:none;
+}
+.v15-streak-pop.show{animation:v15Streak 1.35s cubic-bezier(.16,.9,.3,1) forwards}
+
+/* В тёмном игровом режиме */
+html[data-design="playful"] body.dark .v15-assistant{
+  --a-face:#f2f7f3;
+  --a-ink:#263238;
+}
+html[data-design="playful"] body.dark .v15-speech{
+  box-shadow:0 18px 50px rgba(0,0,0,.28);
+}
+
+/* Мобильная компоновка */
+@media(max-width:620px){
+  .v15-assistant{
+    right:10px;
+    bottom:10px;
+    width:82px;
+    height:100px;
+  }
+  .v15-mascot-button{width:78px;height:84px}
+  .v15-speech{
+    right:58px;
+    bottom:67px;
+    min-width:0;
+    width:min(310px,calc(100vw - 82px));
+    padding:12px 12px 11px;
+  }
+  .v15-message{font-size:13px}
+  .v15-action{padding:8px 8px}
+  .v15-tip-chip{right:60px;bottom:33px}
+}
+@media(max-width:380px){
+  .v15-speech{
+    right:20px;
+    bottom:91px;
+    width:calc(100vw - 38px);
+  }
+}
+
+/* Анимации */
+@keyframes v15Float{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-3px) rotate(.8deg)}
+}
+@keyframes v15Hello{
+  0%{transform:scale(.86) rotate(-5deg)}
+  55%{transform:scale(1.08) rotate(4deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes v15WaveArm{
+  0%,100%{transform:rotate(0)}
+  50%{transform:rotate(-38deg) translateY(-4px)}
+}
+@keyframes v15Think{
+  0%,100%{transform:rotate(-1.5deg) translateY(0)}
+  50%{transform:rotate(2deg) translateY(-2px)}
+}
+@keyframes v15ExplainArm{
+  from{transform:rotate(0)}
+  to{transform:rotate(22deg) translateY(-2px)}
+}
+@keyframes v15Happy{
+  0%{transform:scale(.92) translateY(3px)}
+  55%{transform:scale(1.10) translateY(-5px)}
+  100%{transform:scale(1)}
+}
+@keyframes v15Oops{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-3px) rotate(-2deg)}
+  65%{transform:translateX(3px) rotate(2deg)}
+}
+@keyframes v15Focus{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-1px) scale(1.01)}
+}
+@keyframes v15Cheer{
+  0%{transform:scale(.9) translateY(4px)}
+  45%{transform:scale(1.12) translateY(-8px) rotate(-2deg)}
+  72%{transform:scale(1.03) translateY(-2px) rotate(2deg)}
+  100%{transform:scale(1)}
+}
+@keyframes v15Sleep{
+  0%,100%{transform:translateY(1px) rotate(-1deg)}
+  50%{transform:translateY(3px) rotate(1deg)}
+}
+@keyframes v15Caret{50%{opacity:0}}
+@keyframes v15Chip{
+  0%{opacity:0;transform:translateY(6px) scale(.94)}
+  12%,78%{opacity:1;transform:none}
+  100%{opacity:0;transform:translateY(-4px) scale(.97)}
+}
+@keyframes v15Streak{
+  0%{opacity:0;transform:translateY(8px) scale(.7)}
+  24%{opacity:1;transform:translateY(0) scale(1.12)}
+  70%{opacity:1;transform:translateY(-8px) scale(1)}
+  100%{opacity:0;transform:translateY(-16px) scale(.9)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .v15-assistant *,
+  .v15-assistant *::before,
+  .v15-assistant *::after{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+html[data-design="playful"] #assistantModeBtn{
+  position:relative;
+  color:var(--text);
+}
+html[data-design="playful"] #assistantModeBtn::after{
+  content:"";
+  position:absolute;
+  right:12px;
+  top:50%;
+  width:7px;height:7px;
+  margin-top:-3.5px;
+  border-radius:50%;
+  background:var(--good);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 10%,transparent);
+}
+html[data-design="playful"] #assistantModeBtn:hover{
+  color:var(--primary);
+}
+
+html[data-design="playful"] #assistantModeBtn[data-assistant-mode="advice"]::after{
+  background:#ffca28;
+  box-shadow:0 0 0 3px color-mix(in srgb,#ffca28 14%,transparent);
+}
+html[data-design="playful"] #assistantModeBtn[data-assistant-mode="off"]::after{
+  background:var(--muted);
+  box-shadow:none;
+}
+
+
+
+/* =====================================================================
+   v1.5.1 · ГОЛОС АЛЬФИ
+   ===================================================================== */
+.v151-voice-settings{
+  margin-top:12px;
+  padding-top:11px;
+  border-top:2px solid var(--line);
+}
+.v151-voice-title{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;
+  font-size:12px;
+  font-weight:1000;
+}
+.v151-voice-title>span{flex:1}
+.v151-toggle{
+  min-width:52px;
+  border:2px solid color-mix(in srgb,var(--primary) 38%,var(--line));
+  border-bottom-width:3px;
+  border-radius:9px;
+  padding:5px 8px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  font-size:11px;
+  font-weight:1000;
+}
+.v151-toggle.off{
+  background:var(--card);
+  color:var(--muted);
+  border-color:var(--line);
+}
+.v151-profile-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-bottom:9px;
+}
+.v151-profile-btn{
+  min-height:38px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:9px;
+  padding:5px 3px;
+  background:var(--card);
+  color:var(--text);
+  font-size:10px;
+  line-height:1.2;
+  font-weight:900;
+}
+.v151-profile-btn.active{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 42%,var(--line));
+}
+.v151-voice-field{
+  display:grid;
+  gap:5px;
+  margin:8px 0;
+}
+.v151-voice-field>span{
+  color:var(--muted);
+  font-size:10px;
+  font-weight:900;
+}
+.v151-voice-field select{
+  width:100%;
+  min-height:40px;
+  border:2px solid var(--line);
+  border-radius:10px;
+  background:var(--bg);
+  color:var(--text);
+  padding:6px 8px;
+  font-size:12px;
+  outline:none;
+}
+.v151-voice-field select:focus{border-color:var(--primary)}
+.v151-auto-row{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin:9px 0;
+  cursor:pointer;
+}
+.v151-auto-row input{
+  width:18px;height:18px;
+  flex:0 0 auto;
+  margin:2px 0 0;
+  accent-color:var(--primary);
+}
+.v151-auto-row span{min-width:0}
+.v151-auto-row b{
+  display:block;
+  font-size:11px;
+}
+.v151-auto-row small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.3;
+}
+.v151-voice-actions{
+  display:grid;
+  gap:5px;
+}
+.v151-voice-note{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.3;
+}
+#v15SpeakBtn.speaking{
+  background:var(--primary);
+  color:#fff;
+  border-color:color-mix(in srgb,var(--primary) 70%,#000);
+  animation:v151SpeakPulse .75s ease-in-out infinite alternate;
+}
+.v15-assistant[data-state="happy"] .mouth,
+.v15-assistant[data-state="cheer"] .mouth,
+.v15-assistant[data-state="celebrate"] .mouth,
+.v15-assistant[data-state="explain"] .mouth{
+  transform-box:fill-box;
+  transform-origin:center;
+}
+#v15SpeakBtn.speaking~*{}
+.v15-assistant:has(#v15SpeakBtn.speaking) .mouth{
+  animation:v151MouthTalk .23s ease-in-out infinite alternate;
+}
+@keyframes v151SpeakPulse{
+  from{transform:scale(.96)}
+  to{transform:scale(1.04)}
+}
+@keyframes v151MouthTalk{
+  from{transform:scaleY(.75)}
+  to{transform:scaleY(1.22)}
+}
+@media(prefers-reduced-motion:reduce){
+  #v15SpeakBtn.speaking,
+  .v15-assistant:has(#v15SpeakBtn.speaking) .mouth{animation:none!important}
+}
+
+
+
+/* =====================================================================
+   v1.6 · AI TUTOR LITE — локальный интеллектуальный слой Альфи
+   ===================================================================== */
+.v16-tutor-btn{
+  display:none;
+  align-items:center;
+  gap:6px;
+  border:2px solid color-mix(in srgb,var(--primary) 34%,var(--line));
+  border-bottom-width:4px;
+  border-radius:12px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  padding:9px 11px;
+  font-size:12px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+html[data-design="playful"] .v16-tutor-btn{display:inline-flex}
+html[data-design="classic"] .v16-tutor-btn{display:none!important}
+.v16-tutor-btn:hover{
+  transform:translateY(-1px);
+  border-bottom-width:3px;
+}
+.v16-tutor-btn:active{
+  transform:translateY(2px);
+  border-bottom-width:1px;
+}
+
+.v16-tutor{
+  display:none;
+  margin-top:11px;
+  padding-top:11px;
+  border-top:2px solid var(--line);
+}
+.v16-tutor.show{display:block}
+.v16-tutor-head{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.v16-tutor-head strong{
+  font-size:12px;
+  font-weight:1000;
+}
+.v16-offline-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  border:1px solid color-mix(in srgb,var(--primary) 25%,var(--line));
+  font-size:9px;
+  font-weight:1000;
+}
+.v16-context{
+  padding:8px 9px;
+  border:2px solid var(--line);
+  border-radius:11px;
+  background:var(--bg);
+  font-size:11px;
+  line-height:1.35;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.v16-context b{color:var(--text)}
+.v16-help-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+.v16-help-btn{
+  min-height:40px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:7px 7px;
+  font-size:10px;
+  line-height:1.2;
+  font-weight:1000;
+}
+.v16-help-btn:hover{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:color-mix(in srgb,var(--primary) 30%,var(--line));
+}
+.v16-help-btn.primary{
+  background:var(--primary);
+  color:#fff;
+  border-color:color-mix(in srgb,var(--primary) 67%,#000);
+}
+.v16-help-meter{
+  display:flex;
+  gap:4px;
+  align-items:center;
+  margin:8px 0 4px;
+}
+.v16-help-meter span{
+  flex:1;
+  height:5px;
+  border-radius:999px;
+  background:var(--line);
+}
+.v16-help-meter span.on{background:var(--primary)}
+.v16-help-caption{
+  color:var(--muted);
+  font-size:9px;
+  margin-bottom:7px;
+}
+.v16-work-box{
+  display:none;
+  margin-top:8px;
+}
+.v16-work-box.show{display:block}
+.v16-work-box textarea{
+  width:100%;
+  min-height:76px;
+  resize:vertical;
+  border:2px solid var(--line);
+  border-radius:11px;
+  background:var(--bg);
+  color:var(--text);
+  padding:9px 10px;
+  font:inherit;
+  font-size:12px;
+  line-height:1.4;
+}
+.v16-work-box textarea:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 10%,transparent);
+}
+.v16-work-actions{
+  display:flex;
+  gap:6px;
+  margin-top:6px;
+}
+.v16-tutor-result{
+  display:none;
+  margin-top:8px;
+  padding:9px 10px;
+  border:2px solid var(--line);
+  border-radius:11px;
+  background:var(--card);
+  font-size:11px;
+  line-height:1.4;
+}
+.v16-tutor-result.show{display:block}
+.v16-tutor-result.good{
+  border-color:color-mix(in srgb,var(--good) 45%,var(--line));
+  background:color-mix(in srgb,var(--good) 7%,var(--card));
+}
+.v16-tutor-result.warn{
+  border-color:color-mix(in srgb,var(--warn) 45%,var(--line));
+  background:color-mix(in srgb,var(--warn) 7%,var(--card));
+}
+.v16-memory-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin-top:7px;
+  padding:5px 7px;
+  border-radius:9px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  color:var(--muted);
+  font-size:9px;
+  font-weight:900;
+}
+.v16-adaptive-note{
+  margin-top:7px;
+  padding:7px 8px;
+  border-left:4px solid var(--primary);
+  border-radius:8px;
+  background:var(--primary-soft);
+  color:var(--text);
+  font-size:10px;
+  line-height:1.35;
+}
+.v16-tutor-btn.v16-repeat{
+  animation:v16TutorNudge .65s cubic-bezier(.16,.9,.3,1);
+}
+@keyframes v16TutorNudge{
+  0%{transform:scale(.96)}
+  55%{transform:scale(1.06)}
+  100%{transform:scale(1)}
+}
+@media(max-width:620px){
+  .v16-tutor-btn{
+    width:100%;
+    justify-content:center;
+    min-height:42px;
+  }
+  .v16-help-row{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  .v16-tutor-btn{animation:none!important;transition:none!important}
+}
+
+
+
+/* =====================================================================
+   v1.6.1 · ЖИВАЯ ОЗВУЧКА АЛЬФИ
+   ===================================================================== */
+.v161-energy-field{
+  display:grid;
+  gap:5px;
+  margin:8px 0 10px;
+  padding:8px 9px;
+  border:2px solid var(--line);
+  border-radius:11px;
+  background:var(--bg);
+}
+.v161-energy-field>span{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:10px;
+}
+.v161-energy-field output{
+  color:var(--primary);
+  font-weight:1000;
+}
+.v161-energy-field input[type="range"]{
+  width:100%;
+  accent-color:var(--primary);
+}
+.v161-energy-field small{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.3;
+}
+.v151-compare-btn{
+  width:100%;
+  min-height:38px;
+  margin:0 0 8px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:7px 8px;
+  font-size:10px;
+  font-weight:1000;
+}
+.v151-compare-btn:hover{
+  color:var(--primary);
+  background:var(--primary-soft);
+  border-color:color-mix(in srgb,var(--primary) 30%,var(--line));
+}
+#v15SpeakBtn.speaking{
+  position:relative;
+  overflow:hidden;
+}
+#v15SpeakBtn.speaking::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:5px;
+  width:4px;
+  height:3px;
+  border-radius:3px;
+  background:currentColor;
+  box-shadow:-7px 0 currentColor,7px 0 currentColor;
+  animation:v161VoiceBars .34s ease-in-out infinite alternate;
+}
+@keyframes v161VoiceBars{
+  from{transform:scaleY(.45);opacity:.55}
+  to{transform:scaleY(1.8);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  #v15SpeakBtn.speaking::after{animation:none!important}
+}
+
+
+
+/* =====================================================================
+   v1.7 · NEURAL VOICE АЛЬФИ
+   ===================================================================== */
+.v17-neural{
+  margin:12px 0 9px;
+  padding:11px;
+  border:2px solid color-mix(in srgb,var(--primary) 24%,var(--line));
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--primary) 12%,transparent),transparent 46%),
+    var(--bg);
+}
+.v17-neural-head{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:9px;
+}
+.v17-neural-head>div{flex:1;min-width:0}
+.v17-neural-head strong{
+  display:block;
+  font-size:12px;
+  font-weight:1000;
+}
+.v17-neural-head small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+}
+.v17-neural-badge{
+  display:inline-flex;
+  padding:4px 7px;
+  border-radius:999px;
+  background:var(--primary);
+  color:#fff;
+  font-size:9px;
+  font-weight:1000;
+}
+.v17-engine-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-bottom:9px;
+}
+.v17-engine-btn{
+  min-height:39px;
+  border:2px solid var(--line);
+  border-bottom-width:3px;
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:7px 8px;
+  font-size:10px;
+  font-weight:1000;
+}
+.v17-engine-btn.active{
+  border-color:color-mix(in srgb,var(--primary) 48%,var(--line));
+  background:var(--primary-soft);
+  color:var(--primary);
+}
+.v17-cartoon-field{
+  display:grid;
+  gap:5px;
+  padding:8px 9px;
+  margin-bottom:9px;
+  border:2px solid var(--line);
+  border-radius:11px;
+  background:var(--card);
+}
+.v17-cartoon-field>span{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  font-size:10px;
+}
+.v17-cartoon-field output{
+  color:var(--primary);
+  font-weight:1000;
+}
+.v17-cartoon-field input{
+  width:100%;
+  accent-color:var(--primary);
+}
+.v17-cartoon-field small{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.3;
+}
+.v17-neural-status{
+  min-height:31px;
+  display:flex;
+  align-items:center;
+  margin:7px 0;
+  padding:7px 8px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:var(--card);
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.35;
+  font-weight:800;
+}
+.v17-neural-status.ok{
+  color:var(--good);
+  border-color:color-mix(in srgb,var(--good) 35%,var(--line));
+  background:color-mix(in srgb,var(--good) 6%,var(--card));
+}
+.v17-neural-status.warn{
+  color:#967000;
+  border-color:color-mix(in srgb,#ffca28 50%,var(--line));
+  background:color-mix(in srgb,#ffca28 8%,var(--card));
+}
+.v17-neural-status.error{
+  color:#c23a42;
+  border-color:color-mix(in srgb,#e45860 42%,var(--line));
+  background:color-mix(in srgb,#e45860 7%,var(--card));
+}
+.v17-neural-status.busy::before{
+  content:"";
+  flex:0 0 auto;
+  width:10px;height:10px;
+  margin-right:7px;
+  border:2px solid var(--line);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:v17Spin .7s linear infinite;
+}
+.v17-neural-progress{
+  display:none;
+  gap:5px;
+  margin:7px 0 9px;
+}
+.v17-neural-progress.show{display:grid}
+.v17-progress-track{
+  height:7px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line);
+}
+.v17-progress-track i{
+  display:block;
+  width:0;
+  height:100%;
+  border-radius:inherit;
+  background:var(--primary);
+  transition:width .18s ease;
+}
+.v17-neural-progress span{
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+}
+.v17-neural-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.v17-neural-actions #v17Download{
+  grid-column:1/-1;
+}
+.v17-neural-actions button:disabled{
+  opacity:.52;
+  cursor:not-allowed;
+}
+.v15-action.danger-soft{
+  color:#b23b43;
+}
+.v15-action.danger-soft:hover{
+  border-color:color-mix(in srgb,#e45860 38%,var(--line));
+  background:color-mix(in srgb,#e45860 8%,var(--card));
+}
+.v17-neural-note{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:8.5px;
+  line-height:1.35;
+}
+@keyframes v17Spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){
+  .v17-neural-status.busy::before{animation:none!important}
+  .v17-progress-track i{transition:none!important}
+}
