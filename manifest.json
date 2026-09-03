@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.5: исправлен Whisper WASM fp32+q4, Android consent switch при DNT/GPC, сохранены Child Safety и mobile sidebar UX.",
+  "description": "Алгебра 8 v1.11.6: Android Whisper module-worker fallback через same-page WASM runtime; iPhone рабочий путь сохранён; Child Safety сохранена.",
   "orientation": "any",
   "categories": [
     "education"

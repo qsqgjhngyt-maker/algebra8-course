@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.5";
+  const VERSION="1.11.6";
   const WEBSITE_ID="1a59caa5-62af-44bc-a583-fa4b3c8fe80a";
   const PROD_HOST="qsqgjhngyt-maker.github.io";
   const CONSENT_KEY="a8_analytics_consent_v1111";

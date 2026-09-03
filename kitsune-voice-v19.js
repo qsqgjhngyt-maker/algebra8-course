@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.5";
+  const VERSION="1.11.6";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -22,6 +22,10 @@
   let worker=null;
   let workerReady=false;
   let workerLoading=false;
+  let mainThreadTranscriber=null;
+  let mainThreadLoading=null;
+  let mainThreadBackend="";
+  let workerFallbackTried=false;
   let workerWaiters=new Map();
   let seq=0;
 
@@ -83,12 +87,86 @@
       (platform==="MacIntel"&&Number(navigator.maxTouchPoints)>1);
   }
 
+  function isAndroidLike(){
+    return /Android/i.test(String(navigator.userAgent||""));
+  }
+
+  async function loadTransformersMainThread(){
+    if(window.__kitsuneTransformersModule)return window.__kitsuneTransformersModule;
+    setWhisperStatus("Android: module worker недоступен — подключаю совместимый локальный runtime…","busy");
+    const mod=await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0/+esm");
+    window.__kitsuneTransformersModule=mod;
+    try{
+      if(mod.env?.backends?.onnx?.wasm){
+        mod.env.backends.onnx.wasm.numThreads=1;
+        mod.env.backends.onnx.wasm.proxy=false;
+      }
+    }catch(e){}
+    return mod;
+  }
+
+  async function prepareWhisperMainThread(){
+    if(mainThreadTranscriber)return mainThreadTranscriber;
+    if(mainThreadLoading)return mainThreadLoading;
+
+    mainThreadLoading=(async()=>{
+      const {pipeline}=await loadTransformersMainThread();
+      const options={
+        device:"wasm",
+        dtype:{encoder_model:"fp32",decoder_model_merged:"q4"},
+        progress_callback:(p)=>{
+          let progress=null;
+          if(Number.isFinite(Number(p?.progress))){
+            const raw=Number(p.progress);
+            progress=raw<=1?raw*100:raw;
+          }
+          setWhisperProgress(progress,String(p?.file||p?.name||p?.status||"Загрузка").split("/").pop());
+        }
+      };
+      setWhisperStatus("Android: подготавливаю Whisper через совместимый WASM runtime…","busy");
+      mainThreadTranscriber=await pipeline("automatic-speech-recognition","onnx-community/whisper-tiny",options);
+      mainThreadBackend="WASM · Android fallback";
+      workerReady=false;
+      whisperReady=true;save();
+      setWhisperProgress(null);
+      setWhisperStatus("✅ Whisper готов · Android WASM fallback. Голосовой ввод работает локально.","ok");
+      updateVoiceUi();
+      return mainThreadTranscriber;
+    })();
+
+    try{return await mainThreadLoading}
+    catch(err){
+      mainThreadTranscriber=null;
+      const msg=String(err?.message||err).slice(0,260);
+      setWhisperProgress(null);
+      setWhisperStatus("Whisper Android fallback не запустился: "+msg,"warn");
+      throw err;
+    }finally{mainThreadLoading=null}
+  }
+
+  async function activateAndroidWorkerFallback(reason="Module Worker error"){
+    if(workerFallbackTried||!isAndroidLike())return false;
+    workerFallbackTried=true;
+    workerLoading=false;workerReady=false;
+    try{worker?.terminate?.()}catch(e){}
+    worker=null;
+    setWhisperProgress(null);
+    setWhisperStatus("Android: локальный module worker не загрузился. Автоматически переключаюсь на совместимый WASM…","busy");
+    try{
+      await prepareWhisperMainThread();
+      return true;
+    }catch(err){
+      console.warn("[Kitsune Whisper Android fallback]",reason,err);
+      return false;
+    }
+  }
+
   function ensureWorker(){
     if(worker)return worker;
 
     /* v1.11.4: same-origin module worker. Blob module workers caused Safari/
        ONNX dynamic-import failures (ort *.jsep.mjs) under strict CSP. */
-    worker=new Worker("./whisper-worker-v1114.js",{type:"module",name:"kitsune-whisper"});
+    worker=new Worker("./whisper-worker-v1116.js",{type:"module",name:"kitsune-whisper"});
 
     worker.onmessage=e=>{
       const m=e.data||{};
@@ -122,8 +200,12 @@
       workerLoading=false;workerReady=false;
       setWhisperProgress(null);
       const msg=String(e?.message||"Module Worker error").slice(0,220);
-      setWhisperStatus("Ошибка загрузки локального Whisper worker: "+msg,"warn");
-      updateVoiceUi();
+      if(isAndroidLike()){
+        activateAndroidWorkerFallback(msg).catch(()=>{});
+      }else{
+        setWhisperStatus("Ошибка загрузки локального Whisper worker: "+msg,"warn");
+        updateVoiceUi();
+      }
     };
     return worker;
   }
@@ -154,7 +236,16 @@
     if(isIOSLike()&&preferred==="wasm"){
       setWhisperStatus("iPhone/iPad: запускаю совместимый WASM Whisper (fp32 + q4)…","busy");
     }
-    ensureWorker().postMessage({type:"load",preferred});
+    try{
+      ensureWorker().postMessage({type:"load",preferred});
+    }catch(err){
+      workerLoading=false;
+      if(isAndroidLike()){
+        await activateAndroidWorkerFallback(String(err?.message||err));
+      }else{
+        setWhisperStatus("Ошибка запуска Whisper worker: "+String(err?.message||err).slice(0,220),"warn");
+      }
+    }
   }
 
   function setWhisperStatus(text,kind=""){
@@ -186,7 +277,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.11.5</span>
+        <span>v1.11.6</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
@@ -569,8 +660,29 @@
   }
 
   async function transcribe(samples){
+    /* Android module-worker fallback runs Whisper directly on the page's
+       main JS realm. Audio still stays on-device. */
+    if(mainThreadTranscriber){
+      dialogState("🧠 Распознаю речь локально…","thinking");
+      const result=await mainThreadTranscriber(samples,{
+        language:"russian",
+        task:"transcribe",
+        return_timestamps:false
+      });
+      return String(result?.text||"").trim();
+    }
+
     const preferred=await preferredWhisperBackend();
-    const w=ensureWorker();
+    let w;
+    try{w=ensureWorker()}
+    catch(err){
+      if(isAndroidLike()){
+        await activateAndroidWorkerFallback(String(err?.message||err));
+        if(mainThreadTranscriber)return transcribe(samples);
+      }
+      throw err;
+    }
+
     const id=++seq;
     const promise=new Promise((resolve,reject)=>{
       workerWaiters.set(id,{resolve,reject});
@@ -587,11 +699,11 @@
   }
 
   function waitWorkerReady(timeout=25000){
-    if(workerReady)return Promise.resolve(true);
+    if(workerReady||mainThreadTranscriber)return Promise.resolve(true);
     const start=performance.now();
     return new Promise(resolve=>{
       const tick=()=>{
-        if(workerReady)return resolve(true);
+        if(workerReady||mainThreadTranscriber)return resolve(true);
         if(performance.now()-start>timeout)return resolve(false);
         setTimeout(tick,180);
       };tick();
