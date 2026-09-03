@@ -893,10 +893,22 @@ document.addEventListener("click",e=>{
   if(isCheck){
     const container=btn.closest(".exercise,.v13-task,.v13-advanced-card,.v12-trap,.v11-visual-check,.test-question");
     if(!container)return;
+
+    /* v1.7.3: кнопка «Проверить» НИКОГДА не открывает окно Альфи.
+       При ошибке разбор показывается локально под заданием (Smart Tutor).
+       Альфи может только дать короткий ненавязчивый chip возле персонажа. */
     setTimeout(()=>{
-      if(v15LooksCorrect(container))v15ReactCorrect();
-      else if(v15LooksWrong(container))v15ReactWrong();
+      if(v15LooksCorrect(container)){
+        v15ReactCorrect();
+      }else if(v15LooksWrong(container)){
+        v15RightStreak=0;
+        v15WrongStreak++;
+        v15SetState("oops");
+        if(v15Mode==="active")v15Chip("Разбор появился под заданием 💡");
+        setTimeout(()=>v15SetState("idle"),850);
+      }
     },95);
+    return;
   }
 
   /* Массовая диагностика/контрольная */

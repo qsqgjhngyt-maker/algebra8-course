@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8: AI Tutor Lite, Альфи и Neural Voice. v1.7.2 исправляет мобильный скролл меню Альфи и конфликт штатных подсказок урока с помощником.",
+  "description": "Алгебра 8 v1.7.3: Smart Inline Tutor Альфи с конкретным пошаговым разбором прямо под заданием, Neural Voice, PWA и офлайн-работой.",
   "orientation": "any",
   "categories": [
     "education"

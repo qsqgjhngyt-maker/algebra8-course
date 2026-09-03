@@ -369,12 +369,16 @@ function v16UpdatePanel(){
 function v16OpenTutor(ctx){
   if(!ctx)return;
   v16Active=ctx;
+
+  /* v1.7.3: помощь по упражнению открывается ВНУТРИ самого задания,
+     а не в огромном меню Альфи. */
+  if(typeof window.v173OpenInline==="function"){
+    window.v173OpenInline(ctx,{reason:"manual"});
+    return;
+  }
+
+  /* fallback для старого движка, но без автоматического открытия Альфи */
   v16EnsurePanel()?.classList.add("show");
-  try{
-    v15Open();
-    v15SetState("think");
-    v15Message("Я вижу это задание. Ответ сразу не показываю — сначала попробуем пройти лестницу подсказок.",{state:"think",open:true});
-  }catch(e){}
   v16UpdatePanel();
 }
 function v16NextHint(){
@@ -384,7 +388,6 @@ function v16NextHint(){
   v16RecordHelp(ctx,level);
   const text=v16HintText(ctx,level);
   v16SetResult(text,level===4?"warn":"");
-  try{v15Message(text,{state:level===1?"think":"explain",open:true})}catch(e){}
   v16UpdatePanel();
 }
 function v16Why(){
@@ -392,7 +395,6 @@ function v16Why(){
   if(!ctx)return;
   const text=v16WhyText(ctx);
   v16SetResult(text);
-  try{v15Message(text,{state:"explain",open:true})}catch(e){}
 }
 function v16ShowWork(){
   const box=document.querySelector("#v16WorkBox");
@@ -415,7 +417,6 @@ function v16AnalyzeWork(){
   const result=v16DiagnosisText(ctx,candidate);
   if(!result.ok)v16RecordError(ctx,result.type,candidate);
   v16SetResult(result.text,result.ok?"good":"warn");
-  try{v15Message(result.text,{state:result.ok?"happy":"think",open:true})}catch(e){}
   v16UpdatePanel();
 }
 function v16ResetHints(){
@@ -463,17 +464,14 @@ function v16OnWrong(ctx){
     btn.classList.remove("v16-repeat");void btn.offsetWidth;btn.classList.add("v16-repeat");
     setTimeout(()=>btn.classList.remove("v16-repeat"),800);
   }
-  if(repeat>=2){
-    const text=`Я заметил повторяющуюся ошибку: «${info.name}». ${info.tip}`;
-    try{
-      if(typeof v15Mode!=="undefined"&&v15Mode==="active")v15Message(text,{state:"think",open:true});
-      else v15Chip?.("Tutor Lite нашёл повторяющуюся ошибку 💡");
-    }catch(e){}
-  }else{
-    try{v15Chip?.(`Tutor Lite: проверь «${info.name}»`)}catch(e){}
-  }
+  /* v1.7.3: никакого открытия меню Альфи после «Проверить».
+     Сразу показываем конкретный inline-разбор этого примера. */
   v16Active=ctx;
-  v16UpdatePanel();
+  if(typeof window.v173OpenInline==="function"){
+    window.v173OpenInline(ctx,{reason:"wrong",errorType:a.type,userValue:input,repeat});
+  }else{
+    try{v15Chip?.(`Проверь: ${(v16ErrorText[a.type]||v16ErrorText.generic).name}`)}catch(e){}
+  }
 }
 
 /* Запоминаем последнее упражнение, с которым реально работал ученик. */
@@ -519,12 +517,12 @@ if(v16Content){
     },60);
   }).observe(v16Content,{childList:true,subtree:true});
 }
-v16EnsurePanel();
+/* v1.7.3: старую большую панель Tutor внутри меню Альфи больше не создаём. */
 v16DecorateExercises();
 
 /* Экспортируем минимум для диагностики и будущего онлайн-слоя. */
 window.AlfiTutorLite={
-  version:"1.6.0",
+  version:"1.7.3",
   offline:true,
   classify:(lessonId,index,value)=>{
     try{

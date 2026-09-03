@@ -1,11 +1,11 @@
-const CACHE="algebra8-v1.7.2";
-const NEURAL_CACHE="algebra8-neural-runtime-v1.7.2";
+const CACHE="algebra8-v1.7.3";
+const NEURAL_CACHE="algebra8-neural-runtime-v1.7.3";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
   "./manifest.json","./assets/icon.svg","./assets/icon-192.png","./assets/icon-512.png",
   "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
   "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
-  "./tutor-lite-v16.js","./neural-voice-v17.js"
+  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js"
 ];
 
 self.addEventListener("install",e=>{
