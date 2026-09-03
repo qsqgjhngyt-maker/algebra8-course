@@ -5,8 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.9";
-  const CONSENT_KEY="a8_analytics_consent_v1111";
+  const VERSION="1.12.0";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
   const PRIVATE_KEYS=[
@@ -16,9 +15,6 @@
     "a8_tutor_help_v16"
   ];
 
-  function analyticsStoredEnabled(){
-    try{return localStorage.getItem(CONSENT_KEY)==="1"}catch(e){return false}
-  }
 
   function html(){
     return `
@@ -28,7 +24,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.11.9</small>
+              <small>Kitsune · режим защиты ребёнка · v1.12.0</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>
@@ -57,27 +53,16 @@
             </article>
           </div>
 
-          <section class="v1111-analytics-box">
+          <section class="v1111-local-only-box">
             <div>
-              <b>📊 Анонимная техническая статистика</b>
-              <small>По умолчанию выключена. Включать её должен взрослый.</small>
+              <b>🛡 Без внешней аналитики</b>
+              <small>Kitsune не отправляет статистику использования, ответы, прогресс, чат или голос во внешние аналитические сервисы.</small>
             </div>
-            <button type="button" class="v1111-toggle" id="v1111AnalyticsToggle" aria-pressed="false">
-              <i></i><span>Выкл.</span>
-            </button>
           </section>
-          <div class="v1113-analytics-reason" id="v1113AnalyticsReason"></div>
-
-          <div class="v1111-analytics-details">
-            <b>Если взрослый включит статистику, Umami получит только:</b>
-            <p>посещения, тип устройства/браузера/ОС и технические события вроде установки PWA или подготовки локальных моделей.</p>
-            <b>Никогда не отправляем:</b>
-            <p>ответы по алгебре, ошибки ученика, текст чата, распознанную речь, аудио, имя, email и локальный прогресс.</p>
-          </div>
 
           <section class="v1111-network-box">
             <b>🌐 Когда курс обращается в интернет</b>
-            <p><strong>GitHub Pages</strong> — сам курс. <strong>jsDelivr / Hugging Face</strong> — только после явного скачивания локальных AI-моделей. <strong>Umami</strong> — только если взрослый включил статистику.</p>
+            <p><strong>GitHub Pages</strong> — сам курс. <strong>jsDelivr / Hugging Face</strong> — только для загрузки локальных AI-runtime и моделей по явному действию пользователя. Внешняя аналитика отключена полностью.</p>
           </section>
 
           <div class="v1111-privacy-actions">
@@ -101,10 +86,8 @@
       markSeen();close();
     });
     root.addEventListener("click",e=>{if(e.target===root)close()});
-    root.querySelector("#v1111AnalyticsToggle")?.addEventListener("click",toggleAnalytics);
     root.querySelector("#v1111ClearPrivate")?.addEventListener("click",clearPrivateMemory);
 
-    sync();
     return root;
   }
 
@@ -114,7 +97,6 @@
 
   function open(){
     const root=ensure();
-    sync();
     root.classList.add("show");
     root.setAttribute("aria-hidden","false");
     document.body.classList.add("v1111-privacy-open");
@@ -129,100 +111,6 @@
     document.body.classList.remove("v1111-privacy-open");
   }
 
-  function sync(){
-    const btn=document.querySelector("#v1111AnalyticsToggle");
-    if(!btn)return;
-
-    const consent=analyticsStoredEnabled();
-    const api=window.KitsuneAnalytics;
-    const owner=!!api?.ownerOptedOut?.();
-    const privacyBlocked=!!api?.privacySignalBlocks?.();
-    const effective=consent&&!owner&&!privacyBlocked;
-
-    /* The switch represents the adult's consent, not network availability.
-       This means it visibly moves on Android even when DNT/GPC is active. */
-    btn.classList.toggle("on",consent);
-    btn.classList.toggle("blocked",consent&&!effective);
-    btn.setAttribute("aria-pressed",consent?"true":"false");
-    btn.disabled=false;
-    const span=btn.querySelector("span");
-    if(span){
-      span.textContent=consent
-        ? (effective?"Вкл.":"Вкл. · защита")
-        : "Выкл.";
-    }
-
-    const reason=document.querySelector("#v1113AnalyticsReason");
-    if(reason){
-      if(owner){
-        reason.innerHTML=consent
-          ? "<b>ℹ Согласие включено, но это устройство отмечено как устройство владельца.</b> Тестовые посещения пока не отправляются."
-          : "<b>ℹ Это устройство отмечено как устройство владельца.</b> Его тестовые посещения исключены из статистики.";
-        reason.className="v1113-analytics-reason show owner";
-      }else if(privacyBlocked){
-        reason.innerHTML=consent
-          ? "<b>🛡 Согласие взрослого включено, но браузер блокирует аналитику через DNT/GPC.</b> Ползунок показывает сохранённое согласие; данные не отправляются, пока защита браузера активна."
-          : "<b>🛡 Браузер включил DNT/GPC.</b> Можно сохранить согласие взрослого переключателем, но данные всё равно не будут отправляться, пока защита браузера активна.";
-        reason.className="v1113-analytics-reason show blocked";
-      }else{
-        reason.textContent="";
-        reason.className="v1113-analytics-reason";
-      }
-    }
-
-    const side=document.querySelector("#privacyBtn");
-    if(side){
-      side.textContent=effective
-        ?"🔒 Приватность · статистика вкл."
-        : consent
-          ?"🔒 Приватность · статистика заблокирована"
-          :"🔒 Приватность · защита";
-    }
-  }
-
-  async function toggleAnalytics(){
-    const api=window.KitsuneAnalytics;
-    const currently=analyticsStoredEnabled();
-    const next=!currently;
-
-    if(next){
-      const ok=confirm(
-        "Включить анонимную техническую статистику?\n\n"+
-        "Будут учитываться посещения, тип устройства и использование функций. "+
-        "Ответы ребёнка, чат, голос и прогресс НЕ отправляются.\n\n"+
-        "Включать эту настройку должен взрослый."
-      );
-      if(!ok)return;
-    }
-
-    /* Save consent immediately so the Android switch responds instantly.
-       Browser DNT/GPC remains authoritative inside analytics-v111.js. */
-    try{localStorage.setItem(CONSENT_KEY,next?"1":"0")}catch(e){}
-    sync();
-
-    if(next&&api?.ownerOptedOut?.()){
-      const remove=confirm(
-        "Это устройство отмечено как устройство владельца и исключено из статистики.\n\n"+
-        "Снять owner-исключение на этом устройстве?"
-      );
-      if(remove)api?.setOwnerOptOut?.(false);
-      sync();
-    }
-
-    if(next&&api?.privacySignalBlocks?.()){
-      alert(
-        "Согласие взрослого сохранено, поэтому ползунок включён.\n\n"+
-        "Но браузер сейчас использует Do Not Track / Global Privacy Control, поэтому Kitsune НЕ отправляет статистику. "+
-        "Это ограничение браузера мы не обходим."
-      );
-      sync();
-      return;
-    }
-
-    if(api?.setConsent){
-      api.setConsent(next).then(()=>sync()).catch(()=>sync());
-    }
-  }
 
   function clearPrivateMemory(){
     const ok=confirm(
@@ -243,7 +131,6 @@
     });
 
     ensure();
-    sync();
     window.addEventListener("kitsune-analytics-consent",sync);
     window.addEventListener("kitsune-analytics-runtime",sync);
 
@@ -260,8 +147,7 @@
     version:VERSION,
     open,
     close,
-    sync,
-    analyticsEnabled:analyticsStoredEnabled
+    sync
   };
 
   if(document.readyState==="loading"){

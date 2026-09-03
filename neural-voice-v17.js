@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION="1.11.9";
+  const V17_VERSION="1.12.0";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -110,7 +110,7 @@
           <strong>🎭 Neural Voice Kitsune</strong>
           <small>Локальный нейро-TTS · без API</small>
         </div>
-        <span class="v17-neural-badge">v1.11.9</span>
+        <span class="v17-neural-badge">v1.12.0</span>
       </div>
 
       <div class="v17-engine-row">

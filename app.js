@@ -636,12 +636,6 @@ document.querySelector("#installBtn").onclick=async()=>{
   if(!installPrompt)return;
   installPrompt.prompt();
   const choice=await installPrompt.userChoice;
-  try{
-    window.KitsuneAnalytics?.track?.("pwa_install_choice",{
-      outcome:choice?.outcome||"unknown",
-      platform:choice?.platform||""
-    });
-  }catch(e){}
   installPrompt=null;
 };
 /* v1.11.9: Service Worker registration is managed by pwa-update-v1119.js */

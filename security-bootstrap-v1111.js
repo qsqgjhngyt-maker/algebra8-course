@@ -1,13 +1,10 @@
 
 /* =====================================================================
-   v1.11.1 · CHILD SAFETY BOOTSTRAP
-   Runs before the app. No analytics/network activity is started here.
+   v1.12.0 · CHILD SAFETY BOOTSTRAP
+   Privacy First: no external analytics.
    ===================================================================== */
 (() => {
   "use strict";
-
-  const OWNER_KEY="a8_analytics_owner_optout";
-  const CONSENT_KEY="a8_analytics_consent_v1111";
 
   try{
     document.documentElement.dataset.design=localStorage.getItem("a8_design_mode")||"playful";
@@ -15,37 +12,9 @@
     document.documentElement.dataset.design="playful";
   }
 
-  /* Owner test-device opt-out remains supported. */
-  try{
-    const u=new URL(location.href);
-    const v=u.searchParams.get("kitsune_owner");
-    if(v==="1")localStorage.setItem(OWNER_KEY,"1");
-    if(v==="0")localStorage.removeItem(OWNER_KEY);
-    if(v==="1"||v==="0"){
-      u.searchParams.delete("kitsune_owner");
-      history.replaceState(history.state,"",u.pathname+(u.search||"")+(u.hash||""));
-    }
-  }catch(e){}
-
-  function analyticsAllowed(){
-    try{
-      return localStorage.getItem(CONSENT_KEY)==="1" &&
-             localStorage.getItem(OWNER_KEY)!=="1";
-    }catch(e){
-      return false;
-    }
-  }
-
-  /* Used by Umami if/when the adult explicitly enables analytics. */
-  window.kitsuneAnalyticsBeforeSend=(type,payload)=>{
-    return analyticsAllowed()?payload:false;
-  };
-
   window.__KITSUNE_CHILD_SAFE__={
-    version:"1.11.9",
-    analyticsAllowed,
-    consentKey:CONSENT_KEY,
-    ownerKey:OWNER_KEY
+    version:"1.12.0",
+    analytics:false
   };
 
   /* Defense-in-depth against casual embedding/clickjacking on the very first

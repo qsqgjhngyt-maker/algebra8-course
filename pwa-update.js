@@ -92,9 +92,6 @@
     waitingWorker=worker||registration?.waiting||waitingWorker;
     setButton("🆕 Обновление доступно","available");
     showBanner();
-    try{
-      window.KitsuneAnalytics?.track?.("pwa_update_available",{version:VERSION});
-    }catch(e){}
   }
 
   function workerInstalled(worker){
@@ -172,10 +169,6 @@
 
     try{
       sessionStorage.setItem(UPDATE_APPLYING_KEY,"1");
-    }catch(e){}
-
-    try{
-      window.KitsuneAnalytics?.track?.("pwa_update_apply_click",{version:VERSION});
     }catch(e){}
 
     worker.postMessage({type:"SKIP_WAITING"});

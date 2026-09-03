@@ -1,4 +1,4 @@
-const CACHE="algebra8-v1.11.9";
+const CACHE="algebra8-v1.12.0";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
@@ -6,7 +6,7 @@ const ASSETS=[
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
   "./coach-v12.js","./pedagogy-v12.js","./mastery-data-v13.js","./mastery-v13.js",
   "./design-v14.js","./learning-fx-v142.js","./live-assistant-v15.js",
-  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js","./whisper-worker-v1114.js","./whisper-worker-v1116.js","./kitsune-live-v110.js","./privacy-v1111.js","./analytics-v111.js","./security-bootstrap-v1111.js","./pwa-update.js"
+  "./tutor-lite-v16.js","./tutor-smart-v173.js","./neural-voice-v17.js","./kitsune-brain-v18.js","./kitsune-voice-v19.js","./whisper-worker-v1114.js","./whisper-worker-v1116.js","./kitsune-live-v110.js","./privacy-v1111.js","./security-bootstrap-v1111.js","./pwa-update.js"
 ];
 
 const CHILD_CSP=[
@@ -21,10 +21,10 @@ const CHILD_CSP=[
   "media-src 'self' data: blob:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cloud.umami.is https://cdn.jsdelivr.net",
+  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
-  "connect-src 'self' https://cloud.umami.is https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
+  "connect-src 'self' https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
   "upgrade-insecure-requests"
 ].join("; ");
 
