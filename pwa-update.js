@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   v1.12.4 · KITSUNE PWA UPDATE MANAGER
+   v1.12.6 · KITSUNE PWA UPDATE MANAGER
    One install, future releases are downloaded in background and activated
    only after the user presses "Обновить сейчас".
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.4";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.6";
   const UPDATE_CHECK_MS=15*60*1000;
   const VISIBILITY_CHECK_MS=5*60*1000;
   const JUST_UPDATED_KEY="a8_pwa_just_updated";

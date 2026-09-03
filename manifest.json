@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.12.4: надёжное обновление iPhone PWA без смешивания старых JS-файлов; исправлен системный fallback озвучки при сбое Neural Voice.",
+  "description": "Алгебра 8 v1.12.6: Neural Voice переведён на RealTimeX Piper 1.1.1 с ONNX Runtime 1.22.0, ESM/CDN fixes и автоматическим fallback.",
   "orientation": "any",
   "categories": [
     "education"

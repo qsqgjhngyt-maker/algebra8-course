@@ -514,7 +514,22 @@ function v151Speak(text=v15LastSpoken,{state=v15State,force=false,voiceOverride=
     u.pitch=prosody.pitch;
     u.volume=prosody.volume;
 
-    u.onstart=()=>v161MarkSpeaking(true,state);
+    u.onstart=()=>{
+      v161MarkSpeaking(true,state);
+      try{
+        const fallback=window.__KITSUNE_SYSTEM_VOICE_FALLBACK__||null;
+        window.dispatchEvent(new CustomEvent("kitsune-voice-engine",{
+          detail:{
+            engine:"system",
+            label:v151IsIOSLike()?"Системный голос iOS":"Системный голос устройства",
+            fallback:!!fallback,
+            reason:String(fallback?.reason||""),
+            ts:Date.now()
+          }
+        }));
+        window.__KITSUNE_SYSTEM_VOICE_FALLBACK__=null;
+      }catch(e){}
+    };
     u.onend=()=>{
       if(run!==v161SpeechRun)return;
       index++;

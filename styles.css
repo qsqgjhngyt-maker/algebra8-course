@@ -5393,3 +5393,56 @@ body.v15-assistant-open .v15-scrim{
   font-size:9px;
   line-height:1.45;
 }
+
+
+/* =====================================================================
+   v1.12.5 · ACTUAL VOICE ENGINE STATUS
+   Shows what really produced the last audible reply, not merely selection.
+   ===================================================================== */
+.v17-engine-live{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:9px 0 11px;
+  padding:10px 11px;
+  border:2px solid var(--line);
+  border-radius:12px;
+  background:color-mix(in srgb,var(--muted) 5%,var(--card));
+}
+.v17-engine-live-dot{
+  flex:0 0 auto;
+  font-size:13px;
+  color:var(--muted);
+}
+.v17-engine-live>div{min-width:0}
+.v17-engine-live b{
+  display:block;
+  font-size:10px;
+  font-weight:1000;
+}
+.v17-engine-live small{
+  display:block;
+  margin-top:2px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.v17-engine-live.neural{
+  border-color:color-mix(in srgb,#2fae68 46%,var(--line));
+  background:color-mix(in srgb,#2fae68 8%,var(--card));
+}
+.v17-engine-live.neural .v17-engine-live-dot,
+.v17-engine-live.neural small{color:#218650}
+.v17-engine-live.system{
+  border-color:color-mix(in srgb,#3b82f6 40%,var(--line));
+  background:color-mix(in srgb,#3b82f6 7%,var(--card));
+}
+.v17-engine-live.system .v17-engine-live-dot,
+.v17-engine-live.system small{color:#2868c7}
+.v17-engine-live.fallback{
+  border-color:color-mix(in srgb,#ffb020 52%,var(--line));
+  background:color-mix(in srgb,#ffb020 9%,var(--card));
+}
+.v17-engine-live.fallback .v17-engine-live-dot,
+.v17-engine-live.fallback small{color:#a36500}

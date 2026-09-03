@@ -7,9 +7,9 @@
 (() => {
   "use strict";
 
-  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.4";
+  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.12.6";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
-  const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
+  const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm";
 
   const KEY_MODE="a8_alfi_voice_engine_v17";
   const KEY_READY="a8_alfi_neural_ready_v17";
@@ -19,6 +19,7 @@
   let cartoon=46;
   let modelReady=false;
   let ttsModule=null;
+  let ttsSession=null;
   let modulePromise=null;
   let neuralRun=0;
   let audioCtx=null;
@@ -26,6 +27,39 @@
   let neuralBusy=false;
 
   let iosAudioUnlocked=false;
+  let lastActualEngine=null;
+
+  function engineStatusMarkup(){
+    return `
+      <div class="v17-engine-live idle" id="v17EngineLive" aria-live="polite">
+        <span class="v17-engine-live-dot">●</span>
+        <div>
+          <b>Фактическая озвучка</b>
+          <small id="v17EngineLiveText">Ещё не запускалась</small>
+        </div>
+      </div>`;
+  }
+
+  function reportActualEngine(detail={}){
+    const engine=detail.engine==="neural"?"neural":"system";
+    const fallback=!!detail.fallback;
+    lastActualEngine={...detail,engine,fallback};
+
+    const box=document.querySelector("#v17EngineLive");
+    const text=document.querySelector("#v17EngineLiveText");
+    if(!box||!text)return;
+
+    box.className=`v17-engine-live ${engine}${fallback?" fallback":""}`;
+    if(engine==="neural"){
+      text.textContent="🎭 Neural Voice · Piper RT 1.1.1 · активен";
+    }else if(fallback){
+      text.textContent=`📱 ${detail.label||"Системный голос"} · fallback`;
+    }else{
+      text.textContent=`📱 ${detail.label||"Системный голос"} · активен`;
+    }
+    if(detail.reason)box.title=detail.reason;
+    else box.removeAttribute("title");
+  }
 
   function isIOSLike(){
     const ua=String(navigator.userAgent||"");
@@ -154,7 +188,7 @@
       <div class="v17-neural-head">
         <div>
           <strong>🎭 Neural Voice Kitsune</strong>
-          <small>Локальный нейро-TTS · без API</small>
+          <small>Локальный нейро-TTS · Piper RT 1.1.1 · без API</small>
         </div>
         <span class="v17-neural-badge">v${V17_VERSION}</span>
       </div>
@@ -163,6 +197,8 @@
         <button type="button" class="v17-engine-btn" data-v17-engine="neural">✨ Нейро</button>
         <button type="button" class="v17-engine-btn" data-v17-engine="system">📱 Системный</button>
       </div>
+
+      ${engineStatusMarkup()}
 
       <label class="v17-cartoon-field">
         <span><b>🎬 Мультяшность</b><output id="v17CartoonValue">${cartoon}%</output></span>
@@ -219,6 +255,7 @@
     block.querySelector("#v17DeleteNeural")?.addEventListener("click",deleteModel);
 
     updateUi();
+    if(lastActualEngine)reportActualEngine(lastActualEngine);
 
     if(location.protocol==="file:"){
       setStatus("Локальное превью: Neural Voice лучше проверять после публикации на GitHub Pages (HTTPS). Системный fallback работает и здесь.","warn");
@@ -232,17 +269,47 @@
     if(modulePromise)return modulePromise;
 
     modulePromise=(async()=>{
-      setStatus("Подключаю нейродвижок…","busy");
+      setStatus("Подключаю обновлённый Piper runtime (ONNX 1.22)…","busy");
       try{
         ttsModule=await import(V17_PACKAGE_URL);
         return ttsModule;
       }catch(err){
         modulePromise=null;
-        throw new Error("Не удалось загрузить нейродвижок. Проверь интернет и открой курс через HTTPS/GitHub Pages.");
+        throw new Error("Не удалось загрузить Piper runtime 1.1.1. Проверь сеть и повтори.");
       }
     })();
 
     return modulePromise;
+  }
+
+  function getTtsSession(tts){
+    if(ttsSession)return ttsSession;
+    if(typeof tts?.TtsSession==="function"){
+      try{
+        ttsSession=new tts.TtsSession({
+          voiceId:V17_VOICE_ID,
+          allowLocalModels:true,
+          fallbackStrategy:"auto",
+          logger:(message)=>{
+            try{console.debug("[Kitsune Piper]",message)}catch(e){}
+          }
+        });
+      }catch(e){
+        ttsSession=null;
+      }
+    }
+    return ttsSession;
+  }
+
+  async function predictWithRuntime(tts,text){
+    const session=getTtsSession(tts);
+    if(session&&typeof session.predict==="function"){
+      return await session.predict(text);
+    }
+    return await tts.predict({
+      text,
+      voiceId:V17_VOICE_ID
+    });
   }
 
   async function verifyStored({silent=true}={}){
@@ -368,10 +435,7 @@
 
       /* Прогрев больше НЕ определяет, скачана модель или нет. */
       try{
-        const warm=await tts.predict({
-          text:"Готово.",
-          voiceId:V17_VOICE_ID
-        });
+        const warm=await predictWithRuntime(tts,"Готово.");
 
         if(!(warm instanceof Blob))throw new Error("Нейродвижок не вернул звуковой файл.");
 
@@ -571,6 +635,17 @@
       onDone?.();
     };
     source.start();
+
+    try{
+      window.dispatchEvent(new CustomEvent("kitsune-voice-engine",{
+        detail:{
+          engine:"neural",
+          label:"Neural Voice · Piper RT 1.1.1",
+          fallback:false,
+          ts:Date.now()
+        }
+      }));
+    }catch(e){}
   }
 
   async function v17SpeakNeural(text,{state="explain",force=false,onDone=null}={}){
@@ -592,10 +667,7 @@
 
       setStatus("Kitsune готовит нейроречь…","busy");
 
-      const wav=await tts.predict({
-        text:phrase,
-        voiceId:V17_VOICE_ID
-      });
+      const wav=await predictWithRuntime(tts,phrase);
 
       if(myRun!==neuralRun)return false;
       if(!(wav instanceof Blob))throw new Error("Нейродвижок не вернул аудио.");
@@ -611,9 +683,9 @@
       console.warn("[Kitsune Neural Voice fallback]",err);
       if(modelReady){
         if(isIOSLike()){
-          setStatus("На iPhone локальный Neural Voice не запустился. Переключаю эту сессию на системный голос iOS.","warn");
+          setStatus("Piper runtime не запустился на iPhone. Включён системный голос iOS fallback.","warn");
         }else{
-          setStatus("Нейроголос временно недоступен — включён системный fallback.","warn");
+          setStatus("Piper runtime временно недоступен — включён системный fallback.","warn");
         }
       }
 
@@ -622,7 +694,14 @@
            downloaded model stays intact; this only changes the current session. */
         if(isIOSLike())mode="system";
         updateUi({refreshStatus:false});
-        try{window.dispatchEvent(new CustomEvent("kitsune-audio-unlock"))}catch(e){}
+        try{
+          window.__KITSUNE_SYSTEM_VOICE_FALLBACK__={
+            reason:isIOSLike()
+              ?"Piper/Neural Voice не запустился на iPhone"
+              :"Neural Voice временно недоступен"
+          };
+          window.dispatchEvent(new CustomEvent("kitsune-audio-unlock"));
+        }catch(e){}
         return systemSpeak(text,{state,force:true,onDone});
       }
       return false;
@@ -657,6 +736,7 @@
       if(mode==="neural"&&!modelReady){
         setStatus("Neural Voice выбран, но модель ещё не скачана — использую системный голос.","warn");
       }
+      try{window.__KITSUNE_SYSTEM_VOICE_FALLBACK__=null}catch(e){}
       return systemSpeak(text,opts);
     };
   }
@@ -669,6 +749,9 @@
   }
 
   bindIOSAudioUnlock();
+  window.addEventListener("kitsune-voice-engine",e=>{
+    reportActualEngine(e.detail||{});
+  });
 
   /* Публичный мини-API для будущих версий курса. */
   window.AlfiNeuralVoice={
@@ -679,7 +762,8 @@
     test:v17Test,
     speak:v17SpeakNeural,
     isReady:()=>modelReady,
-    mode:()=>mode
+    mode:()=>mode,
+    actualEngine:()=>lastActualEngine?{...lastActualEngine}:null
   };
 
   /* Kitsune уже создаётся предыдущим скриптом. Если браузер медленный —
