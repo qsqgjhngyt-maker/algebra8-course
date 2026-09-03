@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.10.1: Kitsune Live с безопасным единым sprite, плавной анимацией без исчезновения персонажа, локальным Brain/Whisper и Neural Voice.",
+  "description": "Алгебра 8 v1.11: Kitsune Analytics через приватный кабинет Umami, PWA install/launch metrics, устройства и технические feature events без передачи учебных ответов, чатов и речи.",
   "orientation": "any",
   "categories": [
     "education"

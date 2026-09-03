@@ -1,6 +1,6 @@
 # Алгебра 8 — интерактивный курс
 
-Версия: **v1.10.1**
+Версия: **v1.11.0**
 
 Что добавлено в этой итерации:
 - живой фон из мягких частиц;
@@ -905,3 +905,99 @@ Kitsune Live больше не меняет `src` во время анимаци
 Дыхание теперь применяется ко всему stage целиком, а не к отдельным слоям, чтобы crossfade-кадры оставались идеально совмещёнными.
 
 Service Worker cache: `algebra8-v1.10.1`.
+
+
+## v1.11.0 — Kitsune Analytics
+
+Добавлен приватный мониторинг использования курса через Umami Cloud.
+
+### Что считается автоматически
+
+Umami автоматически фиксирует:
+- pageviews / visits;
+- уникальных посетителей;
+- браузер;
+- операционную систему;
+- тип устройства;
+- разрешение экрана;
+- язык браузера;
+- referrer;
+- географию на уровне аналитики Umami;
+- Core Web Vitals.
+
+Tracker запускается только на:
+
+`qsqgjhngyt-maker.github.io`
+
+Локальные preview-файлы статистику не отправляют.
+
+### Custom events
+
+Проект дополнительно отправляет только технические события:
+
+- `app_launch`
+- `session_open`
+- `pwa_launch`
+- `pwa_first_standalone_launch`
+- `pwa_install_prompt_available`
+- `pwa_install_button_click`
+- `pwa_install_choice`
+- `pwa_installed`
+- `kitsune_brain_prepare_click`
+- `kitsune_brain_ready`
+- `neural_voice_download_click`
+- `neural_voice_ready`
+- `whisper_prepare_click`
+- `whisper_ready`
+- `kitsune_dialog_open`
+- `voice_mic_button`
+- `file_download_click`
+
+### Что НЕ отправляется
+
+Kitsune Analytics намеренно не отправляет:
+- ответы ученика;
+- математические ошибки/результаты;
+- локальный прогресс;
+- имя;
+- email;
+- содержимое диалога с Kitsune;
+- распознанную речь;
+- аудио микрофона;
+- данные из localStorage;
+- текст упражнений.
+
+Custom event data проходит через allow-list технических полей.
+
+### Privacy
+
+Tracker:
+- respects browser Do Not Track (`data-do-not-track="true"`);
+- ignores URL search parameters (`data-exclude-search="true"`);
+- runs only on the production GitHub Pages hostname;
+- does not use `umami.identify()`.
+
+### Исключение устройств владельца
+
+Чтобы собственные тесты владельца не искажали статистику, на каждом своём браузере/устройстве один раз открыть:
+
+`?kitsune_owner=1`
+
+Ключ `a8_analytics_owner_optout=1` сохранится локально, и `data-before-send` отменит даже автоматические pageviews Umami.
+
+Чтобы снова включить аналитику на этом устройстве:
+
+`?kitsune_owner=0`
+
+### PWA installations
+
+На поддерживаемых Chromium-браузерах используются:
+- `beforeinstallprompt`
+- результат `userChoice`
+- `appinstalled`.
+
+Для платформ, где `appinstalled` недоступен, событие `pwa_first_standalone_launch` фиксирует первый подтверждённый запуск в standalone-режиме и служит дополнительной метрикой фактической установки.
+
+### Dashboard
+
+Статистика остаётся в приватном кабинете владельца Umami. Не создавать Public Share URL, если публичный доступ к аналитике не нужен.

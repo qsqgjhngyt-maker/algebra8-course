@@ -14,6 +14,38 @@
   <link rel="preload" as="image" href="./assets/kitsune/kitsune-sprite-v1101.png" />
   <link rel="stylesheet" href="./styles.css" />
   <title>Алгебра 8 — Учись · Понимай · Решай</title>
+  <script>
+    /* Kitsune Analytics owner opt-out.
+       Open once with ?kitsune_owner=1 on your own device to exclude it.
+       Use ?kitsune_owner=0 to re-enable analytics on that device. */
+    (() => {
+      const KEY="a8_analytics_owner_optout";
+      try{
+        const u=new URL(location.href);
+        const v=u.searchParams.get("kitsune_owner");
+        if(v==="1")localStorage.setItem(KEY,"1");
+        if(v==="0")localStorage.removeItem(KEY);
+        if(v==="1"||v==="0"){
+          u.searchParams.delete("kitsune_owner");
+          history.replaceState(history.state,"",u.pathname+(u.search||"")+(u.hash||""));
+        }
+      }catch(e){}
+      window.kitsuneAnalyticsBeforeSend=(type,payload)=>{
+        try{
+          if(localStorage.getItem(KEY)==="1")return false;
+        }catch(e){}
+        return payload;
+      };
+    })();
+  </script>
+  <script defer
+    src="https://cloud.umami.is/script.js"
+    data-website-id="1a59caa5-62af-44bc-a583-fa4b3c8fe80a"
+    data-domains="qsqgjhngyt-maker.github.io"
+    data-do-not-track="true"
+    data-exclude-search="true"
+    data-performance="true"
+    data-before-send="kitsuneAnalyticsBeforeSend"></script>
 </head>
 <body>
   <canvas id="particlesCanvas" class="particles-canvas" aria-hidden="true"></canvas>
@@ -126,7 +158,7 @@
           <span class="eyebrow">Полный курс</span>
           <h3>Все 6 глав</h3>
         </div>
-        <span class="status-chip">все главы готовы · v1.10.1</span>
+        <span class="status-chip">все главы готовы · v1.11</span>
       </div>
       <div id="homeTopics" class="cards-grid"></div>
     </section>
@@ -148,5 +180,6 @@
   <script src="./kitsune-brain-v18.js"></script>
   <script src="./kitsune-voice-v19.js"></script>
   <script src="./kitsune-live-v110.js"></script>
+  <script src="./analytics-v111.js"></script>
 </body>
 </html>

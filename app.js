@@ -606,8 +606,23 @@ document.querySelector("#resetBtn").onclick=()=>{
    location.reload();
  }
 };
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installPrompt=e;document.querySelector("#installBtn").classList.remove("hidden")});
-document.querySelector("#installBtn").onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null}};
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  installPrompt=e;
+  document.querySelector("#installBtn").classList.remove("hidden");
+});
+document.querySelector("#installBtn").onclick=async()=>{
+  if(!installPrompt)return;
+  installPrompt.prompt();
+  const choice=await installPrompt.userChoice;
+  try{
+    window.KitsuneAnalytics?.track?.("pwa_install_choice",{
+      outcome:choice?.outcome||"unknown",
+      platform:choice?.platform||""
+    });
+  }catch(e){}
+  installPrompt=null;
+};
 if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
 
 function applyReveal(){
