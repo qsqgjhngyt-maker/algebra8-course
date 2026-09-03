@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.0";
+  const VERSION="1.11.1";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -249,7 +249,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.11</span>
+        <span>v1.11.1</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
@@ -515,7 +515,7 @@
       monitorVoice();
 
       clearTimeout(maxTimer);
-      maxTimer=setTimeout(()=>{if(recording)stopRecording()},20000);
+      maxTimer=setTimeout(()=>{if(recording)stopRecording()},15000);
     }catch(err){
       dialogState(friendlyMicError(err),"warn");
       cleanupRecorder();
@@ -664,6 +664,19 @@
   window.addEventListener("resize",syncVisualViewport,{passive:true});
   window.visualViewport?.addEventListener("resize",syncVisualViewport,{passive:true});
   window.visualViewport?.addEventListener("scroll",syncVisualViewport,{passive:true});
+
+  /* v1.11.1 Child Safety: microphone can never keep recording after the app
+     goes to background or the page is left. */
+  document.addEventListener("visibilitychange",()=>{
+    if(document.hidden&&recording)stopRecording();
+  });
+  window.addEventListener("pagehide",()=>{
+    if(recording){
+      try{if(recorder?.state!=="inactive")recorder.stop()}catch(e){}
+    }
+    cleanupRecorder();
+  });
+
   syncVisualViewport();
 
   // Public API.

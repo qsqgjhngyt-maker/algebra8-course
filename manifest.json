@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11: Kitsune Analytics через приватный кабинет Umami, PWA install/launch metrics, устройства и технические feature events без передачи учебных ответов, чатов и речи.",
+  "description": "Алгебра 8 v1.11.1 Child Safety: аналитика opt-in, приватный локальный диалог, контентный guard Kitsune, CSP, ограничение разрешений, безопасный микрофон, PWA.",
   "orientation": "any",
   "categories": [
     "education"
