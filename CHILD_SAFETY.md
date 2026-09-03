@@ -23,9 +23,9 @@
 
 ### Может уйти во внешний network только после действия пользователя
 - загрузка runtime/model files для локального AI;
-- Umami analytics после отдельного opt-in.
+- внешнюю аналитику analytics после отдельного opt-in.
 
-### Никогда не отправляем в Umami
+### Никогда не отправляем в внешнюю аналитику
 - student answer;
 - task result;
 - mistake text;
@@ -93,7 +93,7 @@ Consent key:
 
 Default: missing / `0`.
 
-Umami script не вставляется в DOM до consent.
+внешнюю аналитику script не вставляется в DOM до consent.
 
 Owner opt-out:
 

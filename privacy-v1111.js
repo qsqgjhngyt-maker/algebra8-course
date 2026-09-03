@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.12.0";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.1";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
   const PRIVATE_KEYS=[
@@ -24,7 +24,7 @@
             <div class="v1111-shield">🔒</div>
             <div>
               <strong id="v1111PrivacyTitle">Приватность и безопасность</strong>
-              <small>Kitsune · режим защиты ребёнка · v1.12.0</small>
+              <small>Kitsune · режим защиты ребёнка · v${VERSION}</small>
             </div>
             <button type="button" class="v1111-close" aria-label="Закрыть">×</button>
           </header>
@@ -41,7 +41,7 @@
             </article>
             <article>
               <span>💬</span>
-              <div><b>Диалог с Kitsune</b><small>Текст разговора хранится только в этом браузере и не отправляется в Umami.</small></div>
+              <div><b>Диалог с Kitsune</b><small>Текст разговора хранится только в этом браузере и не отправляется во внешние аналитические сервисы.</small></div>
             </article>
             <article>
               <span>📚</span>
@@ -131,8 +131,6 @@
     });
 
     ensure();
-    window.addEventListener("kitsune-analytics-consent",sync);
-    window.addEventListener("kitsune-analytics-runtime",sync);
 
     try{
       if(localStorage.getItem(FIRST_SEEN_KEY)!=="1"){
@@ -146,8 +144,7 @@
   window.KitsunePrivacy={
     version:VERSION,
     open,
-    close,
-    sync
+    close
   };
 
   if(document.readyState==="loading"){

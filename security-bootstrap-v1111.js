@@ -1,6 +1,6 @@
 
 /* =====================================================================
-   v1.12.0 · CHILD SAFETY BOOTSTRAP
+   v1.12.1 · CHILD SAFETY BOOTSTRAP
    Privacy First: no external analytics.
    ===================================================================== */
 (() => {
@@ -12,8 +12,12 @@
     document.documentElement.dataset.design="playful";
   }
 
+  const APP_VERSION=
+    document.querySelector('meta[name="kitsune-app-version"]')?.content||"1.12.1";
+  window.KITSUNE_APP_VERSION=APP_VERSION;
+
   window.__KITSUNE_CHILD_SAFE__={
-    version:"1.12.0",
+    version:APP_VERSION,
     analytics:false
   };
 

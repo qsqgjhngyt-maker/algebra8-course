@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.12.0: Privacy First — без внешней аналитики. Прогресс, чат и учебные данные остаются локально; PWA Auto Update, Brain, Whisper и Voice сохранены.",
+  "description": "Алгебра 8 v1.12.1: исправлен Privacy Center и синхронизация версии PWA; Privacy First без внешней аналитики.",
   "orientation": "any",
   "categories": [
     "education"

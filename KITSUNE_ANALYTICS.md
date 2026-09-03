@@ -3,7 +3,7 @@
 Начиная с **v1.12.0 внешняя аналитика полностью удалена из проекта**.
 
 Удалено:
-- Umami Cloud tracker;
+- внешнюю аналитику Cloud tracker;
 - Website ID;
 - custom analytics events;
 - consent toggle;
