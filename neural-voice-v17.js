@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION="1.7.0";
+  const V17_VERSION="1.7.1";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@mintplex-labs/piper-tts-web@1.0.5/+esm";
 
@@ -66,7 +66,7 @@
     txt.textContent=label?`${label} · ${Math.round(p)}%`:`${Math.round(p)}%`;
   }
 
-  function updateUi(){
+  function updateUi({refreshStatus=true}={}){
     document.querySelectorAll("[data-v17-engine]").forEach(b=>{
       const active=(mode==="system"&&b.dataset.v17Engine==="system") ||
                    (mode!=="system"&&b.dataset.v17Engine==="neural");
@@ -81,15 +81,17 @@
     const dl=document.querySelector("#v17Download");
     const test=document.querySelector("#v17TestNeural");
     const del=document.querySelector("#v17DeleteNeural");
-    if(dl)dl.textContent=modelReady?"✅ Голос подготовлен":"⬇ Скачать голос Альфи (~63 МБ)";
-    if(dl)dl.disabled=neuralBusy;
+    if(dl)dl.textContent=modelReady?"✅ Голос скачан":"⬇ Скачать голос Альфи (~63 МБ)";
+    if(dl)dl.disabled=neuralBusy||modelReady;
     if(test)test.disabled=neuralBusy||!modelReady;
     if(del)del.disabled=neuralBusy||!modelReady;
+
+    if(!refreshStatus)return;
 
     if(modelReady){
       setStatus(mode==="system"
         ?"Нейроголос сохранён, но сейчас выбран системный."
-        :"Neural Voice готов. Альфи будет использовать его автоматически.","ok");
+        :"Neural Voice готов. Нажми «Тест нейроголоса».","ok");
     }else{
       setStatus("Нейроголос ещё не скачан. Пока работает системная озвучка.","");
     }
@@ -108,7 +110,7 @@
           <strong>🎭 Neural Voice Альфи</strong>
           <small>Локальный нейро-TTS · без API</small>
         </div>
-        <span class="v17-neural-badge">v1.7</span>
+        <span class="v17-neural-badge">v1.7.1</span>
       </div>
 
       <div class="v17-engine-row">
@@ -132,6 +134,7 @@
       <div class="v17-neural-actions">
         <button type="button" class="v15-action primary-action" id="v17Download">⬇ Скачать голос Альфи (~63 МБ)</button>
         <button type="button" class="v15-action" id="v17TestNeural">▶ Тест нейроголоса</button>
+        <button type="button" class="v15-action" id="v17Recover">🔎 Проверить модель</button>
         <button type="button" class="v15-action danger-soft" id="v17DeleteNeural">🗑 Удалить модель</button>
       </div>
 
@@ -166,6 +169,7 @@
 
     block.querySelector("#v17Download")?.addEventListener("click",downloadAndPrepare);
     block.querySelector("#v17TestNeural")?.addEventListener("click",v17Test);
+    block.querySelector("#v17Recover")?.addEventListener("click",()=>recoverStoredModel({announce:true}));
     block.querySelector("#v17DeleteNeural")?.addEventListener("click",deleteModel);
 
     updateUi();
@@ -195,16 +199,51 @@
     return modulePromise;
   }
 
-  async function verifyStored(){
+  async function verifyStored({silent=true}={}){
     try{
       const tts=await loadModule();
       if(typeof tts.stored!=="function")return modelReady;
       const list=await tts.stored();
       modelReady=Array.isArray(list)&&list.includes(V17_VOICE_ID);
-      save();updateUi();
+      if(modelReady&&mode==="auto")mode="neural";
+      save();
+      updateUi({refreshStatus:!silent});
       return modelReady;
     }catch(e){
+      if(!silent)setStatus(`Не удалось проверить локальную модель: ${String(e?.message||e).slice(0,130)}`,"error");
       return modelReady;
+    }
+  }
+
+  async function recoverStoredModel({announce=false}={}){
+    if(neuralBusy)return modelReady;
+    neuralBusy=true;
+    updateUi({refreshStatus:false});
+    if(announce)setStatus("Проверяю локальное хранилище браузера…","busy");
+
+    try{
+      const tts=await loadModule();
+      if(typeof tts.stored!=="function")throw new Error("В библиотеке нет функции stored().");
+      const list=await tts.stored();
+      const found=Array.isArray(list)&&list.includes(V17_VOICE_ID);
+
+      modelReady=found;
+      if(found&&mode!=="system")mode="neural";
+      save();
+      updateUi({refreshStatus:false});
+
+      if(found){
+        setStatus("✅ Нашёл уже скачанную модель! Повторно 63 МБ качать не нужно. Нажми «Тест нейроголоса».","ok");
+      }else if(announce){
+        setStatus("В локальном хранилище модели нет. Нажми «Скачать голос Альфи».","warn");
+      }
+      return found;
+    }catch(err){
+      if(announce)setStatus(friendlyError(err),"error");
+      return modelReady;
+    }finally{
+      neuralBusy=false;
+      updateUi({refreshStatus:false});
     }
   }
 
@@ -217,65 +256,136 @@
   }
 
   async function downloadAndPrepare(){
-    if(neuralBusy)return;
+    if(neuralBusy||modelReady)return;
     neuralBusy=true;
-    updateUi();
+    updateUi({refreshStatus:false});
     setProgress(2,"Подготовка");
 
+    let tts=null;
+    let storedAfterDownload=false;
+
     try{
-      const tts=await loadModule();
+      tts=await loadModule();
 
       if(typeof tts.download!=="function"||typeof tts.predict!=="function"){
         throw new Error("Библиотека TTS загрузилась без необходимых функций.");
       }
 
-      setStatus("Скачиваю русский нейроголос. Не закрывай страницу…","busy");
+      /* Сначала проверим — вдруг v1.7.0 уже успела сохранить модель. */
+      if(typeof tts.stored==="function"){
+        const before=await tts.stored();
+        if(Array.isArray(before)&&before.includes(V17_VOICE_ID)){
+          modelReady=true;
+          storedAfterDownload=true;
+          mode="neural";
+          save();
+          setProgress(null);
+          updateUi({refreshStatus:false});
+          setStatus("✅ Модель уже была скачана ранее. Повторная загрузка не нужна. Проверяю генерацию…","ok");
+        }
+      }
 
-      await tts.download(V17_VOICE_ID,progress=>{
-        const total=Number(progress?.total)||0;
-        const loaded=Number(progress?.loaded)||0;
-        const pct=total>0 ? loaded/total*100 : 12;
-        const url=String(progress?.url||"");
-        const label=/\.onnx(?:$|\?)/i.test(url)?"Модель":/json/i.test(url)?"Конфигурация":"Загрузка";
-        setProgress(pct,label);
-      });
+      if(!storedAfterDownload){
+        setStatus("Скачиваю русский нейроголос. Не закрывай страницу…","busy");
 
-      setProgress(100,"Модель загружена");
-      setStatus("Первый запуск: подготавливаю нейродвижок и кэш для офлайн-работы…","busy");
+        await tts.download(V17_VOICE_ID,progress=>{
+          const total=Number(progress?.total)||0;
+          const loaded=Number(progress?.loaded)||0;
+          const pct=total>0 ? loaded/total*100 : 12;
+          const url=String(progress?.url||"");
+          const label=/\.onnx(?:$|\?)/i.test(url)?"Модель":/json/i.test(url)?"Конфигурация":"Загрузка";
+          setProgress(pct,label);
+        });
 
-      /* Короткая пробная генерация прогревает ONNX/phonemizer и проверяет,
-         что модель реально работает, а не только сохранилась. */
-      const warm=await tts.predict({
-        text:"Готово.",
-        voiceId:V17_VOICE_ID
-      });
+        setProgress(100,"Модель загружена");
 
-      if(!(warm instanceof Blob))throw new Error("Нейродвижок не вернул звуковой файл.");
+        /* Критический FIX v1.7.1:
+           100% загрузки и успешная генерация — это ДВА разных состояния.
+           Готовность модели определяем по OPFS через stored(), а не по warm-up. */
+        if(typeof tts.stored==="function"){
+          const list=await tts.stored();
+          storedAfterDownload=Array.isArray(list)&&list.includes(V17_VOICE_ID);
+        }else{
+          storedAfterDownload=true;
+        }
 
-      modelReady=true;
-      mode="neural";
-      save();
-      setProgress(null);
-      setStatus("Готово! Neural Voice установлен. Теперь Альфи говорит нейроголосом.","ok");
-      updateUi();
+        if(!storedAfterDownload){
+          throw new Error("Загрузка дошла до 100%, но библиотека не видит модель в локальном хранилище.");
+        }
 
-      setTimeout(()=>v17SpeakNeural(
-        "Ура! Мой новый голос готов. Теперь давай разбираться в алгебре вместе!",
-        {state:"celebrate",force:true}
-      ),180);
+        modelReady=true;
+        mode="neural";
+        save();
+        updateUi({refreshStatus:false});
+        setStatus("✅ Модель скачана и сохранена. Теперь проверяю первый запуск нейродвижка…","busy");
+      }
+
+      /* Прогрев больше НЕ определяет, скачана модель или нет. */
+      try{
+        const warm=await tts.predict({
+          text:"Готово.",
+          voiceId:V17_VOICE_ID
+        });
+
+        if(!(warm instanceof Blob))throw new Error("Нейродвижок не вернул звуковой файл.");
+
+        setProgress(null);
+        updateUi({refreshStatus:false});
+        setStatus("✅ Neural Voice полностью готов! Нажми «Тест нейроголоса».","ok");
+
+        setTimeout(()=>v17SpeakNeural(
+          "Ура! Мой новый голос готов. Теперь давай разбираться в алгебре вместе!",
+          {state:"celebrate",force:true}
+        ),180);
+
+      }catch(warmErr){
+        /* Модель остаётся READY: пользователь НЕ должен качать 63 МБ заново. */
+        modelReady=true;
+        mode="neural";
+        save();
+        setProgress(null);
+        updateUi({refreshStatus:false});
+        setStatus(
+          "✅ Модель скачана. Но первый запуск движка не удался: "+
+          String(warmErr?.message||warmErr).slice(0,115)+
+          ". Нажми «Тест нейроголоса» — если повторится, Альфи автоматически включит системный голос.",
+          "warn"
+        );
+        console.warn("[Alfi Neural Voice warm-up]",warmErr);
+      }
 
     }catch(err){
-      modelReady=false;
+      /* Даже после ошибки ещё раз проверяем OPFS — скачанный файл не теряем. */
+      let found=false;
+      try{
+        if(tts&&typeof tts.stored==="function"){
+          const list=await tts.stored();
+          found=Array.isArray(list)&&list.includes(V17_VOICE_ID);
+        }
+      }catch(e){}
+
+      modelReady=found;
+      if(found&&mode!=="system")mode="neural";
       save();
       setProgress(null);
-      setStatus(friendlyError(err),"error");
+      updateUi({refreshStatus:false});
+
+      if(found){
+        setStatus(
+          "✅ Модель в браузере сохранена, повторно скачивать её не нужно. Ошибка была уже на этапе запуска: "+
+          String(err?.message||err).slice(0,120),
+          "warn"
+        );
+      }else{
+        setStatus(friendlyError(err),"error");
+      }
       console.warn("[Alfi Neural Voice]",err);
+
     }finally{
       neuralBusy=false;
-      updateUi();
+      updateUi({refreshStatus:false});
     }
   }
-
   async function deleteModel(){
     if(neuralBusy||!modelReady)return;
     if(!confirm("Удалить нейроголос Альфи из памяти браузера? Системный голос останется работать."))return;
@@ -501,8 +611,12 @@
   setTimeout(injectUi,900);
 
   if(modelReady){
-    /* Не тянем библиотеку при каждом старте. Проверка OPFS выполняется
-       только при первом реальном обращении к Neural Voice. */
     setStatus("Neural Voice отмечен как установлен. Проверю модель при первой реплике.","ok");
+  }else if(location.protocol!=="file:"&&window.isSecureContext){
+    /* FIX v1.7.1: восстанавливаем модель, скачанную предыдущей версией,
+       даже если v1.7.0 не успела записать флаг modelReady в localStorage. */
+    setTimeout(()=>recoverStoredModel({announce:false}).then(found=>{
+      if(found)setStatus("✅ Нашёл модель, скачанную ранее. Нажми «Тест нейроголоса».","ok");
+    }),700);
   }
 })();

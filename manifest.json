@@ -28,7 +28,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Интерактивный курс алгебры 8 класса с AI Tutor Lite, Альфи и локальным Neural Voice на Piper TTS. PWA, GitHub Pages, офлайн после подготовки.",
+  "description": "Интерактивный курс алгебры 8 класса с AI Tutor Lite и Neural Voice Альфи. v1.7.1 исправляет восстановление уже скачанной Piper-модели и диагностику запуска.",
   "orientation": "any",
   "categories": [
     "education"
