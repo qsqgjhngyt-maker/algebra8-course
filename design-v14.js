@@ -93,7 +93,7 @@ const v14BaseHome=renderHome;
 renderHome=function(){
   v14BaseHome();
   document.querySelectorAll(".status-chip").forEach(x=>{
-    if(x.textContent.includes("v1.3"))x.textContent=x.textContent.replace("v1.3","v1.11.6"); else if(/все главы готовы · v1\.4(?:\.2)?/.test(x.textContent))x.textContent="все главы готовы · v1.11.6";
+    if(x.textContent.includes("v1.3"))x.textContent=x.textContent.replace("v1.3","v1.11.7"); else if(/все главы готовы · v1\.4(?:\.2)?/.test(x.textContent))x.textContent="все главы готовы · v1.11.7";
   });
 };
 window.renderHome=renderHome;

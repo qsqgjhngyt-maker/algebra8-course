@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.11.6: Android Whisper module-worker fallback через same-page WASM runtime; iPhone рабочий путь сохранён; Child Safety сохранена.",
+  "description": "Алгебра 8 v1.11.7: Android Whisper WASM blob-module compatibility fix; iPhone Voice path and Child Safety preserved.",
   "orientation": "any",
   "categories": [
     "education"

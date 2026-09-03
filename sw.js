@@ -1,5 +1,5 @@
-const CACHE="algebra8-v1.11.6";
-const NEURAL_CACHE="algebra8-ai-runtime-v1.11.6";
+const CACHE="algebra8-v1.11.7";
+const NEURAL_CACHE="algebra8-ai-runtime-v1.11.7";
 const ASSETS=[
   "./","./index.html","./styles.css","./app.js","./chapter1-v02.js","./course-v1.js",
   "./manifest.json","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
@@ -21,7 +21,7 @@ const CHILD_CSP=[
   "media-src 'self' data: blob:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cloud.umami.is https://cdn.jsdelivr.net",
+  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cloud.umami.is https://cdn.jsdelivr.net",
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
   "connect-src 'self' https://cloud.umami.is https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",

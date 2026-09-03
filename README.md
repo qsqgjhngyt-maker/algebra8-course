@@ -1,6 +1,6 @@
 # Алгебра 8 — интерактивный курс
 
-Версия: **v1.11.6**
+Версия: **v1.11.7**
 
 Что добавлено в этой итерации:
 - живой фон из мягких частиц;
@@ -1189,3 +1189,14 @@ Privacy toggle больше не выглядит неработающим, ес
 - Fallback использует тот же локальный Whisper `onnx-community/whisper-tiny`, конфигурацию `fp32 + q4` и однопоточный WASM.
 - Аудио и распознанный текст остаются на устройстве.
 - Для fallback runtime используется ESM-сборка Transformers.js с jsDelivr, уже разрешённым Child Safety CSP.
+
+
+## v1.11.7 — Android Whisper WASM Blob Fix
+
+Исправлен следующий уровень Android-ошибки Whisper:
+`Failed to fetch dynamically imported module: blob:...`
+
+- ONNX Runtime WASM теперь получает прямые URL runtime-файлов через jsDelivr вместо проблемного blob-module wrapper.
+- В CSP точечно разрешён `blob:` для script/module runtime; общий `unsafe-eval` не включён.
+- Child Safety, DNT/GPC и локальная обработка голоса сохранены.
+- Рабочая iPhone-ветка Whisper не изменена.

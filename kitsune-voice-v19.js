@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="1.11.6";
+  const VERSION="1.11.7";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -100,6 +100,14 @@
       if(mod.env?.backends?.onnx?.wasm){
         mod.env.backends.onnx.wasm.numThreads=1;
         mod.env.backends.onnx.wasm.proxy=false;
+        /* Android/Chrome fix: ONNX Runtime may otherwise create a blob:
+           module wrapper for its WASM runtime. Some Android browsers reject
+           that dynamic module import. Point ORT directly at same-version
+           jsDelivr assets instead. */
+        mod.env.backends.onnx.wasm.wasmPaths={
+          mjs:"https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.2/dist/ort-wasm-simd-threaded.mjs",
+          wasm:"https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.2/dist/ort-wasm-simd-threaded.wasm"
+        };
       }
     }catch(e){}
     return mod;
@@ -277,7 +285,7 @@
     block.innerHTML=`
       <div class="v19-voice-head">
         <div><strong>🎙️ Voice Dialogue</strong><small>локальный Whisper · русский язык</small></div>
-        <span>v1.11.6</span>
+        <span>v1.11.7</span>
       </div>
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>

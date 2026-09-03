@@ -14,7 +14,7 @@
              media-src 'self' data: blob:;
              font-src 'self' data:;
              style-src 'self' 'unsafe-inline';
-             script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cloud.umami.is https://cdn.jsdelivr.net;
+             script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cloud.umami.is https://cdn.jsdelivr.net;
              worker-src 'self' blob:;
              child-src 'self' blob:;
              connect-src 'self' https://cloud.umami.is https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com;" />
@@ -143,7 +143,7 @@
           <span class="eyebrow">Полный курс</span>
           <h3>Все 6 глав</h3>
         </div>
-        <span class="status-chip">все главы готовы · v1.11.6</span>
+        <span class="status-chip">все главы готовы · v1.11.7</span>
       </div>
       <div id="homeTopics" class="cards-grid"></div>
     </section>
