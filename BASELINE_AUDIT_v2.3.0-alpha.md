@@ -34,6 +34,10 @@
 - Service Worker has explicit auth/Qwen/TTS bypass rules.
 - Fixed an alpha version-label regression in the inherited design wrapper: the
   home status chip now reads the shared app version instead of forcing v2.2.3.
+- Fixed the Google Identity button being removed by the synchronous Adult
+  Center status redraw; GIS now renders into the new panel after redraw.
+- Advanced the Service Worker release cache to `2.3.0-alpha.1` so installed
+  PWAs receive the Google button fix without clearing model/OPFS caches.
 - Broker unit/integration tests: 3 passed, 0 failed.
 - Cloudflare Wrangler 4.129.0 dry-run and production bundle: pass; 13.32 KiB
   upload / 3.91 KiB gzip.

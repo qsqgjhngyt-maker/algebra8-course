@@ -162,23 +162,31 @@
     state.busy=true;state.detail="Готовлю защищённый вход Google…";notify();
     const authChallenge=await challenge("enroll");
     await loadGoogle();
-    const host=document.querySelector("#khiGoogleButton");
-    if(!host)throw new Error("Панель входа закрыта");
-    host.innerHTML="";
-    window.google.accounts.id.initialize({
-      client_id:config.googleClientId,
-      callback:response=>completeEnrollment(response?.credential,authChallenge),
-      nonce:authChallenge.nonce,
-      auto_select:false,
-      cancel_on_tap_outside:true,
-      context:"signin",
-      ux_mode:"popup"
-    });
-    window.google.accounts.id.renderButton(host,{
-      type:"standard",theme:"outline",size:"large",text:"continue_with",
-      shape:"pill",logo_alignment:"left",width:280
-    });
     state.busy=false;state.detail="Нажмите кнопку Google и войдите как взрослый.";notify();
+    /* notify() redraws Adult Center. Render GIS only after that synchronous
+       redraw; otherwise the newly created iframe is immediately discarded. */
+    setTimeout(()=>{
+      try{
+        const host=document.querySelector("#khiGoogleButton");
+        if(!host)throw new Error("Панель входа закрыта");
+        host.innerHTML="";
+        window.google.accounts.id.initialize({
+          client_id:config.googleClientId,
+          callback:response=>completeEnrollment(response?.credential,authChallenge),
+          nonce:authChallenge.nonce,
+          auto_select:false,
+          cancel_on_tap_outside:true,
+          context:"signin",
+          ux_mode:"popup"
+        });
+        window.google.accounts.id.renderButton(host,{
+          type:"standard",theme:"outline",size:"large",text:"continue_with",
+          shape:"pill",logo_alignment:"left",width:280
+        });
+      }catch(error){
+        state.detail=String(error?.message||error);notify();
+      }
+    },0);
   }
   async function completeEnrollment(credential,authChallenge){
     const localSubject=googleSubject(credential);
