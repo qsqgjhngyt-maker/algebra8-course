@@ -1,12 +1,12 @@
 
 /* ================================================================
-   Kitsune Math Lab v1.13.0
+   Kitsune Math Lab v1.13.1
    Sandbox + homework + step verifier + generator + local skill map.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.13.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.13.1";
   const HW_KEY="a8_mathlab_homework_v130";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const HISTORY_KEY="a8_mathlab_history_v130";
@@ -504,6 +504,51 @@ x > -6"></textarea>
     try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){}
   }
 
+  /* v1.13.1 ROUTE FIX
+     Legacy course extensions redefine the global go() function several times
+     (chapter1-v02.js, course-v1.js, mastery-v13.js). Therefore registering the
+     Math Lab only in app.js is not stable. Math Lab installs its own final
+     route wrapper after those legacy modules and also binds direct click
+     handlers as a defensive fallback. */
+  const mlPreviousGo=typeof window.go==="function"?window.go:null;
+
+  window.go=function(view){
+    if(view==="mathlab"){
+      render();
+      return;
+    }
+    return mlPreviousGo?.(view);
+  };
+
+  function bindMathLabRoute(){
+    document.querySelectorAll('[data-view="mathlab"]').forEach(btn=>{
+      if(btn.dataset.mathLabBound==="1")return;
+      btn.dataset.mathLabBound="1";
+      btn.addEventListener("click",e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        render();
+        try{
+          if(window.innerWidth<981){
+            document.querySelector("#sidebar")?.classList.remove("open");
+            document.body.classList.remove("sidebar-mobile-open");
+            document.querySelector("#sidebarScrim")?.setAttribute("aria-hidden","true");
+          }
+        }catch(x){}
+      },{capture:true});
+    });
+
+    document.querySelectorAll('[data-view-jump="mathlab"]').forEach(btn=>{
+      if(btn.dataset.mathLabBound==="1")return;
+      btn.dataset.mathLabBound="1";
+      btn.addEventListener("click",e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        render();
+      },{capture:true});
+    });
+  }
+
   window.renderMathLab=render;
   window.KitsuneMathLab={
     version:VERSION,
@@ -512,4 +557,10 @@ x > -6"></textarea>
     homework:()=>JSON.parse(JSON.stringify(homework)),
     skills:()=>JSON.parse(JSON.stringify(skills))
   };
+
+  bindMathLabRoute();
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",bindMathLabRoute,{once:true});
+  }
 })();
+

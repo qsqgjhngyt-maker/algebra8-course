@@ -554,7 +554,7 @@ function go(view){
  if(view==="home")renderHome();
  if(view==="course")renderCourse();
  if(view==="trainer")renderTrainer();
- if(view==="mathlab")window.renderMathLab?.();
+ if(view==="mathlab")return window.renderMathLab?.();
  if(view==="mistakes")renderMistakes();
  if(view==="progress")renderProgress();
 }

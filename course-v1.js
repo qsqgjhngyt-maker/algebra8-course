@@ -293,7 +293,7 @@ renderMistakes=function(){
  content.innerHTML=`<section class="progress-card reveal"><span class="eyebrow">Персональное повторение</span><h2>Ошибки — готовый план повторения</h2><p class="muted">Последние 120 неправильных ответов сохраняются только на этом устройстве.</p>${items.length?items.slice(0,40).map(m=>`<div class="exercise"><b>${lessonData[m.lesson]?.title||"Тренажёр"}</b><p>${m.question}</p><small class="muted">Твой ответ: ${m.answer||"—"}</small>${lessonData[m.lesson]?`<div style="margin-top:10px"><button class="secondary" onclick="openLesson('${m.lesson}')">Повторить тему</button></div>`:""}</div>`).join(""):`<div class="callout good">🎉 Пока ошибок нет.</div>`}</section>`;applyReveal();
 };
 
-go=function(view){if(view==="home")renderHome();if(view==="course")renderCourse();if(view==="trainer")renderTrainer();if(view==="chapterfinal")v1FinalHub();if(view==="mistakes")renderMistakes();if(view==="progress")renderProgress()};
+go=function(view){if(view==="mathlab")return window.renderMathLab?.();if(view==="home")renderHome();if(view==="course")renderCourse();if(view==="trainer")renderTrainer();if(view==="chapterfinal")v1FinalHub();if(view==="mistakes")renderMistakes();if(view==="progress")renderProgress()};
 
 renderHome();
 
