@@ -1,12 +1,12 @@
 
 /* ================================================================
-   Kitsune Math Lab v1.13.1
+   Kitsune Math Lab v1.14.0
    Sandbox + homework + step verifier + generator + local skill map.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.13.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
   const HW_KEY="a8_mathlab_homework_v130";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const HISTORY_KEY="a8_mathlab_history_v130";
@@ -16,6 +16,7 @@
   let history=[];
   let currentTab="solve";
   let lastResult=null;
+  let currentGeneratedPack=null;
   let graphResizeObserver=null;
 
   try{
@@ -55,13 +56,53 @@
     })[type]||"Алгебра";
   }
 
-  function touchSkill(result,good=true){
+  function courseTopics(){
+    try{
+      if(typeof chapters!=="undefined"&&Array.isArray(chapters)){
+        return chapters.flatMap(ch=>ch.topics.map(t=>({
+          id:t.id,title:t.title,chapter:ch.id,chapterTitle:ch.title
+        })));
+      }
+    }catch(e){}
+    return [];
+  }
+
+  function topicLabel(id){
+    const t=courseTopics().find(x=>x.id===id);
+    return t?`${t.id} · ${t.title}`:String(id||"");
+  }
+
+  function weakTopicIds(){
+    return courseTopics()
+      .map(t=>{
+        const s=skills[`topic:${t.id}`]||{attempts:0,success:0};
+        const score=s.attempts
+          ?(s.success/s.attempts*100) - Math.min(18,s.attempts*1.5)
+          :52;
+        return {id:t.id,score};
+      })
+      .sort((a,b)=>a.score-b.score)
+      .slice(0,14)
+      .map(x=>x.id);
+  }
+
+  function touchSkill(result,good=true,topicId=null){
     const key=result?.kind==="quadratic"?"quadratic":result?.kind==="linear"&&result?.type==="equation"?"linear":result?.type||"expression";
     const row=skills[key]||{attempts:0,success:0,last:0};
     row.attempts++;
     if(good)row.success++;
     row.last=Date.now();
     skills[key]=row;
+
+    if(topicId){
+      const tkey=`topic:${topicId}`;
+      const tr=skills[tkey]||{attempts:0,success:0,last:0};
+      tr.attempts++;
+      if(good)tr.success++;
+      tr.last=Date.now();
+      skills[tkey]=tr;
+    }
+
     save();
     renderSkills();
   }
@@ -200,16 +241,21 @@ x > -6"></textarea>
   }
 
   function hwCard(h){
+    const gen=h.generated||null;
     return `<article class="ml-hw-card ${h.done?"done":""}" data-hw-id="${h.id}">
       <div class="ml-hw-top">
         <button class="ml-check" data-hw-action="done" title="Готово">${h.done?"✓":"○"}</button>
-        <div><b>${esc(h.task)}</b><small>${new Date(h.created).toLocaleDateString("ru-RU")}</small></div>
+        <div>
+          ${gen?`<span class="ml-hw-topic">§ ${esc(gen.topicId)} · ${esc(gen.topicTitle)}</span>`:""}
+          <b>${esc(h.task)}</b>
+          <small>${new Date(h.created).toLocaleDateString("ru-RU")}${gen?` · ${"●".repeat(gen.difficulty||1)}`:""}</small>
+        </div>
         <button class="ml-icon" data-hw-action="delete" title="Удалить">×</button>
       </div>
-      <textarea class="ml-hw-work" rows="3" placeholder="Моё решение / промежуточные шаги…">${esc(h.work||"")}</textarea>
+      <textarea class="ml-hw-work" rows="3" placeholder="${gen?"Мой ответ / решение…":"Моё решение / промежуточные шаги…"}">${esc(h.work||"")}</textarea>
       <div class="ml-hw-actions">
-        <button data-hw-action="solve">🧮 Проверить задачу</button>
-        <button data-hw-action="steps">✅ Проверить мои шаги</button>
+        <button data-hw-action="solve">🧮 ${gen?"Показать разбор":"Проверить задачу"}</button>
+        <button data-hw-action="steps">✅ ${gen?"Проверить ответ":"Проверить мои шаги"}</button>
         <button data-hw-action="hint">🦊 Подсказка</button>
       </div>
       <div class="ml-hw-result"></div>
@@ -217,30 +263,80 @@ x > -6"></textarea>
   }
 
   function trainerTab(){
+    const topics=courseTopics();
+    const chapterOptions=(()=>{
+      try{
+        if(typeof chapters!=="undefined"){
+          return chapters.map(ch=>`<option value="${ch.id}">Глава ${ch.id}. ${esc(ch.title)}</option>`).join("");
+        }
+      }catch(e){}
+      return "";
+    })();
+    const topicOptions=topics.map(t=>`<option value="${t.id}">${esc(t.id)} · ${esc(t.title)}</option>`).join("");
+
     return `
-      <div class="ml-panel">
-        <span class="eyebrow">Бесконечная практика</span>
-        <h3>Генератор заданий</h3>
-        <div class="ml-generator-options">
-          <label>Тема
-            <select id="mlGenTopic">
-              <option value="linear">Линейные уравнения</option>
-              <option value="quadratic">Квадратные уравнения</option>
-              <option value="inequality">Неравенства</option>
-              <option value="sqrt">Квадратные корни</option>
+      <div class="ml-panel ml-gen2">
+        <div class="ml-panel-head">
+          <div>
+            <span class="eyebrow">Generator 2.0 · 51/51 тем</span>
+            <h3>Умный генератор по всему курсу</h3>
+          </div>
+          <span class="status-chip">51 тема · 6 глав</span>
+        </div>
+
+        <div class="ml-gen-mode-grid">
+          <label>Режим
+            <select id="mlGenMode">
+              <option value="topic">🎯 Конкретная тема</option>
+              <option value="chapter">📚 По главе</option>
+              <option value="all">🌐 Весь курс</option>
+              <option value="adaptive">🧠 Адаптивный</option>
+              <option value="control">📝 Контрольная</option>
+              <option value="homework">🏠 Подборка ДЗ</option>
+              <option value="marathon">🏆 Марафон 51</option>
             </select>
           </label>
+
+          <label id="mlGenChapterWrap">Глава
+            <select id="mlGenChapter">
+              <option value="0">Все главы</option>
+              ${chapterOptions}
+            </select>
+          </label>
+
+          <label id="mlGenTopicWrap">Тема
+            <select id="mlGenTopicId">${topicOptions}</select>
+          </label>
+
           <label>Сложность
             <select id="mlGenDifficulty">
               <option value="1">🌱 Легко</option>
-              <option value="2">📘 Нормально</option>
+              <option value="2" selected>📘 Нормально</option>
               <option value="3">🧠 Сложно</option>
             </select>
           </label>
-          <button class="primary" id="mlGenerateBtn">🎲 Новое задание</button>
+
+          <label id="mlGenCountWrap">Количество
+            <select id="mlGenCount">
+              <option value="1" selected>1 задание</option>
+              <option value="5">5 заданий</option>
+              <option value="8">8 заданий</option>
+              <option value="10">10 заданий</option>
+              <option value="12">12 заданий</option>
+              <option value="20">20 заданий</option>
+            </select>
+          </label>
+
+          <button class="primary glow-btn" id="mlGenerateBtn">✨ Создать набор</button>
         </div>
+
+        <div id="mlGenModeNote" class="ml-gen-note"></div>
+
         <div id="mlGenerated" class="ml-generated">
-          <div class="ml-empty">Нажми «Новое задание».</div>
+          <div class="ml-empty">
+            🎯 Выбери режим. Можно взять любую из 51 темы, собрать контрольную,
+            адаптивный набор или настоящий марафон по всему курсу.
+          </div>
         </div>
       </div>`;
   }
@@ -332,31 +428,74 @@ x > -6"></textarea>
     homework=homework.slice(-100);save();
   }
 
+  function addGeneratedHomework(tasks){
+    const rows=Array.isArray(tasks)?tasks:[tasks];
+    for(const g of rows){
+      if(!g?.question)continue;
+      homework.push({
+        id:"hw_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+        task:g.question,
+        work:"",
+        done:false,
+        created:Date.now(),
+        generated:g
+      });
+    }
+    homework=homework.slice(-100);
+    save();
+  }
+
   async function handleHwAction(card,action){
     const id=card.dataset.hwId;
     const h=homework.find(x=>x.id===id);if(!h)return;
     const workEl=card.querySelector(".ml-hw-work");
     h.work=workEl?.value||"";save();
     const out=card.querySelector(".ml-hw-result");
+    const gen=h.generated||null;
 
     if(action==="done"){h.done=!h.done;save();renderTab();return}
     if(action==="delete"){homework=homework.filter(x=>x.id!==id);save();renderTab();return}
 
     if(action==="solve"){
-      out.innerHTML=`<div class="ml-loading">⚙ Считаю…</div>`;
+      out.innerHTML=`<div class="ml-loading">⚙ Готовлю проверенный разбор…</div>`;
+      if(gen){
+        out.innerHTML=`<div class="ml-result-card">
+          <div class="ml-result-head"><span>✅ Generator 2.0</span><b>${esc(gen.answer)}</b></div>
+          <p>${esc(gen.explanation||"Ответ проверен локальным генератором.")}</p>
+          <small>Тема: ${esc(gen.topicId)} · ${esc(gen.topicTitle)}</small>
+        </div>`;
+        return;
+      }
       try{
         const r=await window.KitsuneMath.analyze(h.task);
         out.innerHTML=resultHtml(r);touchSkill(r,true);
       }catch(e){out.innerHTML=`<div class="ml-error">${esc(e.message)}</div>`}
     }
+
     if(action==="steps"){
-      if(!h.work.trim()){out.innerHTML=`<div class="ml-error">Сначала запиши свои шаги в поле выше.</div>`;return}
+      if(!h.work.trim()){out.innerHTML=`<div class="ml-error">Сначала запиши свой ответ или решение в поле выше.</div>`;return}
+      if(gen){
+        try{
+          const check=await window.KitsuneMath.checkGenerated(gen,h.work);
+          out.innerHTML=check.ok
+            ?`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`
+            :`<div class="ml-error">Пока не совпало. Попробуй ещё раз или возьми подсказку.</div>`;
+          touchSkill({type:generatedSkillType(gen)},check.ok,gen.topicId);
+        }catch(e){out.innerHTML=`<div class="ml-error">${esc(e.message)}</div>`}
+        return;
+      }
       try{
         const r=await window.KitsuneMath.verifySteps(h.work);
         out.innerHTML=`<div class="ml-step-report ${r.ok?"good":"warn"}">${r.rows.map(x=>`<div class="ml-step-row ${x.ok?"ok":"bad"}"><span>${x.ok?"✓":"!"}</span><div><b>${esc(x.line)}</b><small>${esc(x.message)}</small></div></div>`).join("")}</div>`;
       }catch(e){out.innerHTML=`<div class="ml-error">${esc(e.message)}</div>`}
     }
+
     if(action==="hint"){
+      if(gen){
+        const verified={type:"generated",display:gen.answer,steps:[gen.hint],topicTitle:gen.topicTitle};
+        await askAi(gen.question,verified,out,{hintOnly:true});
+        return;
+      }
       try{
         const r=await window.KitsuneMath.analyze(h.task);
         await askAi(h.task,r,out,{hintOnly:true});
@@ -364,44 +503,234 @@ x > -6"></textarea>
     }
   }
 
-  async function generateTask(){
-    const topic=document.querySelector("#mlGenTopic")?.value||"linear";
-    const difficulty=Number(document.querySelector("#mlGenDifficulty")?.value||1);
-    const host=document.querySelector("#mlGenerated");
-    const g=await window.KitsuneMath.generate(topic,difficulty);
-    host.dataset.expected=g.answer;
-    host.dataset.question=g.question;
-    host.innerHTML=`<div class="ml-generated-card">
-      <span class="eyebrow">${skillName(topic)}</span>
-      <h2>${esc(g.question)}</h2>
-      <div class="ml-inline">
-        <input id="mlGenAnswer" class="ml-input" placeholder="Твой ответ">
-        <button class="primary" id="mlCheckGenerated">Проверить</button>
-      </div>
-      <div class="ml-actions">
-        <button class="secondary" id="mlGenHint">🦊 Подсказка</button>
-        <button class="secondary" id="mlGenToHw">📚 В ДЗ</button>
-      </div>
-      <div id="mlGenResult"></div>
+  function generatorModeText(mode){
+    const map={
+      topic:"Выбери любую из 51 тем. Можно сгенерировать несколько разных заданий именно по ней.",
+      chapter:"Смешанная практика внутри выбранной главы.",
+      all:"Случайный набор из всех 51 тем курса.",
+      adaptive:"Kitsune чаще выбирает темы с ошибками и темы, которые ещё мало тренировались.",
+      control:"12 заданий: по две темы из каждой главы, от простого к сложному.",
+      homework:"Подборка с плавным ростом сложности. Её можно целиком отправить в Homework Studio.",
+      marathon:"51 задание — ровно по одному из каждой темы курса. Полная проверка покрытия."
+    };
+    return map[mode]||"";
+  }
+
+  function syncGeneratorModeUi(){
+    const mode=document.querySelector("#mlGenMode")?.value||"topic";
+    const topicWrap=document.querySelector("#mlGenTopicWrap");
+    const chapterWrap=document.querySelector("#mlGenChapterWrap");
+    const countWrap=document.querySelector("#mlGenCountWrap");
+    const count=document.querySelector("#mlGenCount");
+    const note=document.querySelector("#mlGenModeNote");
+    const btn=document.querySelector("#mlGenerateBtn");
+
+    if(topicWrap)topicWrap.style.display=mode==="topic"?"":"none";
+    if(chapterWrap)chapterWrap.style.display=(mode==="chapter"||mode==="homework")?"":"none";
+    if(countWrap)countWrap.style.display=mode==="marathon"?"none":"";
+
+    if(count){
+      count.disabled=mode==="control";
+      if(mode==="control")count.value="12";
+      if(mode==="homework"&&count.value==="1")count.value="8";
+    }
+
+    if(note){
+      let extra="";
+      if(mode==="adaptive"){
+        const weak=weakTopicIds().slice(0,5);
+        extra=weak.length?` Сейчас приоритет: ${weak.map(topicLabel).join(" · ")}.`:"";
+      }
+      note.textContent=generatorModeText(mode)+extra;
+    }
+
+    if(btn){
+      btn.textContent=mode==="marathon"?"🏆 Создать марафон 51":
+        mode==="control"?"📝 Собрать контрольную":
+        mode==="homework"?"🏠 Подобрать ДЗ":"✨ Создать набор";
+    }
+  }
+
+  function generatedAnswerField(task,index){
+    if(task.kind==="choice"&&Array.isArray(task.options)){
+      return `<div class="ml-gen-choices">
+        ${task.options.map((opt,j)=>`
+          <label class="ml-gen-choice">
+            <input type="radio" name="mlGenChoice_${index}" value="${j}">
+            <span>${esc(opt)}</span>
+          </label>`).join("")}
+      </div>`;
+    }
+    return `<div class="ml-inline ml-gen-answer-row">
+      <input id="mlGenAnswer_${index}" class="ml-input" placeholder="Твой ответ" autocomplete="off">
+      <button class="primary" data-gen-action="check" data-gen-index="${index}">Проверить</button>
     </div>`;
-    document.querySelector("#mlCheckGenerated")?.addEventListener("click",()=>{
-      const val=document.querySelector("#mlGenAnswer")?.value||"";
-      const norm=s=>String(s).toLowerCase().replace(/\s+/g,"").replace(/[−–—]/g,"-").replace(/,/g,".");
-      const ok=norm(val)===norm(g.answer) || norm(val).replace(/x[₁1]=/g,"").replace(/x[₂2]=/g,"").split(/[;,]/).sort().join("|")===
-        norm(g.answer).replace(/x[₁1]=/g,"").replace(/x[₂2]=/g,"").split(/[;,]/).sort().join("|");
-      document.querySelector("#mlGenResult").innerHTML=ok
-        ?`<div class="ml-success">✅ Верно! ${esc(g.answer)}</div>`
-        :`<div class="ml-error">Пока не совпало. Попробуй ещё раз или возьми подсказку.</div>`;
-      touchSkill({type:topic},ok);
+  }
+
+  function generatedCard(task,index){
+    const dots="●".repeat(task.difficulty||1)+"○".repeat(Math.max(0,3-(task.difficulty||1)));
+    return `<article class="ml-generated-card ml-gen2-card" data-gen-card="${index}">
+      <div class="ml-gen-card-head">
+        <div>
+          <span class="eyebrow">§ ${esc(task.topicId)} · глава ${task.chapterId}</span>
+          <h4>${esc(task.topicTitle)}</h4>
+        </div>
+        <span class="ml-gen-difficulty" title="Сложность">${dots}</span>
+      </div>
+      <div class="ml-gen-question">${esc(task.question)}</div>
+      ${generatedAnswerField(task,index)}
+      ${task.kind==="choice"?`
+        <button class="primary ml-choice-check" data-gen-action="check" data-gen-index="${index}">Проверить ответ</button>`:""}
+      <div class="ml-actions ml-gen-card-actions">
+        <button class="secondary" data-gen-action="hint" data-gen-index="${index}">🦊 Подсказка</button>
+        <button class="secondary" data-gen-action="reveal" data-gen-index="${index}">🧮 Разбор</button>
+        <button class="secondary" data-gen-action="homework" data-gen-index="${index}">📚 В ДЗ</button>
+      </div>
+      <div class="ml-gen-feedback" id="mlGenFeedback_${index}"></div>
+    </article>`;
+  }
+
+  function renderGeneratedPack(pack){
+    const host=document.querySelector("#mlGenerated");
+    if(!host)return;
+    currentGeneratedPack=pack;
+    const tasks=pack?.tasks||[];
+    const mode=pack?.mode||"all";
+    const coverage=pack?.coverage?.length||0;
+    const chaptersCount=pack?.chapters?.length||0;
+
+    host.innerHTML=`
+      <div class="ml-gen-pack-head">
+        <div>
+          <span class="eyebrow">Набор готов</span>
+          <h3>${tasks.length} ${tasks.length===1?"задание":tasks.length<5?"задания":"заданий"}</h3>
+          <p>${coverage} тем · ${chaptersCount} глав · всё сгенерировано локально</p>
+        </div>
+        <div class="ml-actions">
+          <button class="secondary" id="mlGenRegenerate">↻ Новый набор</button>
+          <button class="primary" id="mlGenPackToHw">📚 Весь набор в ДЗ</button>
+        </div>
+      </div>
+      ${mode==="marathon"?`
+        <div class="ml-marathon-banner">
+          🏆 <b>Полное покрытие курса:</b> 51 из 51 тем. Карточки ниже используют
+          content-visibility, поэтому длинный марафон не должен тормозить интерфейс.
+        </div>`:""}
+      <div class="ml-gen-set">
+        ${tasks.map(generatedCard).join("")}
+      </div>`;
+
+    bindGeneratedPack(pack);
+  }
+
+  function generatedSkillType(task){
+    if(task.chapterId===1)return "rational";
+    if(task.chapterId===2)return "sqrt";
+    if(task.chapterId===4)return "inequality";
+    if(task.chapterId===5)return "function";
+    if(task.chapterId===3&&["3-29","3-30","3-31","3-32"].includes(task.topicId))return "system";
+    if(task.chapterId===3)return "equation";
+    return "expression";
+  }
+
+  async function generatedHint(task,host){
+    const verified={
+      type:"generated",
+      display:task.answer,
+      steps:[task.hint||"Определи правило темы и сделай первый шаг."],
+      topicTitle:task.topicTitle
+    };
+    await askAi(task.question,verified,host,{hintOnly:true});
+  }
+
+  function bindGeneratedPack(pack){
+    const tasks=pack.tasks||[];
+
+    document.querySelector("#mlGenRegenerate")?.addEventListener("click",generateTask);
+    document.querySelector("#mlGenPackToHw")?.addEventListener("click",()=>{
+      addGeneratedHomework(tasks);
+      const b=document.querySelector("#mlGenPackToHw");
+      if(b){b.textContent="✅ Набор добавлен в ДЗ";b.disabled=true}
     });
-    document.querySelector("#mlGenHint")?.addEventListener("click",async()=>{
-      const r=await window.KitsuneMath.analyze(g.question);
-      await askAi(g.question,r,document.querySelector("#mlGenResult"),{hintOnly:true});
+
+    document.querySelectorAll("[data-gen-action]").forEach(btn=>{
+      btn.addEventListener("click",async()=>{
+        const index=Number(btn.dataset.genIndex);
+        const task=tasks[index];
+        if(!task)return;
+        const host=document.querySelector(`#mlGenFeedback_${index}`);
+        const action=btn.dataset.genAction;
+
+        if(action==="homework"){
+          addGeneratedHomework(task);
+          host.innerHTML=`<div class="ml-success">📚 Добавлено в Homework Studio.</div>`;
+          return;
+        }
+
+        if(action==="hint"){
+          await generatedHint(task,host);
+          return;
+        }
+
+        if(action==="reveal"){
+          host.innerHTML=`<div class="ml-result-card">
+            <div class="ml-result-head"><span>✅ Проверенный ответ</span><b>${esc(task.answer)}</b></div>
+            <p>${esc(task.explanation||"Результат проверен локальным генератором.")}</p>
+          </div>`;
+          return;
+        }
+
+        if(action==="check"){
+          let answer="";
+          if(task.kind==="choice"){
+            answer=document.querySelector(`input[name="mlGenChoice_${index}"]:checked`)?.value??"";
+          }else{
+            answer=document.querySelector(`#mlGenAnswer_${index}`)?.value??"";
+          }
+          if(answer===""){
+            host.innerHTML=`<div class="ml-error">Сначала выбери или введи ответ.</div>`;
+            return;
+          }
+
+          host.innerHTML=`<div class="ml-loading">⚙ Проверяю локально…</div>`;
+          try{
+            const check=await window.KitsuneMath.checkGenerated(task,answer);
+            touchSkill({type:generatedSkillType(task)},check.ok,task.topicId);
+            if(check.ok){
+              host.innerHTML=`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`;
+            }else{
+              host.innerHTML=`<div class="ml-error">Пока не совпало. Ответ не раскрываю — попробуй ещё раз или попроси подсказку.</div>`;
+            }
+          }catch(e){
+            host.innerHTML=`<div class="ml-error">${esc(e.message||e)}</div>`;
+          }
+        }
+      });
     });
-    document.querySelector("#mlGenToHw")?.addEventListener("click",()=>{
-      addHomeworkTasks(g.question);
-      document.querySelector("#mlGenResult").innerHTML=`<div class="ml-success">📚 Добавлено в домашнее задание.</div>`;
-    });
+  }
+
+  async function generateTask(){
+    const mode=document.querySelector("#mlGenMode")?.value||"topic";
+    const difficulty=Number(document.querySelector("#mlGenDifficulty")?.value||2);
+    let count=Number(document.querySelector("#mlGenCount")?.value||8);
+    const chapterId=Number(document.querySelector("#mlGenChapter")?.value||0);
+    const topicId=document.querySelector("#mlGenTopicId")?.value||courseTopics()[0]?.id;
+    const host=document.querySelector("#mlGenerated");
+    if(!host)return;
+
+    if(mode==="control")count=12;
+    if(mode==="marathon")count=51;
+
+    host.innerHTML=`<div class="ml-loading">⚙ Generator 2.0 подбирает задания и проверяет ключи…</div>`;
+    try{
+      const pack=await window.KitsuneMath.generateSet({
+        mode,topicId,chapterId:chapterId||null,count,difficulty,
+        weakTopicIds:mode==="adaptive"?weakTopicIds():[]
+      });
+      renderGeneratedPack(pack);
+    }catch(e){
+      host.innerHTML=`<div class="ml-error">⚠ ${esc(e.message||e)}</div>`;
+    }
   }
 
   async function drawGraph(){
@@ -486,7 +815,10 @@ x > -6"></textarea>
       card.querySelectorAll("[data-hw-action]").forEach(b=>b.addEventListener("click",()=>handleHwAction(card,b.dataset.hwAction)));
     });
 
+    document.querySelector("#mlGenMode")?.addEventListener("change",syncGeneratorModeUi);
+    document.querySelector("#mlGenChapter")?.addEventListener("change",syncGeneratorModeUi);
     document.querySelector("#mlGenerateBtn")?.addEventListener("click",generateTask);
+    if(document.querySelector("#mlGenMode"))syncGeneratorModeUi();
   }
 
   function render(){
@@ -504,7 +836,7 @@ x > -6"></textarea>
     try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){}
   }
 
-  /* v1.13.1 ROUTE FIX
+  /* v1.14.0 ROUTE FIX
      Legacy course extensions redefine the global go() function several times
      (chapter1-v02.js, course-v1.js, mastery-v13.js). Therefore registering the
      Math Lab only in app.js is not stable. Math Lab installs its own final

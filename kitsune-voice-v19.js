@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.13.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 

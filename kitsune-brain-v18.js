@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.13.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -618,7 +618,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     const safety=childSafetyCheck(user);
     if(safety)return safety.reply;
 
-    /* v1.13.1: free-form calculations no longer require an opened textbook
+    /* v1.14.0: free-form calculations no longer require an opened textbook
        exercise. Math Worker computes first; Brain only explains verified facts. */
     if(window.KitsuneMath?.looksMath?.(user)){
       try{

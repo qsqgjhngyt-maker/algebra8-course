@@ -1,19 +1,19 @@
 
 /* ================================================================
-   Kitsune Math Engine API v1.13.1
+   Kitsune Math Engine API v1.14.0
    Thin async wrapper around the deterministic local Math Worker.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.13.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
   let worker=null;
   let seq=0;
   const pending=new Map();
 
   function ensureWorker(){
     if(worker)return worker;
-    worker=new Worker("./math-worker-v130.js?v=1.13.1",{name:"kitsune-math"});
+    worker=new Worker("./math-worker-v130.js?v=1.14.0",{name:"kitsune-math"});
     worker.onmessage=e=>{
       const m=e.data||{};
       const p=pending.get(m.id);
@@ -66,6 +66,10 @@
     verifySteps:input=>call("verifySteps",{input}),
     sampleFunction:(expression,options={})=>call("sampleFunction",{expression,options}),
     generate:(topic="linear",difficulty=1)=>call("generate",{topic,difficulty}),
+    generateTopic:(topicId,difficulty=2)=>call("generate",{topicId,difficulty}),
+    generateSet:(options={})=>call("generateSet",options),
+    checkGenerated:(task,answer)=>call("checkGenerated",{task,answer}),
+    generatorCatalog:()=>call("generatorCatalog",{}),
     looksMath,
     facts:resultFacts,
     terminate(){
