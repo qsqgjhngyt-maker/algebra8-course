@@ -5907,3 +5907,77 @@ body.kitsune-perf-careful .particles-canvas{will-change:auto!important}
   .ki-session-size{align-items:flex-start;flex-direction:column}
   .ki-session-size select{width:100%}
 }
+
+
+/* =====================================================================
+   v2.0.0 · FINAL PRODUCTION · Search / Offline / Math Board
+   ===================================================================== */
+.ks-hero,.ko-hero{padding:20px 22px;margin-bottom:16px}
+.ks-hero h2,.ko-hero h2{margin:4px 0 7px}
+.ks-hero p,.ko-hero p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
+.ks-search-row{display:flex;gap:8px;margin-top:14px}
+.ks-search-row .ml-input{flex:1}
+.ks-body{padding:15px}
+.ks-results{display:grid;gap:9px}
+.ks-result{
+  width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,.6fr) auto;
+  gap:12px;align-items:center;text-align:left;padding:13px 14px;
+  border:2px solid var(--line);border-radius:13px;background:var(--card-strong);color:var(--text)
+}
+.ks-result h3{margin:3px 0 0;font-size:13px}
+.ks-result p{margin:0;color:var(--muted);font-size:9px;line-height:1.4}
+.ks-open-arrow{font-size:9px;font-weight:900;color:var(--primary)}
+.ks-count{margin:0 0 10px;color:var(--muted);font-size:9px}
+.ks-empty{padding:28px 15px;text-align:center;color:var(--muted);font-size:10px}
+
+.ko-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.ko-refreshing{font-size:9px;color:var(--muted)}
+.ko-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.ko-summary>div{
+  display:flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid var(--line);
+  border-radius:11px;background:var(--card-strong);font-size:8.5px;font-weight:800
+}
+.ko-dot{font-size:12px}.ko-dot.ok{color:var(--good)}.ko-dot.warn{color:#e69b13}.ko-dot.off{color:var(--danger)}
+.ko-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ko-card{
+  padding:13px;border:2px solid var(--line);border-radius:14px;background:var(--card-strong)
+}
+.ko-card-head{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:flex-start;margin-bottom:10px}
+.ko-card-head>span:first-child{font-size:23px}
+.ko-card-head b,.ko-card-head small{display:block}
+.ko-card-head b{font-size:11px}.ko-card-head small{margin-top:3px;color:var(--muted);font-size:8px;line-height:1.4}
+.ko-actions{margin-top:12px;padding:16px}
+.ko-actions h3{margin:4px 0 5px}.ko-actions p{margin:0;color:var(--muted);font-size:9px;line-height:1.5}
+.ko-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.ko-info{padding:16px}.ko-info h3{margin:4px 0 8px}.ko-info p{font-size:9px;color:var(--muted);line-height:1.5}
+.ko-storage>div{display:flex;justify-content:space-between;gap:10px;font-size:9px}
+.ko-storage i{display:block;height:7px;border-radius:999px;background:var(--line);overflow:hidden;margin:8px 0}
+.ko-storage i em{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-2))}
+.ko-storage small{display:block;color:var(--muted);font-size:8px;margin-bottom:10px}
+.ko-network-note{padding:10px;border-radius:10px;background:var(--primary-soft)}
+.ko-network-note b,.ko-network-note span,.ko-network-note small{display:block}
+.ko-network-note b{font-size:9px}.ko-network-note span{margin-top:3px;font-size:8px}.ko-network-note small{margin-top:5px;color:var(--muted);font-size:8px;line-height:1.4}
+
+.ml-board-toolbar{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.ml-board-wrap{
+  width:100%;min-height:360px;border:2px solid var(--line);border-radius:14px;
+  background:var(--card-strong);overflow:hidden;touch-action:none
+}
+.ml-board-wrap canvas{display:block;width:100%;touch-action:none;cursor:crosshair}
+.ml-board-note{
+  margin-top:9px;padding:9px 10px;border-radius:10px;background:var(--primary-soft);
+  color:var(--muted);font-size:8.5px;line-height:1.45
+}
+
+@media(max-width:1050px){
+  .ko-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:760px){
+  .ks-result{grid-template-columns:1fr}
+  .ko-summary{grid-template-columns:1fr 1fr}
+  .ko-info-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .ks-search-row{flex-direction:column}
+  .ko-grid,.ko-summary{grid-template-columns:1fr}
+}

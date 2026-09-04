@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Learning Intelligence v1.15.0
+   Kitsune Learning Intelligence v2.0.0
    Local-only adaptive route, error intelligence, spaced repetition,
    parent summary, export/import and deterministic tutor tools.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
   const ERR_KEY="a8_learning_errors_v150";
   const REVIEW_KEY="a8_learning_reviews_v150";
   const SESSION_KEY="a8_learning_sessions_v150";
@@ -343,6 +343,13 @@
         if(!due.length)return {handled:true,text:"На сегодня обязательных повторений нет. Можно сделать короткую адаптивную тренировку."};
         return {handled:true,text:`Сегодня к повторению ${due.length}: ${due.slice(0,4).map(x=>topicMeta(x.topicId).title).join(", ")}.`};
       }
+      if(/(?:где|найди|покажи|какая тема|в каком уроке)/.test(q)&&window.KitsuneCourseSearch){
+        const cleaned=q.replace(/(?:где|найди|покажи|какая тема|в каком уроке|про|тема|урок)/g," ").trim();
+        const rows=window.KitsuneCourseSearch.search(cleaned||q,3);
+        if(rows.length){
+          return {handled:true,text:`Нашла: ${rows.map(x=>`§ ${x.id} «${x.title}»`).join("; ")}. Открой «Поиск по курсу», чтобы сразу перейти к теме.`};
+        }
+      }
       return {handled:false};
     },
     summary:tutorSummaryText,
@@ -519,6 +526,7 @@
       <div class="ml-actions">
         <button class="primary" data-ki-check="${prefix}-${index}">Проверить</button>
         <button class="secondary" data-ki-hint="${prefix}-${index}" data-level="1">💡 Подсказка 1/4</button>
+        <button class="secondary" data-ki-voice="${prefix}-${index}">🎙 Спросить Kitsune</button>
       </div>
       <div id="kiFeedback_${prefix}_${index}"></div>
     </article>`;
@@ -551,6 +559,13 @@
         fb.innerHTML=`<div class="ki-hint-level"><b>Подсказка ${level}/4</b><p>${esc(hintLadder(task,level))}</p></div>`;
         level=Math.min(4,level+1);b.dataset.level=String(level);
         b.textContent=level===4?"🧮 Полный разбор 4/4":`💡 Подсказка ${level}/4`;
+      });
+      document.querySelector(`[data-ki-voice="${key}"]`)?.addEventListener("click",()=>{
+        const ctx={
+          lesson:{id:task.topicId,title:task.topicTitle,remember:topicRule(task.topicId)},
+          exercise:{q:task.question,hint:task.hint,a:[task.answer]}
+        };
+        window.KitsuneVoiceDialogue?.open?.(ctx);
       });
     });
   }

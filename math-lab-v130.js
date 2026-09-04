@@ -1,15 +1,16 @@
 
 /* ================================================================
-   Kitsune Math Lab v1.15.0
+   Kitsune Math Lab v2.0.0
    Sandbox + homework + step verifier + generator + local skill map.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
   const HW_KEY="a8_mathlab_homework_v130";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const HISTORY_KEY="a8_mathlab_history_v130";
+  const BOARD_KEY="a8_mathlab_board_v200";
 
   let homework=[];
   let skills={};
@@ -17,15 +18,18 @@
   let currentTab="solve";
   let lastResult=null;
   let currentGeneratedPack=null;
+  let boardStrokes=[];
   let graphResizeObserver=null;
 
   try{
     homework=JSON.parse(localStorage.getItem(HW_KEY)||"[]");
     skills=JSON.parse(localStorage.getItem(SKILL_KEY)||"{}");
     history=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+    boardStrokes=JSON.parse(localStorage.getItem(BOARD_KEY)||"[]");
     if(!Array.isArray(homework))homework=[];
     if(!skills||typeof skills!=="object")skills={};
     if(!Array.isArray(history))history=[];
+    if(!Array.isArray(boardStrokes))boardStrokes=[];
   }catch(e){}
 
   function save(){
@@ -33,6 +37,7 @@
       localStorage.setItem(HW_KEY,JSON.stringify(homework.slice(-100)));
       localStorage.setItem(SKILL_KEY,JSON.stringify(skills));
       localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-60)));
+      localStorage.setItem(BOARD_KEY,JSON.stringify(boardStrokes.slice(-250)));
     }catch(e){}
   }
 
@@ -139,6 +144,7 @@
             <button data-ml-tab="solve" class="${currentTab==="solve"?"active":""}">🧮 Решить</button>
             <button data-ml-tab="steps" class="${currentTab==="steps"?"active":""}">✅ Проверить шаги</button>
             <button data-ml-tab="graph" class="${currentTab==="graph"?"active":""}">📈 График</button>
+            <button data-ml-tab="board" class="${currentTab==="board"?"active":""}">✍️ Доска</button>
             <button data-ml-tab="homework" class="${currentTab==="homework"?"active":""}">📚 Домашнее задание</button>
             <button data-ml-tab="trainer" class="${currentTab==="trainer"?"active":""}">🎯 Генератор</button>
           </div>
@@ -219,6 +225,24 @@ x > -6"></textarea>
         </div>
         <div class="ml-graph-wrap"><canvas id="mlGraphCanvas"></canvas></div>
         <div id="mlGraphInfo" class="ml-result compact"></div>
+      </div>`;
+  }
+
+  function boardTab(){
+    return `
+      <div class="ml-panel">
+        <div class="ml-panel-head">
+          <div><span class="eyebrow">Local Scratchpad</span><h3>✍️ Математическая доска</h3></div>
+          <span class="status-chip">только на устройстве</span>
+        </div>
+        <p class="muted">Пиши пальцем, мышью или стилусом. Это локальный черновик без камеры и без отправки изображения наружу.</p>
+        <div class="ml-board-toolbar">
+          <button class="secondary" id="mlBoardUndo">↶ Отменить штрих</button>
+          <button class="secondary" id="mlBoardClear">Очистить</button>
+          <button class="secondary" id="mlBoardSave">⬇️ PNG</button>
+        </div>
+        <div class="ml-board-wrap"><canvas id="mlBoardCanvas"></canvas></div>
+        <div class="ml-board-note">Черновик сохраняется локально как набор штрихов. Автораспознавание рукописных формул намеренно не включено: оно потребовало бы отдельной тяжёлой vision-модели и ухудшило бы стабильность мобильной офлайн-сборки.</div>
       </div>`;
   }
 
@@ -346,9 +370,11 @@ x > -6"></textarea>
     if(!body)return;
     body.innerHTML=currentTab==="steps"?stepsTab():
       currentTab==="graph"?graphTab():
+      currentTab==="board"?boardTab():
       currentTab==="homework"?homeworkTab():
       currentTab==="trainer"?trainerTab():solveTab();
     bindTab();
+    if(currentTab==="board")setTimeout(initBoard,0);
   }
 
   function resultHtml(r,{hideFinal=false}={}){
@@ -586,6 +612,7 @@ x > -6"></textarea>
       <div class="ml-actions ml-gen-card-actions">
         <button class="secondary" data-gen-action="hint" data-gen-index="${index}">🦊 Подсказка</button>
         <button class="secondary" data-gen-action="reveal" data-gen-index="${index}">🧮 Разбор</button>
+        <button class="secondary" data-gen-action="voice" data-gen-index="${index}">🎙 Спросить</button>
         <button class="secondary" data-gen-action="homework" data-gen-index="${index}">📚 В ДЗ</button>
       </div>
       <div class="ml-gen-feedback" id="mlGenFeedback_${index}"></div>
@@ -610,6 +637,8 @@ x > -6"></textarea>
         </div>
         <div class="ml-actions">
           <button class="secondary" id="mlGenRegenerate">↻ Новый набор</button>
+          <button class="secondary" id="mlGenPrint">🖨️ Лист</button>
+          <button class="secondary" id="mlGenPrintKey">🔑 Ключ</button>
           <button class="primary" id="mlGenPackToHw">📚 Весь набор в ДЗ</button>
         </div>
       </div>
@@ -645,10 +674,78 @@ x > -6"></textarea>
     await askAi(task.question,verified,host,{hintOnly:true});
   }
 
+  function printGeneratedPack(pack,withAnswers=false){
+    const tasks=pack?.tasks||[];
+    const w=window.open("","_blank");
+    if(!w)return;
+    const rows=tasks.map((task,i)=>`
+      <article style="break-inside:avoid;margin:0 0 20px">
+        <div style="font-size:11px;color:#666">§ ${esc(task.topicId)} · ${esc(task.topicTitle)}</div>
+        <div style="font-size:18px;font-weight:700;margin:5px 0">${i+1}. ${esc(task.question)}</div>
+        ${withAnswers?`<div style="margin-top:8px"><b>Ответ:</b> ${esc(task.answer)}${task.explanation?`<br><span style="font-size:12px">${esc(task.explanation)}</span>`:""}</div>`:`<div style="height:42px;border-bottom:1px solid #bbb"></div>`}
+      </article>`).join("");
+    w.document.write(`<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Kitsune · ${withAnswers?"Ключ":"Лист заданий"}</title>
+      <style>body{font-family:Arial,sans-serif;max-width:900px;margin:28px auto;padding:0 24px;color:#111}h1{margin-bottom:4px}p{color:#555}@media print{body{margin:0;max-width:none}}</style></head><body>
+      <h1>${withAnswers?"Ключ для проверки":"Лист заданий Kitsune"}</h1>
+      <p>${tasks.length} заданий · сгенерировано локально</p>${rows}
+      <script>setTimeout(()=>window.print(),250)<\/script></body></html>`);
+    w.document.close();
+  }
+
+  function initBoard(){
+    const canvas=document.querySelector("#mlBoardCanvas");if(!canvas)return;
+    const wrap=canvas.parentElement;
+    const dpr=Math.min(devicePixelRatio||1,2);
+    const rect=wrap.getBoundingClientRect();
+    const w=Math.max(300,Math.floor(rect.width)),h=Math.max(360,Math.min(620,Math.floor(innerHeight*.55)));
+    canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+"px";canvas.style.height=h+"px";
+    const ctx=canvas.getContext("2d");
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=2.6;
+    ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue("--text").trim()||"#111";
+
+    const redraw=()=>{
+      ctx.clearRect(0,0,w,h);
+      for(const stroke of boardStrokes){
+        if(!stroke?.length)continue;
+        ctx.beginPath();
+        stroke.forEach((p,i)=>{const x=p.x*w,y=p.y*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});
+        ctx.stroke();
+      }
+    };
+    redraw();
+
+    let active=null;
+    const point=e=>{
+      const r=canvas.getBoundingClientRect();
+      return {x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};
+    };
+    canvas.addEventListener("pointerdown",e=>{
+      canvas.setPointerCapture?.(e.pointerId);
+      active=[point(e)];boardStrokes.push(active);redraw();
+    });
+    canvas.addEventListener("pointermove",e=>{
+      if(!active)return;active.push(point(e));redraw();
+    });
+    const finish=()=>{if(active){active=null;save()}};
+    canvas.addEventListener("pointerup",finish);
+    canvas.addEventListener("pointercancel",finish);
+
+    document.querySelector("#mlBoardUndo")?.addEventListener("click",()=>{boardStrokes.pop();save();redraw()});
+    document.querySelector("#mlBoardClear")?.addEventListener("click",()=>{
+      if(confirm("Очистить математическую доску?")){boardStrokes=[];save();redraw()}
+    });
+    document.querySelector("#mlBoardSave")?.addEventListener("click",()=>{
+      const a=document.createElement("a");a.download="kitsune-math-board.png";a.href=canvas.toDataURL("image/png");a.click();
+    });
+  }
+
   function bindGeneratedPack(pack){
     const tasks=pack.tasks||[];
 
     document.querySelector("#mlGenRegenerate")?.addEventListener("click",generateTask);
+    document.querySelector("#mlGenPrint")?.addEventListener("click",()=>printGeneratedPack(pack,false));
+    document.querySelector("#mlGenPrintKey")?.addEventListener("click",()=>printGeneratedPack(pack,true));
     document.querySelector("#mlGenPackToHw")?.addEventListener("click",()=>{
       addGeneratedHomework(tasks);
       const b=document.querySelector("#mlGenPackToHw");
@@ -671,6 +768,15 @@ x > -6"></textarea>
 
         if(action==="hint"){
           await generatedHint(task,host);
+          return;
+        }
+
+        if(action==="voice"){
+          const ctx={
+            lesson:{id:task.topicId,title:task.topicTitle},
+            exercise:{q:task.question,hint:task.hint,a:[task.answer]}
+          };
+          window.KitsuneVoiceDialogue?.open?.(ctx);
           return;
         }
 
@@ -839,7 +945,7 @@ x > -6"></textarea>
     try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){}
   }
 
-  /* v1.15.0 ROUTE FIX
+  /* v2.0.0 ROUTE FIX
      Legacy course extensions redefine the global go() function several times
      (chapter1-v02.js, course-v1.js, mastery-v13.js). Therefore registering the
      Math Lab only in app.js is not stable. Math Lab installs its own final

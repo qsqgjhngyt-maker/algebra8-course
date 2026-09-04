@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -361,6 +361,28 @@
     return enginePromise;
   }
 
+  async function releaseBrainMemory(){
+    try{
+      if(engine){
+        try{await engine.unload?.()}catch(e){}
+        try{await engine.resetChat?.()}catch(e){}
+      }
+    }finally{
+      engine=null;
+      enginePromise=null;
+      busy=false;
+      progress(null);
+      setStatus(
+        ready
+          ?"Brain выгружен из оперативной памяти. Модель сохранена в локальном кэше."
+          :"Brain не загружен в оперативную память.",
+        "ok"
+      );
+      updateUi({preserveStatus:true});
+    }
+    return true;
+  }
+
   async function prepareBrain(){
     if(busy)return;
     lastBrainNotice=null;
@@ -618,7 +640,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     const safety=childSafetyCheck(user);
     if(safety)return safety.reply;
 
-    /* v1.15.0: deterministic local tutor tools answer learning-route
+    /* v2.0.0: deterministic local tutor tools answer learning-route
        questions before the language model is asked to formulate anything. */
     try{
       const tool=await window.KitsuneTutorTools?.dispatch?.(user,ctx);
@@ -627,7 +649,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
       console.warn("[Kitsune Tutor Tools]",err);
     }
 
-    /* v1.15.0: free-form calculations no longer require an opened textbook
+    /* v2.0.0: free-form calculations no longer require an opened textbook
        exercise. Math Worker computes first; Brain only explains verified facts. */
     if(window.KitsuneMath?.looksMath?.(user)){
       try{
@@ -1037,6 +1059,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     memory:()=>JSON.parse(JSON.stringify(memory)),
     prepare:prepareBrain,
     checkCached,
+    release:releaseBrainMemory,
     evaluate:evaluateWork,
     reply:coachReply,
     chat:dialogReply,

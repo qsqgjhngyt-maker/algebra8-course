@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -776,6 +776,29 @@
   syncVisualViewport();
 
   // Public API.
+  function releaseWhisperMemory(){
+    try{if(recording)stopRecording()}catch(e){}
+    try{cleanupRecorder()}catch(e){}
+    try{worker?.terminate?.()}catch(e){}
+    worker=null;
+    workerReady=false;
+    workerLoading=false;
+    workerFallbackTried=false;
+    workerWaiters.clear();
+    mainThreadTranscriber=null;
+    mainThreadLoading=null;
+    mainThreadBackend="";
+    setWhisperProgress(null);
+    setWhisperStatus(
+      whisperReady
+        ?"Whisper выгружен из оперативной памяти. Локальный кэш модели сохранён."
+        :"Whisper не загружен в оперативную память.",
+      "ok"
+    );
+    updateVoiceUi();
+    return true;
+  }
+
   window.KitsuneVoiceDialogue={
     version:VERSION,
     model:WHISPER_MODEL,
@@ -785,7 +808,13 @@
     send:sendMessage,
     start:startRecording,
     stop:stopRecording,
-    isReady:()=>whisperReady||workerReady
+    release:releaseWhisperMemory,
+    isReady:()=>whisperReady||workerReady,
+    status:()=>({
+      cachedMarker:whisperReady,
+      runtimeReady:workerReady||!!mainThreadTranscriber,
+      backend:mainThreadBackend||(workerReady?"Worker · local runtime":"")
+    })
   };
 
   injectSettings();

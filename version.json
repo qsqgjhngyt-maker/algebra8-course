@@ -1,0 +1,11 @@
+{
+  "name": "Kitsune Algebra 8",
+  "version": "2.0.0",
+  "channel": "final",
+  "architecture": "static-github-pages-pwa",
+  "backend": false,
+  "analytics": false,
+  "math_engine": "local-web-worker",
+  "generator_topics": 51,
+  "release": "FINAL"
+}

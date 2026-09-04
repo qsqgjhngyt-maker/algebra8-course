@@ -1,11 +1,11 @@
 
 /* =====================================================================
-   Kitsune Performance Manager v1.15.0
+   Kitsune Performance Manager v2.0.0
    Conservative local optimization. Never deletes models or progress.
    ===================================================================== */
 (() => {
   "use strict";
-  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
   const KEY="a8_performance_auto_v150";
   let auto=localStorage.getItem(KEY)!=="0";
   let busy=0;

@@ -1,6 +1,6 @@
 {
-  "name": "Алгебра 8 — полный интерактивный курс",
-  "short_name": "Алгебра 8",
+  "name": "Kitsune · Алгебра 8",
+  "short_name": "Kitsune Algebra 8",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f6f8fc",
@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.15.0: Kitsune Tutor Intelligence — адаптивные занятия, классификация ошибок, интервальное повторение, умная тетрадь, родительская сводка, экспорт/импорт и Tutor Tools.",
+  "description": "Kitsune Algebra 8 v2.0.0 FINAL: полностью статический PWA для GitHub Pages с Math Engine, Generator 51/51, Tutor Intelligence, Homework Studio, локальным поиском, офлайн-центром и локальными AI-моделями.",
   "orientation": "any",
   "categories": [
     "education"
