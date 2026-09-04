@@ -324,7 +324,7 @@ if(v13ResetBtn){
   v13ResetBtn.onclick=()=>{
     if(confirm("Сбросить весь учебный прогресс, результаты диагностик и контрольных?")){
       ["a8_completed","a8_attempts","a8_correct","a8_mistakes","a8_solved","a8_lastLesson","a8_streak","a8_last_active",
-       "a8_ch1_test_best","a8_ch1_control_best","a8_v1_best","a8_v1_course_best","a8_v11_control_best",v13StorageKey,"a8_game_xp","a8_game_rewards","a8_tutor_memory_v16","a8_tutor_help_v16","a8_kitsune_brain_memory","a8_kitsune_brain_mode","a8_kitsune_brain_ready","a8_kitsune_dialog_history_v19","a8_kitsune_voice_reply_v19","a8_mathlab_homework_v130","a8_mathlab_skills_v130","a8_mathlab_history_v130","a8_mathlab_board_v200","a8_learning_errors_v150","a8_learning_reviews_v150","a8_learning_sessions_v150","a8_learning_prefs_v150","a8_performance_auto_v150"].forEach(k=>localStorage.removeItem(k));
+       "a8_ch1_test_best","a8_ch1_control_best","a8_v1_best","a8_v1_course_best","a8_v11_control_best",v13StorageKey,"a8_game_xp","a8_game_rewards","a8_tutor_memory_v16","a8_tutor_help_v16","a8_kitsune_brain_memory","a8_kitsune_brain_mode","a8_kitsune_brain_ready","a8_kitsune_dialog_history_v19","a8_kitsune_voice_reply_v19","a8_mathlab_homework_v130","a8_mathlab_skills_v130","a8_mathlab_history_v130","a8_mathlab_board_v200","a8_camera_ocr_ready_v210","a8_zero_config_setup_v210","a8_zero_config_enabled_v210","a8_learning_errors_v150","a8_learning_reviews_v150","a8_learning_sessions_v150","a8_learning_prefs_v150","a8_performance_auto_v150"].forEach(k=>localStorage.removeItem(k));
       location.reload();
     }
   };

@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"2.0.0";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"2.1.0";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
   const PRIVATE_KEYS=[
@@ -49,7 +49,7 @@
             </article>
             <article>
               <span>🚫</span>
-              <div><b>Лишние разрешения</b><small>Камера, геолокация, платежи и USB курсу не нужны и не запрашиваются. После активации PWA политика безопасности дополнительно запрещает их.</small></div>
+              <div><b>Разрешения только по действию</b><small>Геолокация, платежи и USB запрещены. Камера доступна только в функции «Из учебника» и запрашивается браузером после отдельного подтверждения; микрофон — только при голосовом вводе.</small></div>
             </article>
           </div>
 
@@ -62,7 +62,7 @@
 
           <section class="v1111-network-box">
             <b>🌐 Когда курс обращается в интернет</b>
-            <p><strong>GitHub Pages</strong> — сам курс. <strong>jsDelivr / Hugging Face</strong> — только для загрузки локальных AI-runtime и моделей по явному действию пользователя. Внешняя аналитика отключена полностью.</p>
+            <p><strong>GitHub Pages</strong> — сам курс. <strong>jsDelivr / Hugging Face</strong> — статические AI/OCR runtime и модели, которые Kitsune может автоматически подготовить и сохранить локально. Камера и микрофон при этом не включаются. Внешняя аналитика отключена полностью.</p>
           </section>
 
           <div class="v1111-privacy-actions">

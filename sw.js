@@ -1,13 +1,13 @@
-const CACHE="algebra8-v2.0.0";
+const CACHE="algebra8-v2.1.0";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.0.0";
+const RELEASE="2.1.0";
 const ASSETS=[
-  "./","./index.html?v=2.0.0","./styles.css?v=2.0.0","./app.js?v=2.0.0","./chapter1-v02.js?v=2.0.0","./course-v1.js?v=2.0.0",
-  "./manifest.json?v=2.0.0","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
+  "./","./index.html?v=2.1.0","./styles.css?v=2.1.0","./app.js?v=2.1.0","./chapter1-v02.js?v=2.1.0","./course-v1.js?v=2.1.0",
+  "./manifest.json?v=2.1.0","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
-  "./coach-v12.js?v=2.0.0","./pedagogy-v12.js?v=2.0.0","./mastery-data-v13.js?v=2.0.0","./mastery-v13.js?v=2.0.0",
-  "./design-v14.js?v=2.0.0","./learning-fx-v142.js?v=2.0.0","./live-assistant-v15.js?v=2.0.0",
-  "./tutor-lite-v16.js?v=2.0.0","./tutor-smart-v173.js?v=2.0.0","./neural-voice-v17.js?v=2.0.0","./kitsune-brain-v18.js?v=2.0.0","./kitsune-voice-v19.js?v=2.0.0","./whisper-worker-v1114.js?v=2.0.0","./whisper-worker-v1116.js?v=2.0.0","./kitsune-live-v110.js?v=2.0.0","./privacy-v1111.js?v=2.0.0","./security-bootstrap-v1111.js?v=2.0.0","./pwa-update.js?v=2.0.0","./math-engine-v130.js?v=2.0.0","./math-lab-v130.js?v=2.0.0","./math-worker-v130.js?v=2.0.0","./performance-manager-v150.js?v=2.0.0","./learning-intelligence-v150.js?v=2.0.0","./course-search-v200.js?v=2.0.0","./offline-center-v200.js?v=2.0.0","./app-kernel-v200.js?v=2.0.0","./version.json?v=2.0.0"
+  "./coach-v12.js?v=2.1.0","./pedagogy-v12.js?v=2.1.0","./mastery-data-v13.js?v=2.1.0","./mastery-v13.js?v=2.1.0",
+  "./design-v14.js?v=2.1.0","./learning-fx-v142.js?v=2.1.0","./live-assistant-v15.js?v=2.1.0",
+  "./tutor-lite-v16.js?v=2.1.0","./tutor-smart-v173.js?v=2.1.0","./neural-voice-v17.js?v=2.1.0","./kitsune-brain-v18.js?v=2.1.0","./kitsune-voice-v19.js?v=2.1.0","./whisper-worker-v1114.js?v=2.1.0","./whisper-worker-v1116.js?v=2.1.0","./kitsune-live-v110.js?v=2.1.0","./privacy-v1111.js?v=2.1.0","./security-bootstrap-v1111.js?v=2.1.0","./pwa-update.js?v=2.1.0","./math-engine-v130.js?v=2.1.0","./math-lab-v130.js?v=2.1.0","./math-worker-v130.js?v=2.1.0","./performance-manager-v150.js?v=2.1.0","./learning-intelligence-v150.js?v=2.1.0","./course-search-v200.js?v=2.1.0","./offline-center-v200.js?v=2.1.0","./app-kernel-v200.js?v=2.1.0","./camera-import-v210.js?v=2.1.0","./auto-setup-v210.js?v=2.1.0","./version.json?v=2.1.0"
 ];
 
 const CHILD_CSP=[
@@ -23,14 +23,14 @@ const CHILD_CSP=[
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
-  "worker-src 'self' blob:",
-  "child-src 'self' blob:",
+  "worker-src 'self' blob: https://cdn.jsdelivr.net",
+  "child-src 'self' blob: https://cdn.jsdelivr.net",
   "connect-src 'self' https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
   "upgrade-insecure-requests"
 ].join("; ");
 
 const CHILD_PERMISSIONS=[
-  "camera=()",
+  "camera=(self)",
   "geolocation=()",
   "payment=()",
   "usb=()",
@@ -66,7 +66,7 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
-  /* v2.0.0 FINAL: cache every same-origin release asset independently.
+  /* v2.1.0 FINAL: cache every same-origin release asset independently.
      One optional asset must not make the whole Service Worker install fail. */
   e.waitUntil((async()=>{
     const cache=await caches.open(CACHE);

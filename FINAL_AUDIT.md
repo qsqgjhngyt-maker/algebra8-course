@@ -1,6 +1,6 @@
 # Kitsune Algebra 8 — FINAL RELEASE AUDIT
 
-Release: v2.0.0 FINAL
+Release: v2.1.0 ZERO-CONFIG CAMERA
 Target: GitHub Pages project site
 Backend: none
 
@@ -34,12 +34,14 @@ Backend: none
 | PWA update flow | PASS |
 | Offline app shell | PASS |
 | Offline / AI diagnostics | PASS |
+| Automatic optional-module preparation | PASS |
+| No camera/mic request during auto-setup | PASS |
 | Optional AI preparation for offline cache | PASS |
 | RAM release without deleting models | PASS |
 | Performance Manager | PASS |
 | No external analytics | PASS |
 | Static GitHub Pages architecture | PASS |
-| Camera OCR | EXCLUDED BY DESIGN |
+| Camera homework import + local OCR | PASS |
 
 ## GitHub Pages checks
 - relative asset URLs;
@@ -54,8 +56,9 @@ Backend: none
 
 ## AI network boundary
 Application code and study logic are same-origin/static.
-On first explicit preparation, optional AI components may download static runtime/model
-artifacts from jsDelivr and model storage. These artifacts are cached by the
+On first zero-config preparation, optional AI/OCR components may download static
+runtime/model artifacts from jsDelivr and model storage. This happens without
+opening camera or microphone. These artifacts are cached by the
 Service Worker / browser runtime / Cache Storage / OPFS as appropriate.
 
 No study backend is introduced.

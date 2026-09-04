@@ -1,6 +1,6 @@
 
 /* =====================================================================
-   Kitsune Offline & AI Center v2.0.0
+   Kitsune Offline & AI Center v2.1.0
    Static GitHub Pages architecture:
    app shell is same-origin and cached by SW;
    optional AI runtimes/models are loaded only by explicit user action
@@ -9,7 +9,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.0.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
   let lastStatus=null;
 
   function esc(s){
@@ -138,12 +138,12 @@
 
       <section class="ko-actions glass-panel">
         <div>
-          <span class="eyebrow">Production Offline</span>
-          <h3>Подготовить устройство к автономной работе</h3>
-          <p>Курс, Math Engine, Generator, Tutor Intelligence и интерфейс уже обслуживаются только GitHub Pages. Brain, Whisper и Neural Voice — тяжёлые опциональные модели: они загружаются только после явной команды и затем используют локальные кэши браузера.</p>
+          <span class="eyebrow">Zero-Config Offline</span>
+          <h3>Автоматическая подготовка устройства</h3>
+          <p>В v2.1.0 Kitsune сама подготавливает Brain, Whisper, голос и OCR в фоне, когда есть сеть и достаточно места. Ребёнку не нужно заходить в настройки. Кнопки ниже оставлены как диагностика и ручной повтор для взрослого.</p>
         </div>
         <div class="ml-actions">
-          <button class="primary glow-btn" id="koPrepareAll">📴 Подготовить AI для офлайна</button>
+          <button class="primary glow-btn" id="koPrepareAll">↻ Повторить автоподготовку</button>
           <button class="secondary" id="koPersist">💾 Защитить локальное хранилище</button>
           <button class="secondary" id="koReleaseRam">🧹 Освободить RAM</button>
           <button class="secondary" id="koUpdate">🔄 Проверить обновление</button>
@@ -201,6 +201,15 @@
     bind();
   }
   async function prepareAll(){
+    if(window.KitsuneZeroConfig?.run){
+      setAction("Запускаю zero-config подготовку…");
+      try{
+        await window.KitsuneZeroConfig.run({manual:true});
+        setAction("✅ Автоподготовка завершена или поставлена на безопасный повтор.","ok");
+        setTimeout(refresh,700);
+      }catch(e){setAction(String(e?.message||e),"error")}
+      return;
+    }
     if(!navigator.onLine){
       setAction("Сейчас нет сети. Уже загруженные компоненты продолжат работать, но новые модели скачать нельзя.","error");
       return;
@@ -240,6 +249,7 @@
       await window.KitsuneBrain?.release?.();
       await window.KitsuneVoiceDialogue?.release?.();
       await window.AlfiNeuralVoice?.release?.();
+      await window.KitsuneCameraImport?.releaseOCR?.();
       window.KitsuneMath?.terminate?.();
       setAction("✅ Тяжёлые runtime выгружены из RAM. Локальные модели и прогресс сохранены.","ok");
       setTimeout(refresh,500);
