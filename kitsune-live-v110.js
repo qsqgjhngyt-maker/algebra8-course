@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.12.6";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.13.0";
   const SPRITE="./assets/kitsune/kitsune-sprite-v1101.png";
   const FRAMES={
     idle:{x:0,y:0},

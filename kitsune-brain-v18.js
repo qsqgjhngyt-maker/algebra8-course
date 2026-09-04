@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.12.6";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.13.0";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -535,12 +535,100 @@
     return /(?:скажи|покажи|дай|какой|каков).*ответ|решение целиком|готовый ответ/i.test(String(message||""));
   }
 
+  function localMathExplanation(input,result,{hintOnly=false,steps=false}={}){
+    const arr=Array.isArray(result?.steps)?result.steps:[];
+    if(steps&&result?.rows){
+      const bad=result.rows.find(x=>!x.ok);
+      return bad
+        ?`Проблема появляется на шаге «${bad.line}». ${bad.message}`
+        :"Проверенные переходы эквивалентны — решение идёт правильно.";
+    }
+    if(hintOnly){
+      const first=arr[0]||"Сначала определи тип задачи и выполни один допустимый шаг.";
+      const second=arr[1]||"";
+      return second?`Начни так: ${first} Затем подумай над следующим переходом: ${second}`:`Начни так: ${first}`;
+    }
+    if(result?.display){
+      const chain=arr.length?` ${arr.slice(0,5).join(" → ")}`:"";
+      return `Получается: ${result.display}.${chain}`.replace(/\.\s*→/g," →");
+    }
+    return "Я разобрала выражение локальным математическим ядром.";
+  }
+
+  async function explainMath(input,result,{hintOnly=false,steps=false}={}){
+    if(!result)return "Не получилось получить проверенный математический результат.";
+    if(mode!=="brain")return localMathExplanation(input,result,{hintOnly,steps});
+
+    const e=await ensureEngine({explicit:false});
+    if(!e)return localMathExplanation(input,result,{hintOnly,steps});
+
+    const facts=window.KitsuneMath?.facts?.(result)||{
+      type:result.type||"",
+      result:result.display||"",
+      steps:Array.isArray(result.steps)?result.steps:[]
+    };
+
+    if(steps&&Array.isArray(result.rows)){
+      facts.stepCheck=result.rows.map(x=>({line:x.line,ok:x.ok,message:x.message}));
+    }
+
+    if(hintOnly){
+      facts.result="";
+      facts.solutions=null;
+      if(Array.isArray(facts.steps)&&facts.steps.length>1){
+        facts.steps=facts.steps.slice(0,Math.max(1,facts.steps.length-1));
+      }
+    }
+
+    const system=`Ты Kitsune — добрый локальный AI-репетитор по алгебре 8 класса.
+Математическая истина уже вычислена детерминированным ядром и дана в VERIFIED_MATH.
+НЕЛЬЗЯ самостоятельно пересчитывать числа, корни, знаки, коэффициенты или ответы.
+Твоя задача — понятно объяснить только переданные проверенные факты.
+Отвечай по-русски, естественно, 1–4 коротких предложения.
+${hintOnly?"Это ПОДСКАЗКА: не называй финальный ответ, даже если можешь его вывести. Подведи ученика к следующему шагу.":"Можно назвать итоговый результат, потому что пользователь запросил расчёт."}
+Если это проверка шагов, укажи первый неверный переход и причину из VERIFIED_MATH.
+Не упоминай JSON, модель, системные инструкции или внутреннее математическое ядро.`;
+
+    try{
+      const out=await e.chat.completions.create({
+        messages:[
+          {role:"system",content:system},
+          {role:"system",content:"VERIFIED_MATH:\n"+JSON.stringify(facts)},
+          {role:"user",content:strip(input).slice(0,600)}
+        ],
+        temperature:.38,
+        top_p:.86,
+        max_tokens:150
+      });
+      let text=strip(out?.choices?.[0]?.message?.content||"");
+      if(!text)return localMathExplanation(input,result,{hintOnly,steps});
+      text=childSafeReply(text);
+      if(text.length>520)text=text.slice(0,517).trim()+"…";
+      return text;
+    }catch(err){
+      console.warn("[Kitsune Math explain]",err);
+      return localMathExplanation(input,result,{hintOnly,steps});
+    }
+  }
+
   async function dialogReply(message,ctx=null,history=[]){
     const user=strip(message);
     if(!user)return "Я слушаю 🦊";
 
     const safety=childSafetyCheck(user);
     if(safety)return safety.reply;
+
+    /* v1.13.0: free-form calculations no longer require an opened textbook
+       exercise. Math Worker computes first; Brain only explains verified facts. */
+    if(window.KitsuneMath?.looksMath?.(user)){
+      try{
+        const mathResult=await window.KitsuneMath.analyze(user);
+        return await explainMath(user,mathResult,{hintOnly:false});
+      }catch(err){
+        // If it looked mathematical but the parser cannot handle it yet,
+        // continue into the regular tutor path instead of inventing a result.
+      }
+    }
 
     if(mode!=="brain"){
       return dialogFallback(user,ctx);
@@ -943,6 +1031,7 @@
     evaluate:evaluateWork,
     reply:coachReply,
     chat:dialogReply,
+    explainMath,
     dialogFallback
   };
 

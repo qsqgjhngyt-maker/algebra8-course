@@ -1,13 +1,13 @@
-const CACHE="algebra8-v1.12.6";
+const CACHE="algebra8-v1.13.0";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="1.12.6";
+const RELEASE="1.13.0";
 const ASSETS=[
-  "./","./index.html?v=1.12.6","./styles.css?v=1.12.6","./app.js?v=1.12.6","./chapter1-v02.js?v=1.12.6","./course-v1.js?v=1.12.6",
-  "./manifest.json?v=1.12.6","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
+  "./","./index.html?v=1.13.0","./styles.css?v=1.13.0","./app.js?v=1.13.0","./chapter1-v02.js?v=1.13.0","./course-v1.js?v=1.13.0",
+  "./manifest.json?v=1.13.0","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
-  "./coach-v12.js?v=1.12.6","./pedagogy-v12.js?v=1.12.6","./mastery-data-v13.js?v=1.12.6","./mastery-v13.js?v=1.12.6",
-  "./design-v14.js?v=1.12.6","./learning-fx-v142.js?v=1.12.6","./live-assistant-v15.js?v=1.12.6",
-  "./tutor-lite-v16.js?v=1.12.6","./tutor-smart-v173.js?v=1.12.6","./neural-voice-v17.js?v=1.12.6","./kitsune-brain-v18.js?v=1.12.6","./kitsune-voice-v19.js?v=1.12.6","./whisper-worker-v1114.js?v=1.12.6","./whisper-worker-v1116.js?v=1.12.6","./kitsune-live-v110.js?v=1.12.6","./privacy-v1111.js?v=1.12.6","./security-bootstrap-v1111.js?v=1.12.6","./pwa-update.js?v=1.12.6"
+  "./coach-v12.js?v=1.13.0","./pedagogy-v12.js?v=1.13.0","./mastery-data-v13.js?v=1.13.0","./mastery-v13.js?v=1.13.0",
+  "./design-v14.js?v=1.13.0","./learning-fx-v142.js?v=1.13.0","./live-assistant-v15.js?v=1.13.0",
+  "./tutor-lite-v16.js?v=1.13.0","./tutor-smart-v173.js?v=1.13.0","./neural-voice-v17.js?v=1.13.0","./kitsune-brain-v18.js?v=1.13.0","./kitsune-voice-v19.js?v=1.13.0","./whisper-worker-v1114.js?v=1.13.0","./whisper-worker-v1116.js?v=1.13.0","./kitsune-live-v110.js?v=1.13.0","./privacy-v1111.js?v=1.13.0","./security-bootstrap-v1111.js?v=1.13.0","./pwa-update.js?v=1.13.0","./math-engine-v130.js?v=1.13.0","./math-lab-v130.js?v=1.13.0","./math-worker-v130.js?v=1.13.0"
 ];
 
 const CHILD_CSP=[

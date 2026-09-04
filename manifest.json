@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Алгебра 8 v1.12.6: Neural Voice переведён на RealTimeX Piper 1.1.1 с ONNX Runtime 1.22.0, ESM/CDN fixes и автоматическим fallback.",
+  "description": "Алгебра 8 v1.13.0: Kitsune Math Lab — локальное математическое ядро, песочница, домашнее задание, проверка шагов, графики, генератор и адаптивная карта навыков.",
   "orientation": "any",
   "categories": [
     "education"

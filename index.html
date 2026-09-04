@@ -18,8 +18,8 @@
              worker-src 'self' blob:;
              child-src 'self' blob:;
              connect-src 'self' https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com;" />
-  <meta name="kitsune-app-version" content="1.12.6" />
-  <script src="./security-bootstrap-v1111.js?v=1.12.6"></script>
+  <meta name="kitsune-app-version" content="1.13.0" />
+  <script src="./security-bootstrap-v1111.js?v=1.13.0"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#49b447" />
 <meta name="description" content="Алгебра 8 — интерактивный курс от простого к сложному." />
@@ -27,7 +27,7 @@
   <link rel="icon" href="./assets/favicon-64.png" type="image/png" />
   <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon-180.png" />
   <link rel="preload" as="image" href="./assets/kitsune/kitsune-sprite-v1101.png" />
-  <link rel="stylesheet" href="./styles.css?v=1.12.6" />
+  <link rel="stylesheet" href="./styles.css?v=1.13.0" />
   <title>Алгебра 8 — Учись · Понимай · Решай</title>
 </head>
 <body>
@@ -51,6 +51,7 @@
         <button class="nav-btn active" data-view="home">🏠 Главная</button>
         <button class="nav-btn" data-view="course">🗺️ Карта курса</button>
         <button class="nav-btn" data-view="trainer">🧩 Тренажёр</button>
+        <button class="nav-btn mathlab-nav" data-view="mathlab">🧪 Math Lab · ДЗ</button>
         <button class="nav-btn" data-view="chapterfinal">🏁 Итоги глав</button>
         <button class="nav-btn" data-view="mastery">🎓 Закрепление</button>
         <button class="nav-btn" data-view="mistakes">🧠 Мои ошибки</button>
@@ -63,7 +64,7 @@
         <button id="themeBtn" class="ghost">🌙 Тёмная тема</button>
         <button id="effectsBtn" class="ghost">✨ Эффекты: авто</button>
         <button id="privacyBtn" class="ghost">🔒 Приватность</button>
-        <button id="updateBtn" class="ghost" type="button">🔄 Версия v1.12.6</button>
+        <button id="updateBtn" class="ghost" type="button">🔄 Версия v1.13.0</button>
         <button id="installBtn" class="ghost hidden">⬇️ Установить приложение</button>
       </div>
     </aside>
@@ -104,11 +105,13 @@
           <span>🎯 до уверенного решения</span>
           <span>📱 удобно и на телефоне</span>
           <span>🔒 приватность по умолчанию</span>
+          <span>🧪 песочница и ДЗ с Kitsune</span>
         </div>
 
         <div class="hero-actions">
           <button class="primary glow-btn" data-action="continue">Продолжить обучение →</button>
           <button class="secondary" data-view-jump="course">Посмотреть программу</button>
+          <button class="secondary" data-view-jump="mathlab">🧪 Открыть Math Lab</button>
         </div>
       </div>
 
@@ -145,29 +148,31 @@
           <span class="eyebrow">Полный курс</span>
           <h3>Все 6 глав</h3>
         </div>
-        <span class="status-chip">все главы готовы · v1.12.6</span>
+        <span class="status-chip">все главы готовы · v1.13.0</span>
       </div>
       <div id="homeTopics" class="cards-grid"></div>
     </section>
   </template>
 
-  <script src="./app.js?v=1.12.6"></script>
-  <script src="./pwa-update.js?v=1.12.6"></script>
-  <script src="./chapter1-v02.js?v=1.12.6"></script>
-  <script src="./course-v1.js?v=1.12.6"></script>
-  <script src="./coach-v12.js?v=1.12.6"></script>
-  <script src="./pedagogy-v12.js?v=1.12.6"></script>
-  <script src="./mastery-data-v13.js?v=1.12.6"></script>
-  <script src="./mastery-v13.js?v=1.12.6"></script>
-  <script src="./design-v14.js?v=1.12.6"></script>
-  <script src="./learning-fx-v142.js?v=1.12.6"></script>
-  <script src="./live-assistant-v15.js?v=1.12.6"></script>
-  <script src="./tutor-lite-v16.js?v=1.12.6"></script>
-  <script src="./tutor-smart-v173.js?v=1.12.6"></script>
-  <script src="./neural-voice-v17.js?v=1.12.6"></script>
-  <script src="./kitsune-brain-v18.js?v=1.12.6"></script>
-  <script src="./kitsune-voice-v19.js?v=1.12.6"></script>
-  <script src="./kitsune-live-v110.js?v=1.12.6"></script>
-  <script src="./privacy-v1111.js?v=1.12.6"></script>
+  <script src="./app.js?v=1.13.0"></script>
+  <script src="./pwa-update.js?v=1.13.0"></script>
+  <script src="./chapter1-v02.js?v=1.13.0"></script>
+  <script src="./course-v1.js?v=1.13.0"></script>
+  <script src="./coach-v12.js?v=1.13.0"></script>
+  <script src="./pedagogy-v12.js?v=1.13.0"></script>
+  <script src="./mastery-data-v13.js?v=1.13.0"></script>
+  <script src="./mastery-v13.js?v=1.13.0"></script>
+  <script src="./design-v14.js?v=1.13.0"></script>
+  <script src="./learning-fx-v142.js?v=1.13.0"></script>
+  <script src="./live-assistant-v15.js?v=1.13.0"></script>
+  <script src="./tutor-lite-v16.js?v=1.13.0"></script>
+  <script src="./tutor-smart-v173.js?v=1.13.0"></script>
+  <script src="./neural-voice-v17.js?v=1.13.0"></script>
+  <script src="./math-engine-v130.js?v=1.13.0"></script>
+  <script src="./math-lab-v130.js?v=1.13.0"></script>
+  <script src="./kitsune-brain-v18.js?v=1.13.0"></script>
+  <script src="./kitsune-voice-v19.js?v=1.13.0"></script>
+  <script src="./kitsune-live-v110.js?v=1.13.0"></script>
+  <script src="./privacy-v1111.js?v=1.13.0"></script>
 </body>
 </html>
