@@ -133,7 +133,7 @@ OCR предназначен для печатных заданий. Матем�
 распознаны неточно, поэтому обязательна визуальная проверка перед добавлением.
 
 
-## Student mode / Adult Center (v2.2.0)
+## Student mode / Adult Center (v2.2.1)
 
 The default student interface hides technical diagnostics, update controls,
 reset controls and advanced AI/runtime settings so they do not distract from

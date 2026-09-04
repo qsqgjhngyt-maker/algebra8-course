@@ -1,12 +1,12 @@
 
 /* =====================================================================
-   Kitsune Mastery Score v2.2.0
+   Kitsune Mastery Score v2.2.1
    Local confidence score for all 51 topics.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const ERR_KEY="a8_learning_errors_v150";
   const REVIEW_KEY="a8_learning_reviews_v150";

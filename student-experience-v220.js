@@ -1,12 +1,12 @@
 
 /* =====================================================================
-   Kitsune Student Experience v2.2.0
+   Kitsune Student Experience v2.2.1
    Child-first UI + Adult Center + Accessibility.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const MODE_KEY="a8_student_mode_v220";
   const A11Y_KEY="a8_accessibility_v220";
   let adultTab="overview";

@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -640,7 +640,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     const safety=childSafetyCheck(user);
     if(safety)return safety.reply;
 
-    /* v2.2.0: deterministic local tutor tools answer learning-route
+    /* v2.2.1: deterministic local tutor tools answer learning-route
        questions before the language model is asked to formulate anything. */
     try{
       const tool=await window.KitsuneTutorTools?.dispatch?.(user,ctx);
@@ -649,7 +649,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
       console.warn("[Kitsune Tutor Tools]",err);
     }
 
-    /* v2.2.0: free-form calculations no longer require an opened textbook
+    /* v2.2.1: free-form calculations no longer require an opened textbook
        exercise. Math Worker computes first; Brain only explains verified facts. */
     if(window.KitsuneMath?.looksMath?.(user)){
       try{

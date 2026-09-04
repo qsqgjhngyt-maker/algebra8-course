@@ -1,19 +1,19 @@
 
 /* ================================================================
-   Kitsune Math Engine API v2.2.0
+   Kitsune Math Engine API v2.2.1
    Thin async wrapper around the deterministic local Math Worker.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   let worker=null;
   let seq=0;
   const pending=new Map();
 
   function ensureWorker(){
     if(worker)return worker;
-    worker=new Worker("./math-worker-v130.js?v=2.2.0",{name:"kitsune-math"});
+    worker=new Worker("./math-worker-v130.js?v=2.2.1",{name:"kitsune-math"});
     worker.onmessage=e=>{
       const m=e.data||{};
       const p=pending.get(m.id);

@@ -1,11 +1,11 @@
 
 /* =====================================================================
-   Kitsune App Kernel v2.2.0
+   Kitsune App Kernel v2.2.1
    Final navigation authority. Loaded after all legacy route modules.
    ===================================================================== */
 (() => {
   "use strict";
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const legacyGo=typeof window.go==="function"?window.go:null;
 
   function closeMobileSidebar(){

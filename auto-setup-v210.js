@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Zero-Config Setup v2.2.0
+   Kitsune Zero-Config Setup v2.2.1
    One-time background preparation of optional AI/OCR modules.
    No settings work is required from the child.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const KEY="a8_zero_config_setup_v210";
   const AUTO_KEY="a8_zero_config_enabled_v210";
   const RETRY_MS=300_000;

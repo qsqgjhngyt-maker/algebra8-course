@@ -1,12 +1,12 @@
 
 /* =====================================================================
-   Kitsune Reliability Center v2.2.0
+   Kitsune Reliability Center v2.2.1
    Self-test, Safe Mode and non-destructive recovery.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
   const SAFE_KEY="a8_safe_mode_v220";
   const SAFE_PREV_KEY="a8_safe_prev_v220";
 

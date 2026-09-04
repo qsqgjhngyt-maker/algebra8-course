@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Kitsune Algebra 8 v2.2.0: Student Experience & Reliability — простой детский режим, Adult Center, Mastery Score 51, Safe Mode, Production Self-Test и Accessibility.",
+  "description": "Kitsune Algebra 8 v2.2.1: исправление динамических панелей — без невидимых блоков и ложных пустых отступов на ПК, Android и iPhone.",
   "orientation": "any",
   "categories": [
     "education"

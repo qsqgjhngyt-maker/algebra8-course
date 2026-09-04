@@ -1,6 +1,6 @@
 # Kitsune Algebra 8 — FINAL RELEASE AUDIT
 
-Release: v2.2.0 STUDENT EXPERIENCE & RELIABILITY
+Release: v2.2.1 DYNAMIC REVEAL / LAYOUT FIX
 Target: GitHub Pages project site
 Backend: none
 
@@ -51,6 +51,10 @@ Backend: none
 | Production Self-Test | PASS |
 | Non-destructive app-shell recovery | PASS |
 | Accessibility modes | PASS |
+| Dynamic reveal manager | PASS |
+| Fail-open reveal CSS | PASS |
+| Late-inserted panel visibility | PASS |
+| Student / Adult / MathLab / Route / Search / Offline reveal coverage | PASS |
 ## GitHub Pages checks
 - relative asset URLs;
 - no server routes;
