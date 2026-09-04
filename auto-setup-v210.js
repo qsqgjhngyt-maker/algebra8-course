@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Zero-Config Setup v2.1.0
+   Kitsune Zero-Config Setup v2.2.0
    One-time background preparation of optional AI/OCR modules.
    No settings work is required from the child.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
   const KEY="a8_zero_config_setup_v210";
   const AUTO_KEY="a8_zero_config_enabled_v210";
   const RETRY_MS=300_000;
@@ -32,7 +32,10 @@
     try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
   }
   function enabled(){
-    try{return localStorage.getItem(AUTO_KEY)!=="0"}catch(e){return true}
+    try{
+      if(localStorage.getItem("a8_safe_mode_v220")==="1")return false;
+      return localStorage.getItem(AUTO_KEY)!=="0";
+    }catch(e){return true}
   }
   function done(){
     return ["ready","unsupported"].includes(state.brain) &&

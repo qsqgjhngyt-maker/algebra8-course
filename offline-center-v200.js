@@ -1,6 +1,6 @@
 
 /* =====================================================================
-   Kitsune Offline & AI Center v2.1.0
+   Kitsune Offline & AI Center v2.2.0
    Static GitHub Pages architecture:
    app shell is same-origin and cached by SW;
    optional AI runtimes/models are loaded only by explicit user action
@@ -9,7 +9,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
   let lastStatus=null;
 
   function esc(s){
@@ -140,7 +140,7 @@
         <div>
           <span class="eyebrow">Zero-Config Offline</span>
           <h3>Автоматическая подготовка устройства</h3>
-          <p>В v2.1.0 Kitsune сама подготавливает Brain, Whisper, голос и OCR в фоне, когда есть сеть и достаточно места. Ребёнку не нужно заходить в настройки. Кнопки ниже оставлены как диагностика и ручной повтор для взрослого.</p>
+          <p>В v2.2.0 Kitsune сама подготавливает Brain, Whisper, голос и OCR в фоне, когда есть сеть и достаточно места. Ребёнку не нужно заходить в настройки. Кнопки ниже оставлены как диагностика и ручной повтор для взрослого.</p>
         </div>
         <div class="ml-actions">
           <button class="primary glow-btn" id="koPrepareAll">↻ Повторить автоподготовку</button>

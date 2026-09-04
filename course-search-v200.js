@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Local Course Search v2.1.0
+   Kitsune Local Course Search v2.2.0
    Builds a tiny in-memory index from the already bundled course content.
    No embeddings, no network, no external search service.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
   let index=null;
   let query="";
 

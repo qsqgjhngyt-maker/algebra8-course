@@ -1,6 +1,6 @@
 
 /* ================================================================
-   Kitsune Math Worker v2.1.0
+   Kitsune Math Worker v2.2.0
    Deterministic local algebra core for grade 8.
    No network, no eval(), no Function().
    ================================================================ */

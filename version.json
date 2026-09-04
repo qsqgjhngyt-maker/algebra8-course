@@ -1,16 +1,22 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "channel": "final",
   "architecture": "static-github-pages-pwa",
   "backend": false,
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "ZERO_CONFIG_CAMERA",
+  "release": "STUDENT_EXPERIENCE_RELIABILITY",
   "features": [
+    "accessibility",
+    "adult-center",
     "automatic-module-preparation",
     "camera-homework-import",
-    "local-ocr"
+    "local-ocr",
+    "mastery-score-51",
+    "production-self-test",
+    "safe-mode",
+    "student-mode"
   ]
 }

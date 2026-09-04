@@ -131,3 +131,13 @@ GitHub Pages не позволяет проекту произвольно за�
 
 OCR предназначен для печатных заданий. Математические символы могут быть
 распознаны неточно, поэтому обязательна визуальная проверка перед добавлением.
+
+
+## Student mode / Adult Center (v2.2.0)
+
+The default student interface hides technical diagnostics, update controls,
+reset controls and advanced AI/runtime settings so they do not distract from
+learning.
+
+`Для взрослых` is an interface separation only. It is not a password,
+authentication system or parental-control enforcement boundary.

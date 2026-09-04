@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Learning Intelligence v2.1.0
+   Kitsune Learning Intelligence v2.2.0
    Local-only adaptive route, error intelligence, spaced repetition,
    parent summary, export/import and deterministic tutor tools.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
   const ERR_KEY="a8_learning_errors_v150";
   const REVIEW_KEY="a8_learning_reviews_v150";
   const SESSION_KEY="a8_learning_sessions_v150";
@@ -555,6 +555,7 @@
       document.querySelector(`[data-ki-hint="${key}"]`)?.addEventListener("click",e=>{
         const b=e.currentTarget;
         let level=Number(b.dataset.level||1);
+        try{window.KitsuneMastery?.recordHint?.(task.topicId,level)}catch(e){}
         const fb=document.querySelector(`#kiFeedback_${prefix}_${index}`);
         fb.innerHTML=`<div class="ki-hint-level"><b>Подсказка ${level}/4</b><p>${esc(hintLadder(task,level))}</p></div>`;
         level=Math.min(4,level+1);b.dataset.level=String(level);
@@ -667,7 +668,7 @@
 
   window.KitsuneLearning={
     version:VERSION,
-    render,recordError,recordSuccess,recordGeneratedResult,recordStepResult,
+    render,recordError,recordSuccess,recordGeneratedResult,recordStepResult,recordTopicSkill,
     classifyError,dueReviews,weakestTopics,buildPlan,similarTasks,parentSummary,
     exportData,tutorSummary:tutorSummaryText,
     prefs:()=>({...prefs})

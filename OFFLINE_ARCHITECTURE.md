@@ -1,7 +1,7 @@
 # Kitsune Algebra 8 — GitHub Pages Production Architecture
 
 ## Release
-v2.1.0 ZERO-CONFIG
+v2.2.0 STUDENT EXPERIENCE & RELIABILITY
 
 ## Hosting model
 The application is a static PWA and requires no application backend.
@@ -90,3 +90,24 @@ permission prompt. A gallery/file fallback is also available.
 Recognition uses Tesseract.js v5.1.1 in the browser. Runtime/language files are
 static CDN/model assets and are cached after preparation. OCR output is always
 editable before it is added to Homework Studio.
+
+
+## Safe Mode and recovery
+
+v2.2.0 adds a non-destructive Safe Mode for problematic devices:
+- Brain switches to Smart Tutor;
+- Neural Voice switches to system TTS;
+- automatic heavy-module setup pauses;
+- heavy runtimes are released from RAM;
+- progress, homework, OPFS and model caches stay intact.
+
+The Adult Center can also rebuild the app-shell cache while online. This only
+removes release caches named `algebra8-v*`; AI runtime/model caches and local
+study data are intentionally preserved.
+
+## Student / Adult UX separation
+
+Student mode is enabled by default and hides technical/administrative views.
+The Adult Center exposes diagnostics, Mastery 51, accessibility and recovery.
+This separation is UX-only and is not presented as an authentication or
+parental-control boundary.

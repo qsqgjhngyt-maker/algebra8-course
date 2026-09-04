@@ -1,11 +1,11 @@
 
 /* =====================================================================
-   Kitsune App Kernel v2.1.0
+   Kitsune App Kernel v2.2.0
    Final navigation authority. Loaded after all legacy route modules.
    ===================================================================== */
 (() => {
   "use strict";
-  const VERSION=window.KITSUNE_APP_VERSION||"2.1.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.0";
   const legacyGo=typeof window.go==="function"?window.go:null;
 
   function closeMobileSidebar(){
@@ -25,6 +25,7 @@
       case "route": return window.KitsuneLearning?.render?.();
       case "search": return window.KitsuneCourseSearch?.render?.();
       case "offline": return window.KitsuneOffline?.render?.();
+      case "adult": return window.KitsuneStudentExperience?.routeAdult?.();
       case "chapterfinal":
         if(typeof renderChapterFinal==="function")return renderChapterFinal();
         if(typeof v1RenderChapterFinal==="function")return v1RenderChapterFinal(1,"test");

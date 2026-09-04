@@ -1,6 +1,6 @@
 # Kitsune Algebra 8 — FINAL RELEASE AUDIT
 
-Release: v2.1.0 ZERO-CONFIG CAMERA
+Release: v2.2.0 STUDENT EXPERIENCE & RELIABILITY
 Target: GitHub Pages project site
 Backend: none
 
@@ -43,6 +43,14 @@ Backend: none
 | Static GitHub Pages architecture | PASS |
 | Camera homework import + local OCR | PASS |
 
+| Student mode by default | PASS |
+| Adult Center | PASS |
+| Mastery Score 51 | PASS |
+| Hint-aware mastery scoring | PASS |
+| Safe Mode without deleting progress/models | PASS |
+| Production Self-Test | PASS |
+| Non-destructive app-shell recovery | PASS |
+| Accessibility modes | PASS |
 ## GitHub Pages checks
 - relative asset URLs;
 - no server routes;
