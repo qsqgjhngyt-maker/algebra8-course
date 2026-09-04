@@ -1,12 +1,12 @@
 
 /* ================================================================
-   Kitsune Math Lab v1.14.0
+   Kitsune Math Lab v1.15.0
    Sandbox + homework + step verifier + generator + local skill map.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
+  const VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
   const HW_KEY="a8_mathlab_homework_v130";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const HISTORY_KEY="a8_mathlab_history_v130";
@@ -415,6 +415,7 @@ x > -6"></textarea>
         </div>`).join("")}
       </div>`;
       touchSkill({type:"expression"},r.ok);
+      window.KitsuneLearning?.recordStepResult?.(input,r,(typeof state!=="undefined"?state.lastLesson:""));
     }catch(err){
       out.innerHTML=`<div class="ml-error">⚠ ${esc(err.message||err)}</div>`;
     }
@@ -481,6 +482,7 @@ x > -6"></textarea>
             ?`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`
             :`<div class="ml-error">Пока не совпало. Попробуй ещё раз или возьми подсказку.</div>`;
           touchSkill({type:generatedSkillType(gen)},check.ok,gen.topicId);
+          window.KitsuneLearning?.recordGeneratedResult?.(gen,check.ok,h.work);
         }catch(e){out.innerHTML=`<div class="ml-error">${esc(e.message)}</div>`}
         return;
       }
@@ -696,6 +698,7 @@ x > -6"></textarea>
           try{
             const check=await window.KitsuneMath.checkGenerated(task,answer);
             touchSkill({type:generatedSkillType(task)},check.ok,task.topicId);
+            window.KitsuneLearning?.recordGeneratedResult?.(task,check.ok,answer);
             if(check.ok){
               host.innerHTML=`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`;
             }else{
@@ -836,7 +839,7 @@ x > -6"></textarea>
     try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){}
   }
 
-  /* v1.14.0 ROUTE FIX
+  /* v1.15.0 ROUTE FIX
      Legacy course extensions redefine the global go() function several times
      (chapter1-v02.js, course-v1.js, mastery-v13.js). Therefore registering the
      Math Lab only in app.js is not stable. Math Lab installs its own final

@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.14.0";
+  const V17_VERSION=window.KITSUNE_APP_VERSION||"1.15.0";
   const V17_VOICE_ID="ru_RU-dmitri-medium";
   const V17_PACKAGE_URL="https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm";
 

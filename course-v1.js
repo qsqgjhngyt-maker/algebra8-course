@@ -46,6 +46,7 @@ function v1Roman(n){return ["","I","II","III","IV","V","VI"][n]||String(n)}
 function v1RecordMistake(lesson,question,answer){
   state.mistakes.push({lesson,question,answer,ts:Date.now()});
   state.mistakes=state.mistakes.slice(-120);
+  try{window.KitsuneLearning?.recordError?.({topicId:lesson,question,student:answer})}catch(e){}
 }
 
 function v1QuickHtml(id,q){
@@ -138,13 +139,13 @@ function v1UpdateMastery(id){
 }
 window.v1CheckAnswer=(id,i)=>{
  const e=lessonData[id].exercises[i],input=document.querySelector(`#ans-${id}-${i}`),fb=document.querySelector(`#fb-${id}-${i}`),ok=v1Match(input.value,e.a);state.attempts++;
- if(ok){state.correct++;state.solved[`${id}-${i}`]=true;fb.className="feedback ok";fb.textContent="✅ Верно! Отлично.";const box=document.querySelector(`[data-ex="${id}-${i}"]`);if(box){box.classList.remove("success-flash");void box.offsetWidth;box.classList.add("success-flash");setTimeout(()=>box.classList.remove("success-flash"),900)}ch1TouchActivity();v1UpdateMastery(id)}
+ if(ok){state.correct++;state.solved[`${id}-${i}`]=true;try{window.KitsuneLearning?.recordSuccess?.(id)}catch(e){}fb.className="feedback ok";fb.textContent="✅ Верно! Отлично.";const box=document.querySelector(`[data-ex="${id}-${i}"]`);if(box){box.classList.remove("success-flash");void box.offsetWidth;box.classList.add("success-flash");setTimeout(()=>box.classList.remove("success-flash"),900)}ch1TouchActivity();v1UpdateMastery(id)}
  else{fb.className="feedback bad";fb.textContent="Пока не так. Попробуй ещё раз или открой подсказку.";v1RecordMistake(id,e.q,input.value)}
  v1Save();
 };
 window.v1CheckChallenge=id=>{
  const e=lessonData[id].challenge,input=document.querySelector(`#ans-${id}-challenge`),fb=document.querySelector(`#fb-${id}-challenge`),ok=v1Match(input.value,e.a);state.attempts++;
- if(ok){state.correct++;state.solved[`${id}-challenge`]=true;fb.className="feedback ok";fb.textContent="🌟 Верно! Сложное задание покорено.";ch1TouchActivity();v1UpdateMastery(id)}
+ if(ok){state.correct++;state.solved[`${id}-challenge`]=true;try{window.KitsuneLearning?.recordSuccess?.(id)}catch(e){}fb.className="feedback ok";fb.textContent="🌟 Верно! Сложное задание покорено.";ch1TouchActivity();v1UpdateMastery(id)}
  else{fb.className="feedback bad";fb.textContent="Пока не получилось. Подсказка даст направление.";v1RecordMistake(id,e.q,input.value)}
  v1Save();
 };
