@@ -1,6 +1,6 @@
 # Kitsune Algebra 8 — FINAL RELEASE AUDIT
 
-Release: v2.2.1 DYNAMIC REVEAL / LAYOUT FIX
+Release: v2.2.3 DYNAMIC REVEAL / LAYOUT FIX
 Target: GitHub Pages project site
 Backend: none
 
@@ -55,6 +55,14 @@ Backend: none
 | Fail-open reveal CSS | PASS |
 | Late-inserted panel visibility | PASS |
 | Student / Adult / MathLab / Route / Search / Offline reveal coverage | PASS |
+| Tutor inline navigation guard | PASS |
+| Tutor buttons excluded from App Kernel routing | PASS |
+| iOS input auto-zoom guard | PASS |
+| iOS VisualViewport dialog positioning | PASS |
+| Classic design inline Tutor visible | PASS |
+| Stale exercise context cleared | PASS |
+| Dialogue history scoped by task | PASS |
+| Smart fallback reacts to typed message | PASS |
 ## GitHub Pages checks
 - relative asset URLs;
 - no server routes;

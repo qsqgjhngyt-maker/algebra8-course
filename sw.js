@@ -1,13 +1,13 @@
-const CACHE="algebra8-v2.2.1";
+const CACHE="algebra8-v2.2.3";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.2.1";
+const RELEASE="2.2.3";
 const ASSETS=[
-  "./","./index.html?v=2.2.1","./styles.css?v=2.2.1","./app.js?v=2.2.1","./chapter1-v02.js?v=2.2.1","./course-v1.js?v=2.2.1",
-  "./manifest.json?v=2.2.1","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
+  "./","./index.html?v=2.2.3","./styles.css?v=2.2.3","./app.js?v=2.2.3","./chapter1-v02.js?v=2.2.3","./course-v1.js?v=2.2.3",
+  "./manifest.json?v=2.2.3","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
-  "./coach-v12.js?v=2.2.1","./pedagogy-v12.js?v=2.2.1","./mastery-data-v13.js?v=2.2.1","./mastery-v13.js?v=2.2.1",
-  "./design-v14.js?v=2.2.1","./learning-fx-v142.js?v=2.2.1","./live-assistant-v15.js?v=2.2.1",
-  "./tutor-lite-v16.js?v=2.2.1","./tutor-smart-v173.js?v=2.2.1","./neural-voice-v17.js?v=2.2.1","./kitsune-brain-v18.js?v=2.2.1","./kitsune-voice-v19.js?v=2.2.1","./whisper-worker-v1114.js?v=2.2.1","./whisper-worker-v1116.js?v=2.2.1","./kitsune-live-v110.js?v=2.2.1","./privacy-v1111.js?v=2.2.1","./security-bootstrap-v1111.js?v=2.2.1","./pwa-update.js?v=2.2.1","./math-engine-v130.js?v=2.2.1","./math-lab-v130.js?v=2.2.1","./math-worker-v130.js?v=2.2.1","./performance-manager-v150.js?v=2.2.1","./learning-intelligence-v150.js?v=2.2.1","./course-search-v200.js?v=2.2.1","./offline-center-v200.js?v=2.2.1","./app-kernel-v200.js?v=2.2.1","./camera-import-v210.js?v=2.2.1","./auto-setup-v210.js?v=2.2.1","./mastery-score-v220.js?v=2.2.1","./reliability-center-v220.js?v=2.2.1","./student-experience-v220.js?v=2.2.1","./reveal-manager-v221.js?v=2.2.1","./version.json?v=2.2.1"
+  "./coach-v12.js?v=2.2.3","./pedagogy-v12.js?v=2.2.3","./mastery-data-v13.js?v=2.2.3","./mastery-v13.js?v=2.2.3",
+  "./design-v14.js?v=2.2.3","./learning-fx-v142.js?v=2.2.3","./live-assistant-v15.js?v=2.2.3",
+  "./tutor-lite-v16.js?v=2.2.3","./tutor-smart-v173.js?v=2.2.3","./neural-voice-v17.js?v=2.2.3","./kitsune-brain-v18.js?v=2.2.3","./kitsune-voice-v19.js?v=2.2.3","./whisper-worker-v1114.js?v=2.2.3","./whisper-worker-v1116.js?v=2.2.3","./kitsune-live-v110.js?v=2.2.3","./privacy-v1111.js?v=2.2.3","./security-bootstrap-v1111.js?v=2.2.3","./pwa-update.js?v=2.2.3","./math-engine-v130.js?v=2.2.3","./math-lab-v130.js?v=2.2.3","./math-worker-v130.js?v=2.2.3","./performance-manager-v150.js?v=2.2.3","./learning-intelligence-v150.js?v=2.2.3","./course-search-v200.js?v=2.2.3","./offline-center-v200.js?v=2.2.3","./app-kernel-v200.js?v=2.2.3","./camera-import-v210.js?v=2.2.3","./auto-setup-v210.js?v=2.2.3","./mastery-score-v220.js?v=2.2.3","./reliability-center-v220.js?v=2.2.3","./student-experience-v220.js?v=2.2.3","./reveal-manager-v221.js?v=2.2.3","./version.json?v=2.2.3"
 ];
 
 const CHILD_CSP=[
@@ -66,7 +66,7 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
-  /* v2.2.1 FINAL: cache every same-origin release asset independently.
+  /* v2.2.3 FINAL: cache every same-origin release asset independently.
      One optional asset must not make the whole Service Worker install fail. */
   e.waitUntil((async()=>{
     const cache=await caches.open(CACHE);

@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Learning Intelligence v2.2.1
+   Kitsune Learning Intelligence v2.2.3
    Local-only adaptive route, error intelligence, spaced repetition,
    parent summary, export/import and deterministic tutor tools.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const ERR_KEY="a8_learning_errors_v150";
   const REVIEW_KEY="a8_learning_reviews_v150";
   const SESSION_KEY="a8_learning_sessions_v150";

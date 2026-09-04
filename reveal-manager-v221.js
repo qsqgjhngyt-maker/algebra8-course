@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune Reveal Manager v2.2.1
+   Kitsune Reveal Manager v2.2.3
    Centralized, fail-open reveal handling for dynamically inserted panels.
    Prevents invisible elements from occupying layout space when modules
    render after the legacy applyReveal() pass.
@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const ROOT_CLASS="kitsune-reveal-ready";
   const observed=new WeakSet();
   let io=null;

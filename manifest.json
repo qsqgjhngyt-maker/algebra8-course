@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Kitsune Algebra 8 v2.2.1: исправление динамических панелей — без невидимых блоков и ложных пустых отступов на ПК, Android и iPhone.",
+  "description": "Kitsune Algebra 8 v2.2.3: iPhone dialog/tutor stability, context-aware dialogue and stale-task context fix.",
   "orientation": "any",
   "categories": [
     "education"

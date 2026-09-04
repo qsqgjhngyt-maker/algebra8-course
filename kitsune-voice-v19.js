@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const TRANSFORMERS_URL="https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.2.0";
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
@@ -64,15 +64,27 @@
     return (d.textContent||"").replace(/\s+/g," ").trim();
   }
 
-  function currentCtx(){
-    if(activeCtx?.exercise)return activeCtx;
+  function pageCtx(){
     try{
       if(typeof v16CurrentContext==="function"){
         const c=v16CurrentContext();
-        if(c?.exercise)return c;
+        if(c?.exercise&&c?.box?.isConnected)return c;
       }
     }catch(e){}
     return null;
+  }
+
+  function currentCtx(){
+    /* v2.2.3: never keep a task after its exercise DOM was replaced.
+       Previously activeCtx survived navigation and made the dialogue answer
+       every new message as if the old exercise were still selected. */
+    if(activeCtx?.exercise&&activeCtx?.box?.isConnected)return activeCtx;
+    activeCtx=null;
+    return pageCtx();
+  }
+
+  function contextKey(ctx){
+    return ctx?.key||ctx?.lessonId||"free";
   }
 
   function contextLabel(ctx){
@@ -361,9 +373,13 @@
     const vv=window.visualViewport;
     const w=Math.round(vv?.width||window.innerWidth||document.documentElement.clientWidth||0);
     const h=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||0);
+    const top=Math.round(vv?.offsetTop||0);
+    const left=Math.round(vv?.offsetLeft||0);
     const root=document.documentElement;
     if(w>0)root.style.setProperty("--v19-visual-w",`${w}px`);
     if(h>0)root.style.setProperty("--v19-visual-h",`${h}px`);
+    root.style.setProperty("--v19-visual-top",`${Math.max(0,top)}px`);
+    root.style.setProperty("--v19-visual-left",`${Math.max(0,left)}px`);
   }
 
   function dialogMarkup(){
@@ -403,10 +419,22 @@
     root.addEventListener("click",e=>{if(e.target===root)closeDialog()});
     root.querySelector(".v19-send-btn").addEventListener("click",()=>sendCurrentInput());
     root.querySelector(".v19-mic-btn").addEventListener("click",toggleRecord);
-    root.querySelector("textarea").addEventListener("keydown",e=>{
+    const input=root.querySelector("textarea");
+    input.addEventListener("keydown",e=>{
       if(e.key==="Enter"&&!e.shiftKey){
         e.preventDefault();sendCurrentInput();
       }
+    });
+    /* iOS Safari changes visualViewport in several phases while the keyboard
+       opens/closes. Re-measure after focus instead of relying on one resize. */
+    input.addEventListener("focus",()=>{
+      syncVisualViewport();
+      setTimeout(syncVisualViewport,80);
+      setTimeout(syncVisualViewport,260);
+    });
+    input.addEventListener("blur",()=>{
+      setTimeout(syncVisualViewport,80);
+      setTimeout(syncVisualViewport,260);
     });
     renderHistory();
     return root;
@@ -440,7 +468,7 @@
   }
 
   function openDialog(ctx=null){
-    activeCtx=ctx?.exercise?ctx:currentCtx();
+    activeCtx=(ctx?.exercise&&ctx?.box?.isConnected)?ctx:pageCtx();
     syncVisualViewport();
     const root=ensureDialog();
     root.classList.add("show");
@@ -450,7 +478,9 @@
     renderHistory();
     setTimeout(()=>{
       syncVisualViewport();
-      root.querySelector("textarea")?.focus();
+      /* Do not force the iPhone keyboard open. Safari/PWA can otherwise
+         zoom/reposition the visual viewport before the bottom sheet settles. */
+      if(!isIOSLike())root.querySelector("textarea")?.focus();
     },80);
   }
 
@@ -458,6 +488,10 @@
     if(recording)stopRecording();
     document.querySelector("#v19Dialog")?.classList.remove("show");
     document.body.classList.remove("v19-dialog-open");
+    /* Context will be reacquired from the currently visible exercise on the
+       next open. This prevents a closed old lesson from contaminating chat. */
+    activeCtx=null;
+    setTimeout(syncVisualViewport,80);
   }
 
   function dialogState(text,kind=""){
@@ -467,15 +501,16 @@
     el.className=`v19-dialog-live ${kind}`.trim();
   }
 
-  function addHistory(role,content){
-    const msg={role,content:strip(content),ts:Date.now()};
-    history.push(msg);history=history.slice(-20);save();renderHistory();
+  function addHistory(role,content,ctx=activeCtx){
+    const msg={role,content:strip(content),ts:Date.now(),contextKey:contextKey(ctx)};
+    history.push(msg);history=history.slice(-24);save();renderHistory();
   }
 
   function renderHistory(){
     const log=document.querySelector("#v19DialogLog");
     if(!log)return;
-    const shown=history.slice(-14);
+    const key=contextKey(activeCtx);
+    const shown=history.filter(m=>(m.contextKey||"free")===key).slice(-14);
     if(!shown.length){
       log.innerHTML=`<div class="v19-empty-chat"><b>🦊 Kitsune готова слушать.</b><span>Можно написать или нажать «🎙️ Говорить» и спросить, например: «Почему здесь меняется знак?»</span></div>`;
       return;
@@ -501,24 +536,31 @@
   }
 
   async function sendMessage(text){
-    addHistory("user",text);
+    const ctx=currentCtx();
+    activeCtx=ctx;
+    const key=contextKey(ctx);
+    addHistory("user",text,ctx);
     dialogState("🦊 Kitsune думает…","thinking");
 
     let reply="";
-    const ctx=activeCtx?.exercise?activeCtx:currentCtx();
     try{
       if(window.KitsuneBrain?.chat){
-        const prior=history.slice(0,-1).slice(-6).map(x=>({role:x.role,content:x.content}));
+        /* v2.2.3: history from another exercise is never sent to Brain.
+           This removes the "same answer" effect after changing lessons/tasks. */
+        const prior=history
+          .filter(x=>(x.contextKey||"free")===key)
+          .slice(0,-1).slice(-6)
+          .map(x=>({role:x.role,content:x.content}));
         reply=await window.KitsuneBrain.chat(text,ctx,prior);
       }else{
-        reply="Я тебя слышу 🦊 Но Kitsune Brain ещё не подключён.";
+        reply="Я вижу твой вопрос 🦊 Сейчас доступен локальный учебный режим — я могу надёжно помочь с математикой и темами курса.";
       }
     }catch(e){
-      reply="Сейчас не получилось сформулировать ответ. Попробуй спросить короче или открой конкретное задание.";
+      reply="Сейчас не получилось сформулировать ответ именно на этот вопрос. Попробуй написать его чуть короче.";
     }
 
     dialogState("");
-    addHistory("assistant",reply);
+    addHistory("assistant",reply,ctx);
 
     if(voiceReplies){
       try{

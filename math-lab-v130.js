@@ -1,12 +1,12 @@
 
 /* ================================================================
-   Kitsune Math Lab v2.2.1
+   Kitsune Math Lab v2.2.3
    Sandbox + homework + step verifier + generator + local skill map.
    ================================================================ */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const HW_KEY="a8_mathlab_homework_v130";
   const SKILL_KEY="a8_mathlab_skills_v130";
   const HISTORY_KEY="a8_mathlab_history_v130";
@@ -946,7 +946,7 @@ x > -6"></textarea>
     try{window.scrollTo({top:0,behavior:"smooth"})}catch(e){}
   }
 
-  /* v2.2.1 ROUTE FIX
+  /* v2.2.3 ROUTE FIX
      Legacy course extensions redefine the global go() function several times
      (chapter1-v02.js, course-v1.js, mastery-v13.js). Therefore registering the
      Math Lab only in app.js is not stable. Math Lab installs its own final

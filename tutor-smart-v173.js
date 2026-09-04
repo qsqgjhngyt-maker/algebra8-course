@@ -443,11 +443,14 @@
     b.className="v15-action v173-alfi-shortcut";
     b.textContent="🧠 Разобрать текущее";
     b.title="Открыть разбор прямо под последним активным заданием";
-    b.addEventListener("click",()=>{
+    b.addEventListener("click",ev=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
       let ctx=null;
       try{ctx=v16CurrentContext()}catch(e){}
       if(ctx){
-        render(ctx,{reason:"manual"});
+        window.v173OpenInline?.(ctx,{reason:"manual"});
         try{v15Close?.()}catch(e){}
       }else{
         try{v15Chip?.("Сначала выбери задание в уроке") }catch(e){}

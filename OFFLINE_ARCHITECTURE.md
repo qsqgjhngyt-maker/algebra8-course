@@ -1,7 +1,7 @@
 # Kitsune Algebra 8 — GitHub Pages Production Architecture
 
 ## Release
-v2.2.1 STUDENT EXPERIENCE & RELIABILITY
+v2.2.3 STUDENT EXPERIENCE & RELIABILITY
 
 ## Hosting model
 The application is a static PWA and requires no application backend.
@@ -94,7 +94,7 @@ editable before it is added to Homework Studio.
 
 ## Safe Mode and recovery
 
-v2.2.1 adds a non-destructive Safe Mode for problematic devices:
+v2.2.3 adds a non-destructive Safe Mode for problematic devices:
 - Brain switches to Smart Tutor;
 - Neural Voice switches to system TTS;
 - automatic heavy-module setup pauses;

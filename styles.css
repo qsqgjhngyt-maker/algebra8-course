@@ -3414,7 +3414,12 @@ html[data-design="classic"] .v16-tutor-btn{display:none!important}
   .v173-inline-tutor.show,.v173-step.show{animation:none!important}
 }
 
-html[data-design="classic"] .v173-inline-tutor{display:none!important}
+/* v2.2.3: Classic design changes styling, not functionality. */
+html[data-design="classic"] .v173-inline-tutor{
+  background:var(--card);
+  box-shadow:none;
+}
+html[data-design="classic"] .v173-inline-tutor.show{display:block!important}
 
 
 
@@ -6196,4 +6201,64 @@ body.kitsune-safe-mode .v17-engine-live.neural{opacity:.65}
   .sx-main{grid-column:auto}
   .sx-adult-hero{flex-direction:column}
   .sx-stat-grid{grid-template-columns:1fr 1fr}
+}
+
+
+/* =====================================================================
+   v2.2.3 · iOS TUTOR / DIALOG STABILITY
+   ===================================================================== */
+
+/* iOS Safari auto-zooms focused form controls below 16px. That zoom can make
+   the inline tutor/chat look cropped or shifted while Android/desktop stay OK. */
+@supports (-webkit-touch-callout:none){
+  @media(max-width:620px){
+    .v19-dialog-compose textarea,
+    .v173-work-box textarea,
+    .lesson-panel input,
+    .lesson-panel textarea,
+    .lesson-panel select{
+      font-size:16px!important;
+    }
+  }
+}
+
+@media(max-width:620px){
+  .v19-dialog-backdrop.show{
+    /* visualViewport-aware bottom sheet: especially important in iOS PWA
+       when Safari toolbars or the software keyboard resize the visible area. */
+    inset:auto!important;
+    top:var(--v19-visual-top,0px)!important;
+    left:var(--v19-visual-left,0px)!important;
+    width:var(--v19-visual-w,100vw)!important;
+    height:var(--v19-visual-h,100dvh)!important;
+    max-width:none!important;
+  }
+
+  .v19-dialog-card{
+    width:100%!important;
+    max-width:100%!important;
+    height:min(var(--v19-visual-h,100dvh),760px);
+    max-height:100%!important;
+    grid-template-rows:auto minmax(0,1fr) auto auto;
+  }
+
+  .v19-dialog-log{
+    min-height:0!important;
+  }
+
+  .v19-dialog-compose textarea{
+    resize:none;
+  }
+
+  .v173-inline-tutor,
+  .v18-comic-row,
+  .v18-comic-bubble{
+    max-width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+
+  .v173-controls{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  }
 }

@@ -916,6 +916,9 @@ document.addEventListener("click",e=>{
   const insideAlfi=!!btn.closest("#v15Assistant");
   if(insideAlfi)return;
 
+  /* v2.2.3: Smart Tutor owns these buttons completely. */
+  if(btn.matches(".v16-tutor-btn,.v173-alfi-shortcut")||btn.closest(".v173-inline-tutor"))return;
+
   const nativeLessonHelp=
     /Подсказк|Разобрать идею|Хочу понять/i.test(text) ||
     /toggleHint|#hint-|\.hint/.test(onclick);

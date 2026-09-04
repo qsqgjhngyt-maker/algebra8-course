@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const WEBLLM_URL="https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.84/+esm";
   const MODEL_ID="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
 
@@ -528,6 +528,7 @@
     const steps=ctx?smartSteps(ctx):[];
     const first=ctx?safeNextStep(ctx,steps[0]||strip(ctx.exercise?.hint)):"";
     const rule=ctx?(strip(ctx.lesson?.remember)||strip(ctx.lesson?.why)||strip(ctx.lesson?.formula)):"";
+    const quoted=q.length>95?q.slice(0,92)+"…":q;
 
     if(/привет|здравств|как дела|ты тут|kitsune|кицун/i.test(low)){
       return "Я здесь 🦊 Можешь написать или сказать вслух, что именно непонятно в текущем задании.";
@@ -547,10 +548,16 @@
         return ans?`Хорошо, раз ты попросил явно: ответ для самопроверки — ${ans}. Но лучше после этого повторить решение без подсказки.`:"В этом задании итоговый ответ не найден в данных курса.";
       }
     }
-    if(ctx){
-      return `Я вижу текущее задание. Скажи, на каком переходе ты остановился, или напиши свой последний шаг. Моя первая опора: ${first}`;
+    if(/спасибо|понятно|ясно|получилось|разобрал|разобралась/i.test(low)){
+      return "Отлично 🦊 Если хочешь, можешь сразу написать следующий вопрос или свой следующий шаг.";
     }
-    return "Можно поговорить 🙂 Но математические советы я даю надёжнее, когда открыт конкретный урок или задание.";
+
+    /* Smart Tutor must react to what was actually typed. It must not pretend
+       an unrelated free-form question was a request for the same first step. */
+    if(ctx){
+      return `Я прочитала твой вопрос: «${quoted}». Он не похож на просьбу о следующем шаге текущего примера. В локальном режиме я не буду придумывать ответ: могу надёжно объяснить правило этой темы, проверить твой математический шаг или разобрать конкретное задание.`;
+    }
+    return `Я прочитала: «${quoted}». Сейчас локальный режим надёжно отвечает по математике и материалам курса. Для свободных вопросов на любые темы нужен расширенный Cloud Brain — его мы как раз готовим.`;
   }
 
   function isExplicitAnswerRequest(message){
@@ -640,7 +647,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     const safety=childSafetyCheck(user);
     if(safety)return safety.reply;
 
-    /* v2.2.1: deterministic local tutor tools answer learning-route
+    /* v2.2.3: deterministic local tutor tools answer learning-route
        questions before the language model is asked to formulate anything. */
     try{
       const tool=await window.KitsuneTutorTools?.dispatch?.(user,ctx);
@@ -649,7 +656,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
       console.warn("[Kitsune Tutor Tools]",err);
     }
 
-    /* v2.2.1: free-form calculations no longer require an opened textbook
+    /* v2.2.3: free-form calculations no longer require an opened textbook
        exercise. Math Worker computes first; Brain only explains verified facts. */
     if(window.KitsuneMath?.looksMath?.(user)){
       try{

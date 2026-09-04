@@ -1,13 +1,13 @@
 
 /* =====================================================================
-   Kitsune Camera Homework Import v2.2.1
+   Kitsune Camera Homework Import v2.2.3
    Explicit permission -> capture/photo -> local OCR -> editable preview -> DЗ.
    Camera is NEVER requested until the user presses the camera button.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const TESS_URL="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
   const OCR_READY_KEY="a8_camera_ocr_ready_v210";
 

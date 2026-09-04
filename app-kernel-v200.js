@@ -1,11 +1,11 @@
 
 /* =====================================================================
-   Kitsune App Kernel v2.2.1
+   Kitsune App Kernel v2.2.3
    Final navigation authority. Loaded after all legacy route modules.
    ===================================================================== */
 (() => {
   "use strict";
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.1";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
   const legacyGo=typeof window.go==="function"?window.go:null;
 
   function closeMobileSidebar(){
@@ -42,6 +42,9 @@
 
   document.addEventListener("click",e=>{
     if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    /* Inline Tutor controls must never be interpreted as app navigation,
+       even if a future layout places them inside an element with data-view. */
+    if(e.target.closest?.(".v16-tutor-btn,.v173-inline-tutor,.v173-alfi-shortcut"))return;
     const target=e.target.closest?.("[data-view],[data-view-jump]");
     if(!target)return;
     const view=target.dataset.view||target.dataset.viewJump;

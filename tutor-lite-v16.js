@@ -444,7 +444,17 @@ function v16DecorateExercises(){
     btn.className="v16-tutor-btn";
     btn.innerHTML="🧠 Kitsune Tutor";
     btn.title="Локальная помощь по этому заданию";
-    btn.addEventListener("click",()=>v16OpenTutor(v16ParseExercise(box)));
+    btn.addEventListener("click",ev=>{
+      /* v2.2.3: Tutor is an inline action, never a navigation action.
+         Stop legacy/global click routers before they can interpret this click. */
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+      const ctx=v16ParseExercise(box);
+      if(!ctx)return;
+      v16Active=ctx;
+      v16OpenTutor(ctx);
+    });
     row.appendChild(btn);
   });
 }
