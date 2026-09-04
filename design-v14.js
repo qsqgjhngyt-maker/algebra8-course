@@ -92,8 +92,9 @@ v14ApplyDesign(v14Initial,false);
 const v14BaseHome=renderHome;
 renderHome=function(){
   v14BaseHome();
+  const release=window.KITSUNE_APP_VERSION||"2.3.0-alpha";
   document.querySelectorAll(".status-chip").forEach(x=>{
-    if(x.textContent.includes("v1.3"))x.textContent=x.textContent.replace("v1.3","v2.2.3"); else if(/все главы готовы · v1\.4(?:\.2)?/.test(x.textContent))x.textContent="все главы готовы · v2.2.3";
+    if(x.textContent.includes("v1.3"))x.textContent=x.textContent.replace("v1.3",`v${release}`); else if(/все главы готовы · v1\.4(?:\.2)?/.test(x.textContent))x.textContent=`все главы готовы · v${release}`;
   });
 };
 window.renderHome=renderHome;

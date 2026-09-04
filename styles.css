@@ -6262,3 +6262,18 @@ body.kitsune-safe-mode .v17-engine-live.neural{opacity:.65}
     grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   }
 }
+
+/* v2.3.0-alpha · Hybrid Intelligence diagnostics (Adult Center only) */
+.khi-panel{display:grid;gap:16px}
+.khi-notice{display:grid;gap:4px;padding:14px 16px;border-radius:16px;background:#fff7df;border:1px solid #edca69}
+.khi-notice span{color:var(--muted)}
+.khi-status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.khi-status-grid>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel-soft,#fff)}
+.khi-badge{padding:5px 9px;border-radius:999px;font-size:.78rem;font-weight:800;background:#eef1f5;color:#606875}
+.khi-badge.ok{background:#e4f7e7;color:#197437}
+.khi-badge.bad{background:#ffe7e5;color:#a52d27}
+.khi-google{min-height:0;display:flex;justify-content:flex-start}
+.khi-detail{padding:12px 14px;border-radius:14px;background:#f3f6fa;color:var(--muted)}
+.khi-detail.show{color:var(--text)}
+.khi-foot{font-size:.84rem;color:var(--muted)}
+@media(max-width:680px){.khi-status-grid{grid-template-columns:1fr}.khi-panel .ml-actions{display:grid;grid-template-columns:1fr}.khi-panel .ml-actions button{width:100%}}

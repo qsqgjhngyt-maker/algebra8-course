@@ -1,13 +1,13 @@
-const CACHE="algebra8-v2.2.3";
+const CACHE="algebra8-v2.3.0-alpha";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.2.3";
+const RELEASE="2.3.0-alpha";
 const ASSETS=[
-  "./","./index.html?v=2.2.3","./styles.css?v=2.2.3","./app.js?v=2.2.3","./chapter1-v02.js?v=2.2.3","./course-v1.js?v=2.2.3",
-  "./manifest.json?v=2.2.3","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
-  "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png",
+  "./","./index.html?v=2.3.0-alpha","./styles.css?v=2.3.0-alpha","./app.js?v=2.2.3","./chapter1-v02.js?v=2.2.3","./course-v1.js?v=2.2.3",
+  "./manifest.json?v=2.3.0-alpha","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
+  "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png","./cloud-config-v230.js?v=2.3.0-alpha","./hybrid-infrastructure-v230.js?v=2.3.0-alpha",
   "./coach-v12.js?v=2.2.3","./pedagogy-v12.js?v=2.2.3","./mastery-data-v13.js?v=2.2.3","./mastery-v13.js?v=2.2.3",
-  "./design-v14.js?v=2.2.3","./learning-fx-v142.js?v=2.2.3","./live-assistant-v15.js?v=2.2.3",
-  "./tutor-lite-v16.js?v=2.2.3","./tutor-smart-v173.js?v=2.2.3","./neural-voice-v17.js?v=2.2.3","./kitsune-brain-v18.js?v=2.2.3","./kitsune-voice-v19.js?v=2.2.3","./whisper-worker-v1114.js?v=2.2.3","./whisper-worker-v1116.js?v=2.2.3","./kitsune-live-v110.js?v=2.2.3","./privacy-v1111.js?v=2.2.3","./security-bootstrap-v1111.js?v=2.2.3","./pwa-update.js?v=2.2.3","./math-engine-v130.js?v=2.2.3","./math-lab-v130.js?v=2.2.3","./math-worker-v130.js?v=2.2.3","./performance-manager-v150.js?v=2.2.3","./learning-intelligence-v150.js?v=2.2.3","./course-search-v200.js?v=2.2.3","./offline-center-v200.js?v=2.2.3","./app-kernel-v200.js?v=2.2.3","./camera-import-v210.js?v=2.2.3","./auto-setup-v210.js?v=2.2.3","./mastery-score-v220.js?v=2.2.3","./reliability-center-v220.js?v=2.2.3","./student-experience-v220.js?v=2.2.3","./reveal-manager-v221.js?v=2.2.3","./version.json?v=2.2.3"
+  "./design-v14.js?v=2.3.0-alpha","./learning-fx-v142.js?v=2.2.3","./live-assistant-v15.js?v=2.2.3",
+  "./tutor-lite-v16.js?v=2.2.3","./tutor-smart-v173.js?v=2.2.3","./neural-voice-v17.js?v=2.2.3","./kitsune-brain-v18.js?v=2.2.3","./kitsune-voice-v19.js?v=2.2.3","./whisper-worker-v1114.js?v=2.2.3","./whisper-worker-v1116.js?v=2.2.3","./kitsune-live-v110.js?v=2.2.3","./privacy-v1111.js?v=2.3.0-alpha","./security-bootstrap-v1111.js?v=2.3.0-alpha","./pwa-update.js?v=2.3.0-alpha","./math-engine-v130.js?v=2.2.3","./math-lab-v130.js?v=2.2.3","./math-worker-v130.js?v=2.2.3","./performance-manager-v150.js?v=2.2.3","./learning-intelligence-v150.js?v=2.2.3","./course-search-v200.js?v=2.2.3","./offline-center-v200.js?v=2.3.0-alpha","./app-kernel-v200.js?v=2.2.3","./camera-import-v210.js?v=2.2.3","./auto-setup-v210.js?v=2.2.3","./mastery-score-v220.js?v=2.2.3","./reliability-center-v220.js?v=2.2.3","./student-experience-v220.js?v=2.3.0-alpha","./reveal-manager-v221.js?v=2.2.3","./version.json?v=2.3.0-alpha"
 ];
 
 const CHILD_CSP=[
@@ -15,17 +15,17 @@ const CHILD_CSP=[
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "frame-src 'none'",
+  "frame-src https://accounts.google.com",
   "form-action 'none'",
   "manifest-src 'self'",
   "img-src 'self' data: blob:",
   "media-src 'self' data: blob:",
   "font-src 'self' data:",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://accounts.google.com",
   "worker-src 'self' blob: https://cdn.jsdelivr.net",
   "child-src 'self' blob: https://cdn.jsdelivr.net",
-  "connect-src 'self' https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
+  "connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://ws-xoczzsb7am4cyl8c.ap-southeast-1.maas.aliyuncs.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
   "upgrade-insecure-requests"
 ].join("; ");
 
@@ -66,7 +66,7 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
-  /* v2.2.3 FINAL: cache every same-origin release asset independently.
+  /* v2.3.0-alpha: cache every same-origin release asset independently.
      One optional asset must not make the whole Service Worker install fail. */
   e.waitUntil((async()=>{
     const cache=await caches.open(CACHE);
@@ -111,6 +111,13 @@ self.addEventListener("fetch",e=>{
   const url=new URL(e.request.url);
   const sameOrigin=url.origin===self.location.origin;
   const neuralRuntime=url.hostname==="cdn.jsdelivr.net";
+
+  /* Authentication, broker, Qwen and private TTS responses are never cached.
+     Stage 1 uses cross-origin endpoints, but keep this guard if deployment later
+     maps a broker below the PWA origin. */
+  if(url.pathname.startsWith("/v1/auth/")||url.pathname.startsWith("/v1/enroll")||
+     url.pathname.startsWith("/v1/temporary-credential")||url.pathname.startsWith("/v1/qwen/")||
+     url.pathname.startsWith("/v1/tts/"))return;
 
   if(sameOrigin){
     const isNavigation=e.request.mode==="navigate"||e.request.destination==="document";

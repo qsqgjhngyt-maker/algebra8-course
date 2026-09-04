@@ -1,5 +1,24 @@
 # Алгебра 8 — интерактивный курс
 
+## v2.3.0-alpha — Hybrid Intelligence infrastructure
+
+Эта alpha сохраняет весь локальный/offline функционал v2.2.3 и добавляет
+отключённую до настройки взрослым инфраструктуру Cloud Brain:
+
+- отдельный Cloudflare credential broker без учебной БД и истории диалогов;
+- Google Parent Auth только в Adult Center;
+- stateless device certificate и proof-of-possession;
+- временный DashScope credential с TTL 60 секунд;
+- четыре диагностики: Google / broker / Qwen / test answer;
+- temporary credential хранится только в памяти;
+- Service Worker не кэширует auth, Qwen или приватные TTS ответы;
+- direct browser-to-Qwen сначала обязан пройти реальный CORS-тест;
+- proxy не включается автоматически и требует обновления privacy-модели.
+
+Файлы `STAGE1_EXTERNAL_SETUP.md` и `BASELINE_AUDIT_v2.3.0-alpha.md`
+описывают внешний stop point и выполненные проверки. Character Voice, единый
+Router и детский cloud chat относятся к FINAL и в alpha не включены.
+
 Версия: **v2.2.3 STUDENT EXPERIENCE & RELIABILITY**
 
 Что добавлено в этой итерации:

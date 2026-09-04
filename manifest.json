@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Kitsune Algebra 8 v2.2.3: iPhone dialog/tutor stability, context-aware dialogue and stale-task context fix.",
+  "description": "Kitsune Algebra 8 v2.3.0-alpha: optional Hybrid Intelligence infrastructure with the complete local/offline course preserved.",
   "orientation": "any",
   "categories": [
     "education"

@@ -160,12 +160,12 @@
         </article>
         <article class="glass-panel ko-info">
           <span class="eyebrow">GitHub Pages</span>
-          <h3>Без backend</h3>
-          <p>Вся прикладная логика — HTML/CSS/JS, Web Workers, Service Worker и локальные данные. Сервер приложению не требуется. Внешняя сеть нужна только при первом скачивании выбранных AI runtime/model файлов.</p>
+          <h3>Курс работает без cloud</h3>
+          <p>Вся учебная логика — HTML/CSS/JS, Web Workers, Service Worker и локальные данные. Сервер курсу не требуется. В v2.3 Cloud Brain остаётся отдельной необязательной функцией для взрослого и использует минимальный credential broker без учебной базы данных.</p>
           <div class="ko-network-note">
             <b>Runtime/model источники при первой подготовке:</b>
             <span>jsDelivr · Hugging Face/model storage</span>
-            <small>Учебные ответы, прогресс, история ошибок, голосовые записи и Math Lab туда не отправляются как учебный backend.</small>
+            <small>Прогресс, Mastery, история ошибок, raw-аудио, фото и Math Lab остаются локально. Cloud Brain раскрывает свой отдельный статус и правила в Adult Center.</small>
           </div>
         </article>
       </section>`;

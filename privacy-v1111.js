@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"2.2.3";
+  const VERSION=window.KITSUNE_APP_VERSION||document.querySelector('meta[name="kitsune-app-version"]')?.content||"2.3.0-alpha";
   const FIRST_SEEN_KEY="a8_child_safety_seen_v1111";
 
   const PRIVATE_KEYS=[
@@ -17,6 +17,9 @@
 
 
   function html(){
+    const hybrid=window.KitsuneHybridInfrastructure;
+    const cloudConfigured=!!hybrid?.configured?.();
+    const cloudConsented=!!hybrid?.consented?.();
     return `
       <div class="v1111-privacy-backdrop" id="v1111Privacy" aria-hidden="true">
         <section class="v1111-privacy-card" role="dialog" aria-modal="true" aria-labelledby="v1111PrivacyTitle">
@@ -63,6 +66,7 @@
           <section class="v1111-network-box">
             <b>🌐 Когда курс обращается в интернет</b>
             <p><strong>GitHub Pages</strong> — сам курс. <strong>jsDelivr / Hugging Face</strong> — статические AI/OCR runtime и модели, которые Kitsune может автоматически подготовить и сохранить локально. Камера и микрофон при этом не включаются. Внешняя аналитика отключена полностью.</p>
+            <p><strong>Cloud Brain:</strong> ${cloudConfigured?(cloudConsented?"разрешён взрослым на этом устройстве. В Alibaba Cloud может отправляться только минимальный текст текущего вопроса и проверенные математические факты.":"настроен, но выключен на этом устройстве."):"ещё не настроен и не используется."} Raw-аудио, Mastery, история ошибок, ДЗ, фото и содержимое локального хранилища не отправляются.</p>
           </section>
 
           <div class="v1111-privacy-actions">

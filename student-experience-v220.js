@@ -1,12 +1,12 @@
 
 /* =====================================================================
-   Kitsune Student Experience v2.2.3
+   Kitsune Student Experience v2.3.0-alpha
    Child-first UI + Adult Center + Accessibility.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.3.0-alpha";
   const MODE_KEY="a8_student_mode_v220";
   const A11Y_KEY="a8_accessibility_v220";
   let adultTab="overview";
@@ -203,7 +203,8 @@
   }
 
   function adultContent(){
-    return adultTab==="mastery"?`<section class="sx-adult-card"><span class="eyebrow">Mastery 51</span><h3>Уровень владения каждой темой</h3>${masteryRows()}</section>`:
+    return adultTab==="cloud"?(window.KitsuneHybridInfrastructure?.panel?.()||`<section class="sx-adult-card"><h3>Cloud Brain</h3><p>Модуль инфраструктуры не загрузился.</p></section>`):
+      adultTab==="mastery"?`<section class="sx-adult-card"><span class="eyebrow">Mastery 51</span><h3>Уровень владения каждой темой</h3>${masteryRows()}</section>`:
       adultTab==="accessibility"?adultAccessibility():
       adultTab==="reliability"?adultReliability():adultOverview();
   }
@@ -222,6 +223,7 @@
         <div class="sx-adult-tabs">
           <button data-sx-tab="overview" class="${adultTab==="overview"?"active":""}">Обзор</button>
           <button data-sx-tab="mastery" class="${adultTab==="mastery"?"active":""}">Mastery 51</button>
+          <button data-sx-tab="cloud" class="${adultTab==="cloud"?"active":""}">Cloud Brain</button>
           <button data-sx-tab="accessibility" class="${adultTab==="accessibility"?"active":""}">Доступность</button>
           <button data-sx-tab="reliability" class="${adultTab==="reliability"?"active":""}">Диагностика</button>
         </div>
@@ -250,6 +252,7 @@
       try{await window.KitsuneReliability?.repairAppShell?.()}catch(e){alert(String(e?.message||e))}
     });
     document.querySelector("#sxRunTests")?.addEventListener("click",runTests);
+    if(adultTab==="cloud")window.KitsuneHybridInfrastructure?.bind?.();
   }
 
   async function runTests(){
@@ -287,6 +290,10 @@
     if(studentMode()&&document.querySelector("#pageTitle")?.textContent==="Алгебра 8")injectStudentHome();
   });
   observer.observe(document.documentElement,{subtree:true,childList:true});
+
+  window.addEventListener("kitsune-hybrid-status",()=>{
+    if(adultTab==="cloud"&&document.querySelector(".khi-panel"))renderAdult();
+  });
 
   window.KitsuneStudentExperience={
     version:VERSION,
