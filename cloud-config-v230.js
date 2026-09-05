@@ -11,9 +11,6 @@
     enabled:true,
     brokerOrigin:"https://kitsune-hybrid-broker.akronikl.workers.dev",
     googleClientId:"917733706537-8761p6aqah238r1g2anvlhupstu9s98t.apps.googleusercontent.com",
-    qwenApiBase:"https://ws-xoczzsb7am4cyl8c.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1/",
-    qwenModel:"qwen3.7-plus",
-    privacyMode:"direct-temporary-credential",
-    temporaryCredentialTtlSeconds:60
+    privacyMode:"worker-proxy-fixed-test"
   });
 })();

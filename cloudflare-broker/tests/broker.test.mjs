@@ -18,6 +18,8 @@ function env(overrides={}){
     ALLOWED_ORIGIN:origin,
     GOOGLE_CLIENT_ID:"client.apps.googleusercontent.com",
     QWEN_TEMP_TOKEN_URL:"https://workspace.example/api/v1/tokens?expire_in_seconds=60",
+    QWEN_API_BASE:"https://workspace.example/compatible-mode/v1/",
+    QWEN_MODEL:"qwen3.7-plus",
     QWEN_REGION:"test-region",
     DEVICE_CERT_TTL_SECONDS:"43200",
     CHALLENGE_TTL_SECONDS:"120",
@@ -81,10 +83,17 @@ test("parent enrollment, replay rejection and temporary credential",async()=>{
   const googleJwk=await crypto.subtle.exportKey("jwk",rsa.publicKey);
   googleJwk.kid="google-test-key";
   const originalFetch=globalThis.fetch;
-  globalThis.fetch=async url=>{
+  globalThis.fetch=async (url,options={})=>{
     const text=String(url);
     if(text.includes("googleapis.com/oauth2/v3/certs"))return Response.json({keys:[googleJwk]});
-    if(text.startsWith("https://workspace.example/"))return Response.json({token:"st-test-temporary",expires_at:Math.floor(Date.now()/1000)+60});
+    if(text.includes("/api/v1/tokens"))return Response.json({token:"st-test-temporary",expires_at:Math.floor(Date.now()/1000)+60});
+    if(text.endsWith("/compatible-mode/v1/chat/completions")){
+      assert.equal(options.headers.Authorization,"Bearer st-test-temporary");
+      const payload=JSON.parse(options.body);
+      assert.equal(payload.model,"qwen3.7-plus");
+      assert.equal(payload.messages[1].content,"Ответь одним словом: готово");
+      return Response.json({choices:[{message:{content:"готово"}}]});
+    }
     throw new Error(`Unexpected fetch: ${text}`);
   };
   try{
@@ -114,5 +123,22 @@ test("parent enrollment, replay rejection and temporary credential",async()=>{
     const issued=await tokenResponse.json();
     assert.equal(issued.token,"st-test-temporary");
     assert.equal(decodePayload(enrolled.deviceCertificate).typ,"device");
+
+    const testChallengeResponse=await worker.fetch(request("/v1/auth/challenge",{method:"POST",body:{purpose:"qwen-test",clientNonce:"test-3"}}),bindings);
+    const testChallenge=await testChallengeResponse.json();
+    const testProof=await deviceProof(deviceKeys.privateKey,`qwen-test\n${testChallenge.challengeToken}\n${enrolled.deviceCertificate}`);
+    const testResponse=await worker.fetch(request("/v1/qwen/test",{method:"POST",body:{challengeToken:testChallenge.challengeToken,deviceCertificate:enrolled.deviceCertificate,proof:testProof}}),bindings);
+    assert.equal(testResponse.status,200);
+    assert.match(testResponse.headers.get("Cache-Control"),/no-store/);
+    const testText=await testResponse.text();
+    assert.equal(JSON.parse(testText).answer,"готово");
+    assert.equal(testText.includes("st-test-temporary"),false);
+    assert.equal(testText.includes("test-only-permanent-key"),false);
+
+    const rejectedChallengeResponse=await worker.fetch(request("/v1/auth/challenge",{method:"POST",body:{purpose:"qwen-test",clientNonce:"test-4"}}),bindings);
+    const rejectedChallenge=await rejectedChallengeResponse.json();
+    const rejectedProof=await deviceProof(deviceKeys.privateKey,`qwen-test\n${rejectedChallenge.challengeToken}\n${enrolled.deviceCertificate}`);
+    const rejectedResponse=await worker.fetch(request("/v1/qwen/test",{method:"POST",body:{challengeToken:rejectedChallenge.challengeToken,deviceCertificate:enrolled.deviceCertificate,proof:rejectedProof,prompt:"user supplied text"}}),bindings);
+    assert.equal(rejectedResponse.status,400);
   }finally{globalThis.fetch=originalFetch}
 });

@@ -8,12 +8,13 @@
 - отдельный Cloudflare credential broker без учебной БД и истории диалогов;
 - Google Parent Auth только в Adult Center;
 - stateless device certificate и proof-of-possession;
-- временный DashScope credential с TTL 60 секунд;
+- временный DashScope credential с TTL 60 секунд, остающийся внутри Worker;
 - четыре диагностики: Google / broker / Qwen / test answer;
-- temporary credential хранится только в памяти;
+- фиксированный Stage 1 test proxy без произвольного текста и хранения;
 - Service Worker не кэширует auth, Qwen или приватные TTS ответы;
-- direct browser-to-Qwen сначала обязан пройти реальный CORS-тест;
-- proxy не включается автоматически и требует обновления privacy-модели.
+- реальный direct browser-to-Qwen CORS-тест завершился `Failed to fetch`;
+- privacy-модель явно обновлена: Cloudflare транзитно обрабатывает только
+  фиксированный технический тест и короткий ответ, не данные ребёнка.
 
 Файлы `STAGE1_EXTERNAL_SETUP.md` и `BASELINE_AUDIT_v2.3.0-alpha.md`
 описывают внешний stop point и выполненные проверки. Character Voice, единый

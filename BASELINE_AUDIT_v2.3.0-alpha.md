@@ -21,11 +21,12 @@
 ## Stage 1 code checks
 
 - Hybrid client contains no permanent provider credential.
-- Temporary Qwen credential is held in a function-local variable and cleared
-  after the test request.
+- Temporary Qwen credential remains inside Worker and is never returned to the
+  browser by the fixed Stage 1 test route.
 - Device private key is generated non-exportable with Web Crypto.
 - Only the public JWK is sent to the broker.
-- Broker has no database binding and no dialogue endpoint.
+- Broker has no database binding and no dialogue endpoint. Its Qwen test route
+  rejects arbitrary fields and uses a fixed technical prompt.
 - Broker responses use `Cache-Control: no-store`.
 - Broker accepts one exact configured origin; origin is not treated as auth.
 - Google JWT signature, issuer, audience, expiry and nonce are checked.
@@ -36,11 +37,12 @@
   home status chip now reads the shared app version instead of forcing v2.2.3.
 - Fixed the Google Identity button being removed by the synchronous Adult
   Center status redraw; GIS now renders into the new panel after redraw.
-- Advanced the Service Worker release cache to `2.3.0-alpha.1` so installed
+- Advanced the Service Worker release cache to `2.3.0-alpha.2` so installed
   PWAs receive the Google button fix without clearing model/OPFS caches.
-- Broker unit/integration tests: 3 passed, 0 failed.
-- Cloudflare Wrangler 4.129.0 dry-run and production bundle: pass; 13.32 KiB
-  upload / 3.91 KiB gzip.
+- Broker unit/integration tests: 3 passed, 0 failed, including the fixed Qwen
+  proxy, rejection of client-supplied prompt fields, and credential non-leakage.
+- Cloudflare Wrangler 4.129.0 dry-run and production bundle: pass; 16.29 KiB
+  upload / 4.47 KiB gzip.
 - Full alpha JavaScript syntax pass: 39 files.
 - HTML local reference check: 39 references, none missing.
 - CSP duplicate-directive check: pass.
@@ -54,17 +56,20 @@
 
 - Google Web Client ID and external Testing audience configured; the adult test
   user is registered. Real sign-in remains pending publication of the alpha PWA.
-- Cloudflare broker deployed successfully, version
-  `2226938f-cd11-4c0c-b945-97bb245f9ae2`.
+- Cloudflare broker with the fixed Stage 1 test proxy deployed successfully,
+  version `92d1b05b-4af6-4170-af74-a10cf4357b0e`.
 - Live broker health check from the exact allowed origin: HTTP 200,
   `storage: none`, `conversationLogging: false`, region `ap-southeast-1`, and
-  `Cache-Control: no-store, private, max-age=0`. `ready` intentionally remains
-  false until the adult's Google `sub` replaces the bootstrap marker.
+  `Cache-Control: no-store, private, max-age=0`, and `ready: true` after the
+  adult account and all required secrets were configured.
 - Alibaba Singapore workspace configured for `qwen3.7-plus`; permanent API key
   is present only as Cloudflare Secret `DASHSCOPE_API_KEY`.
 - Alibaba Stop-on-Exhaust / Free Quota Only is enabled; no billing profile was
   completed.
-- Direct browser-to-Qwen CORS and test answer remain pending the real PWA test.
+- Real browser-to-Qwen direct CORS failed with `Failed to fetch` after Google and
+  broker checks passed. A privacy-visible fixed test proxy was therefore added;
+  no child text is accepted and Cloudflare only processes the fixed request and
+  bounded answer transiently.
 - iPhone/Android installed-PWA behavior requires real devices.
 
 ## Confirmed public endpoints

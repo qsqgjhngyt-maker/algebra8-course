@@ -88,6 +88,8 @@ Public Worker variables:
 - `ALLOWED_ORIGIN`: exact GitHub Pages origin, no trailing path;
 - `GOOGLE_CLIENT_ID`: public Google Web Client ID;
 - `QWEN_TEMP_TOKEN_URL`: exact region/workspace temporary-token URL;
+- `QWEN_API_BASE`: exact OpenAI-compatible workspace base;
+- `QWEN_MODEL`: `qwen3.7-plus`;
 - `QWEN_REGION`: selected region ID;
 - `DEVICE_CERT_TTL_SECONDS`: `43200` for alpha;
 - `CHALLENGE_TTL_SECONDS`: `120`.
@@ -109,13 +111,11 @@ After the public URLs are final, update `cloud-config-v230.js`:
 - `enabled: true`;
 - `brokerOrigin`: public Worker origin;
 - `googleClientId`: public Web Client ID;
-- `qwenApiBase`: exact OpenAI-compatible base ending in `/compatible-mode/v1/`;
-- `qwenModel`: selected model ID;
-- leave `privacyMode: "direct-temporary-credential"`;
-- leave TTL at 60 seconds.
+- `privacyMode: "worker-proxy-fixed-test"`.
 
-Add the exact Worker origin and exact Qwen origin to `connect-src` in both
-`index.html` and `sw.js`. Do not use `https:` or `*.workers.dev` wildcards.
+Add only the exact Worker origin to the Cloud Brain portion of `connect-src` in
+both `index.html` and `sw.js`. Browser access to the Qwen origin is intentionally
+removed after the real direct CORS test failed.
 
 ## F. Required Stage 1 test order
 
@@ -137,3 +137,8 @@ If the direct request fails because of CORS or provider restrictions, stop.
 Do not silently enable a proxy. First update the privacy model to state that
 Cloudflare transiently processes prompt and response, then implement a narrowly
 scoped no-log/no-store proxy.
+
+This stop point was reached in the real published PWA: direct access failed with
+`Failed to fetch`. The privacy text was updated and Stage 1 now uses only a fixed
+technical `/v1/qwen/test` proxy. It rejects arbitrary prompt fields, keeps the
+temporary credential inside Worker, and does not authorize general child chat.

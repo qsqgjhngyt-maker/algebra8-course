@@ -24,7 +24,7 @@ export default {
         await enforceRate(env.AUTH_RATE_LIMITER,rateKey(request,"challenge"));
         const body=await readJson(request);
         const purpose=String(body.purpose||"");
-        if(!["enroll","temporary-credential"].includes(purpose))throw httpError(400,"invalid_purpose");
+        if(!["enroll","temporary-credential","qwen-test"].includes(purpose))throw httpError(400,"invalid_purpose");
         const now=Math.floor(Date.now()/1000);
         const nonce=randomId(18);
         const payload={
@@ -74,6 +74,37 @@ export default {
         if(!upstream.ok||!result.token)throw httpError(502,"temporary_credential_failed");
         return json({token:result.token,expiresAt:result.expires_at,tokenType:"Bearer"},200,origin,env);
       }
+      if(request.method==="POST"&&url.pathname==="/v1/qwen/test"){
+        const body=await readJson(request);
+        if(Object.keys(body).some(key=>!["challengeToken","deviceCertificate","proof"].includes(key)))throw httpError(400,"unexpected_field");
+        const challenge=await verifyObject(body.challengeToken,env.GRANT_SIGNING_SECRET);
+        validateChallenge(challenge,"qwen-test",env);
+        const certificate=await verifyObject(body.deviceCertificate,env.GRANT_SIGNING_SECRET);
+        validateCertificate(certificate,env);
+        await enforceRate(env.TOKEN_RATE_LIMITER,`qwen-test:${certificate.cnf.jkt}`);
+        await rejectReplay(env,challenge.jti);
+        await verifyDeviceProof(certificate.cnf.jwk,body.proof,`qwen-test\n${body.challengeToken}\n${body.deviceCertificate}`);
+
+        const issued=await mintTemporaryCredential(env);
+        const upstream=await fetch(new URL("chat/completions",env.QWEN_API_BASE.replace(/\/?$/,"/")).toString(),{
+          method:"POST",
+          headers:{"Authorization":`Bearer ${issued.token}`,"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:env.QWEN_MODEL,
+            messages:[
+              {role:"system",content:"Ответь безопасно и очень кратко. Это техническая проверка соединения."},
+              {role:"user",content:"Ответь одним словом: готово"}
+            ],
+            stream:false,max_tokens:12,temperature:0
+          }),
+          cf:{cacheTtl:0,cacheEverything:false}
+        });
+        const text=await upstream.text();
+        let result={};try{result=JSON.parse(text)}catch(e){}
+        const answer=String(result?.choices?.[0]?.message?.content||"").trim().slice(0,160);
+        if(!upstream.ok||!answer)throw httpError(502,"qwen_test_failed");
+        return json({answer},200,origin,env);
+      }
       return json({error:"not_found"},404,origin,env);
     }catch(error){
       const status=Number(error?.status)||500;
@@ -84,9 +115,19 @@ export default {
 };
 
 function requiredConfig(env){
-  return !!(env.ALLOWED_ORIGIN&&env.GOOGLE_CLIENT_ID&&env.QWEN_TEMP_TOKEN_URL&&
+  return !!(env.ALLOWED_ORIGIN&&env.GOOGLE_CLIENT_ID&&env.QWEN_TEMP_TOKEN_URL&&env.QWEN_API_BASE&&env.QWEN_MODEL&&
     env.DASHSCOPE_API_KEY&&env.GRANT_SIGNING_SECRET&&env.PARENT_GOOGLE_SUB&&
     env.PARENT_GOOGLE_SUB!=="PENDING_REPLACE_AFTER_FIRST_GOOGLE_SIGNIN");
+}
+async function mintTemporaryCredential(env){
+  const upstream=await fetch(env.QWEN_TEMP_TOKEN_URL,{
+    method:"POST",headers:{"Authorization":`Bearer ${env.DASHSCOPE_API_KEY}`},
+    cf:{cacheTtl:0,cacheEverything:false}
+  });
+  const text=await upstream.text();
+  let result={};try{result=JSON.parse(text)}catch(e){}
+  if(!upstream.ok||!result.token)throw httpError(502,"temporary_credential_failed");
+  return result;
 }
 function httpError(status,message){const error=new Error(message);error.status=status;return error}
 function boundedInt(value,fallback,min,max){

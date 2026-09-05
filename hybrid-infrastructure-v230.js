@@ -2,7 +2,7 @@
    Kitsune v2.3.0-alpha · Hybrid Intelligence infrastructure client
 
    Adult-only enrollment and connection diagnostics. This module does not
-   route child conversations yet. Temporary Qwen credentials are memory-only.
+   route child conversations yet. The fixed test does not accept user text.
    ===================================================================== */
 (() => {
   "use strict";
@@ -43,8 +43,7 @@
     }catch(e){return ""}
   }
   function configured(){
-    return !!(config.enabled&&config.brokerOrigin&&config.googleClientId&&
-      config.qwenApiBase&&config.qwenModel);
+    return !!(config.enabled&&config.brokerOrigin&&config.googleClientId);
   }
   function consented(){
     try{return localStorage.getItem(CONSENT_KEY)==="1"}catch(e){return false}
@@ -232,56 +231,34 @@
       state.broker="failed";state.detail=String(error?.message||error);
     }finally{state.busy=false;notify()}
   }
-  async function requestTemporaryCredential(){
+  async function requestQwenTest(){
     const record=await dbGet("current");
     if(!record?.privateKey||!record?.certificate)throw new Error("Сначала подтвердите Google и устройство");
-    const tokenChallenge=await challenge("temporary-credential");
-    const proof=await sign(record,`temporary-credential\n${tokenChallenge.challengeToken}\n${record.certificate}`);
-    return brokerFetch("v1/temporary-credential",{
+    const testChallenge=await challenge("qwen-test");
+    const proof=await sign(record,`qwen-test\n${testChallenge.challengeToken}\n${record.certificate}`);
+    return brokerFetch("v1/qwen/test",{
       method:"POST",
       body:JSON.stringify({
-        challengeToken:tokenChallenge.challengeToken,
+        challengeToken:testChallenge.challengeToken,
         deviceCertificate:record.certificate,
         proof
       })
     });
   }
   async function testQwen(){
-    let temporaryToken="";
     try{
       state.busy=true;state.qwen="testing";state.answer="not-tested";
-      state.detail="Получаю временный credential и проверяю прямое соединение…";notify();
-      const issued=await requestTemporaryCredential();
-      temporaryToken=issued.token;
-      if(!temporaryToken)throw new Error("Broker не вернул временный credential");
-      const response=await fetch(new URL("chat/completions",config.qwenApiBase.replace(/\/?$/,"/")).toString(),{
-        method:"POST",cache:"no-store",credentials:"omit",
-        headers:{"Authorization":`Bearer ${temporaryToken}`,"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:config.qwenModel,
-          messages:[
-            {role:"system",content:"Ответь безопасно и очень кратко. Это техническая проверка соединения."},
-            {role:"user",content:"Ответь одним словом: готово"}
-          ],
-          stream:false,
-          max_tokens:12,
-          temperature:0
-        })
-      });
-      const text=await response.text();
-      let body={};try{body=JSON.parse(text)}catch(e){}
-      if(!response.ok)throw new Error(body?.error?.message||`Qwen HTTP ${response.status}`);
-      const answer=String(body?.choices?.[0]?.message?.content||"").trim();
+      state.detail="Проверяю Qwen через защищённый broker фиксированной технической фразой…";notify();
+      const result=await requestQwenTest();
+      const answer=String(result.answer||"").trim();
       if(!answer)throw new Error("Qwen вернул пустой тестовый ответ");
-      state.qwen="connected";state.answer="received";state.directCors="pass";
-      state.detail=`Тестовый ответ получен: ${answer.slice(0,80)}`;
+      state.qwen="connected";state.answer="received";state.directCors="failed";
+      state.detail=`Тестовый ответ получен через broker: ${answer.slice(0,80)}`;
     }catch(error){
       state.qwen="failed";state.answer="not-received";
       const message=String(error?.message||error);
-      state.directCors=/fetch|cors|network/i.test(message)?"failed":"unknown";
-      state.detail=`Direct test не прошёл: ${message}. Proxy не включается автоматически.`;
+      state.detail=`Тест Qwen через broker не прошёл: ${message}`;
     }finally{
-      temporaryToken="";
       state.busy=false;notify();
     }
   }
@@ -303,7 +280,7 @@
       <h3>Cloud Brain</h3>
       <p>Облачный интеллект необязателен. Курс, Math Engine, локальный Brain, Whisper и голос продолжают работать без него.</p>
       ${setup?"":`<div class="khi-notice warn"><b>Нужна настройка владельца</b><span>Публичные адреса и Google Client ID ещё не заданы. Секреты сюда вводить нельзя.</span></div>`}
-      <label class="sx-switch"><input type="checkbox" id="khiConsent" ${consented()?"checked":""} ${setup?"":"disabled"}><span><b>Разрешить Cloud Brain на этом устройстве</b><small>В облако может уходить только минимальный текст текущего вопроса. Raw-аудио, Mastery, ошибки, ДЗ и фото остаются локально.</small></span></label>
+      <label class="sx-switch"><input type="checkbox" id="khiConsent" ${consented()?"checked":""} ${setup?"":"disabled"}><span><b>Разрешить Cloud Brain на этом устройстве</b><small>На Stage 1 через Cloudflare проходит только фиксированная техническая фраза и короткий ответ. Текст ребёнка, raw-аудио, Mastery, ошибки, ДЗ и фото не отправляются.</small></span></label>
       <div class="khi-status-grid">
         <div><b>Google authorized</b>${badge(state.google)}</div>
         <div><b>Broker connected</b>${badge(state.broker)}</div>
@@ -318,7 +295,7 @@
         <button class="secondary" id="khiDisconnect" ${state.device==="enrolled"?"":"disabled"}>Отключить устройство</button>
       </div>
       <div class="khi-detail ${state.detail?"show":""}" role="status" aria-live="polite">${esc(state.detail||"Проверки ещё не запускались.")}</div>
-      <p class="khi-foot">Режим данных: <b>${esc(config.privacyMode)}</b>. Temporary credential хранится только в памяти и очищается после теста. Direct CORS: ${esc(state.directCors)}.</p>
+      <p class="khi-foot">Режим данных: <b>${esc(config.privacyMode)}</b>. Временный credential остаётся внутри Worker; запрос и ответ не сохраняются. Direct CORS: ${esc(state.directCors)} (используется защищённый test proxy).</p>
     </section>`;
   }
   function bind(){
