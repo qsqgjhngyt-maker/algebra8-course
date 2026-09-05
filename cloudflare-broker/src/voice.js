@@ -7,6 +7,20 @@ export function voiceText(text){
     !/https?:|www\.|@|\+?\d[\d ()-]{8,}\d|меня зовут|мой адрес|мой пароль/i.test(text);
 }
 
+function safeProviderError(status,result={}){
+  const code=String(result?.code||"").slice(0,80);
+  const message=String(result?.message||"").slice(0,160);
+  console.warn("[Kitsune Qwen Voice upstream]",status,code,message);
+  if(status===401||/unauthor|invalid.?api.?key/i.test(code+" "+message))return "voice_auth_failed";
+  if(status===403||/permission|forbidden|access/i.test(code+" "+message))return "voice_permission_denied";
+  if(/voice/i.test(code+" "+message)&&/invalid|not.?found|mismatch/i.test(code+" "+message))return "voice_id_mismatch";
+  if(/model/i.test(code+" "+message)&&/invalid|not.?found|mismatch/i.test(code+" "+message))return "voice_model_mismatch";
+  if(/region/i.test(code+" "+message))return "voice_region_mismatch";
+  if(status===429)return "voice_rate_limited";
+  if(status>=500)return "voice_provider_unavailable";
+  return "voice_request_rejected";
+}
+
 async function post(env,path,body,signal){
   const base=new URL(env.QWEN_API_BASE);
   const response=await fetch(new URL(path,base.origin),{
@@ -24,13 +38,7 @@ async function post(env,path,body,signal){
   let result={};
   try{result=text?JSON.parse(text):{}}catch{}
 
-  if(!response.ok){
-    const providerMessage=String(
-      result?.message||result?.code||result?.request_id||"voice_unavailable"
-    );
-    console.warn("[Kitsune Qwen Voice upstream]",response.status,providerMessage.slice(0,160));
-    throw new Error("voice_unavailable");
-  }
+  if(!response.ok)throw new Error(safeProviderError(response.status,result));
   return result;
 }
 
@@ -51,15 +59,25 @@ export async function designVoice(env,signal){
   const voice=result.output?.voice;
   const preview=result.output?.preview_audio?.data;
   if(typeof voice!=="string"||voice.length>200)throw new Error("invalid_voice");
-  return {
-    voiceId:voice,
-    preview:typeof preview==="string"&&preview.length<4000000?preview:""
-  };
+  return {voiceId:voice,preview:typeof preview==="string"&&preview.length<4000000?preview:""};
+}
+
+function approvedAudioUrl(raw){
+  let url;
+  try{url=new URL(String(raw||""))}catch{return null}
+
+  const approved=/(?:^|\.)(?:aliyuncs\.com|alicdn\.com)$/.test(url.hostname);
+  if(!approved)return null;
+
+  /* Qwen-TTS non-streaming responses may return an http:// OSS URL even
+     though the same Alibaba OSS object is available over HTTPS.
+     Never fetch it in plaintext: upgrade ONLY an allow-listed Alibaba host. */
+  if(url.protocol==="http:")url.protocol="https:";
+  if(url.protocol!=="https:")return null;
+  return url;
 }
 
 export async function synthesize(env,text,signal){
-  /* Return a safe diagnostic code instead of throwing it into the generic
-     broker_error masker. No secret value is ever returned. */
   if(!env.QWEN_VOICE_ID)return {error:"voice_not_configured"};
 
   try{
@@ -71,23 +89,14 @@ export async function synthesize(env,text,signal){
         input:{
           text,
           voice:env.QWEN_VOICE_ID,
-          /* Alibaba Qwen-TTS HTTP API expects language_type INSIDE input. */
           language_type:"Russian"
         }
       },
       signal
     );
 
-    const rawUrl=String(result.output?.audio?.url||"");
-    if(!rawUrl)return {error:"audio_url_missing"};
-
-    let audioUrl;
-    try{audioUrl=new URL(rawUrl)}catch{return {error:"invalid_audio_url"}}
-
-    if(
-      audioUrl.protocol!=="https:" ||
-      !/(?:^|\.)(?:aliyuncs\.com|alicdn\.com)$/.test(audioUrl.hostname)
-    )return {error:"invalid_audio_url"};
+    const audioUrl=approvedAudioUrl(result.output?.audio?.url);
+    if(!audioUrl)return {error:"invalid_audio_url"};
 
     const response=await fetch(audioUrl,{
       signal,
@@ -125,7 +134,8 @@ export async function synthesize(env,text,signal){
     }
     return {audio:btoa(binary),mime:"audio/wav"};
   }catch(error){
-    console.warn("[Kitsune Character Voice]",String(error?.message||error).slice(0,160));
-    return {error:String(error?.message||"voice_unavailable").slice(0,80)};
+    const code=String(error?.message||"voice_unavailable").slice(0,80);
+    console.warn("[Kitsune Character Voice]",code);
+    return {error:code};
   }
 }

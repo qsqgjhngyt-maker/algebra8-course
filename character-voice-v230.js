@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.2.1 · Character Voice runtime
+   Kitsune v2.3.0-beta.2.2 · Character Voice runtime
    Cloud Qwen Character Voice -> local Piper/System fallback.
    Adult diagnostics expose the REAL engine and the last TTS failure.
    No voice identifier or secret is ever displayed.
@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.2.1";
+  const VERSION="2.3.0-beta.2.2";
   const fallback=window.v151Speak;
   const previousStop=window.v161StopSpeech;
 
@@ -32,6 +32,14 @@
       voice_not_configured:"QWEN_VOICE_ID не настроен в Worker",
       voice_disabled:"VOICE_ENABLED выключен",
       voice_unavailable:"Qwen TTS недоступен или ключ/модель не имеют нужного доступа",
+      voice_auth_failed:"Alibaba отклонил API key для TTS",
+      voice_permission_denied:"У API key нет разрешения на модель Character Voice",
+      voice_id_mismatch:"Созданный QWEN_VOICE_ID не подходит к выбранной TTS-модели",
+      voice_model_mismatch:"TTS-модель не совпадает с моделью, для которой создан голос",
+      voice_region_mismatch:"Голос и API key находятся в разных регионах Model Studio",
+      voice_rate_limited:"Alibaba ограничил частоту TTS-запросов",
+      voice_provider_unavailable:"Сервис Qwen TTS временно недоступен",
+      voice_request_rejected:"Alibaba отклонил параметры TTS-запроса",
       audio_unavailable:"Синтез создан, но аудиофайл не удалось получить",
       invalid_audio_url:"Провайдер вернул неожиданный адрес аудио",
       cloud_consent_required:"Облачный голос не разрешён взрослым",
