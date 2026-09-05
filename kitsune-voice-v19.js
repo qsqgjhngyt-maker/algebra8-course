@@ -19,6 +19,7 @@
   let voiceReplies=true;
   let history=[];
   let activeCtx=null;
+  let messageSequence=0;
   let worker=null;
   let workerReady=false;
   let workerLoading=false;
@@ -536,6 +537,7 @@
   }
 
   async function sendMessage(text){
+    const turn=++messageSequence;
     const ctx=currentCtx();
     activeCtx=ctx;
     const key=contextKey(ctx);
@@ -559,6 +561,7 @@
       reply="Сейчас не получилось сформулировать ответ именно на этот вопрос. Попробуй написать его чуть короче.";
     }
 
+    if(turn!==messageSequence||contextKey(currentCtx())!==key)return;
     dialogState("");
     addHistory("assistant",reply,ctx);
 

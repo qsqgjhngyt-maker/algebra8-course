@@ -1,7 +1,9 @@
-const CACHE="algebra8-v2.3.0-alpha.2";
+const CACHE="algebra8-v2.3.0-beta";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-alpha.2";
+const RELEASE="2.3.0-beta";
 const ASSETS=[
+  "./privacy-v1111.js?v=2.3.0-beta",
+  "./index.html?v=2.3.0-beta","./kitsune-brain-v18.js?v=2.3.0-beta","./kitsune-voice-v19.js?v=2.3.0-beta","./hybrid-infrastructure-v230.js?v=2.3.0-beta","./intelligence-router-v230.js?v=2.3.0-beta","./character-voice-v230.js?v=2.3.0-beta",
   "./","./index.html?v=2.3.0-alpha.1","./styles.css?v=2.3.0-alpha","./app.js?v=2.2.3","./chapter1-v02.js?v=2.2.3","./course-v1.js?v=2.2.3",
   "./manifest.json?v=2.3.0-alpha","./assets/icon-192.png","./assets/icon-512.png","./assets/icon-maskable-192.png","./assets/icon-maskable-512.png","./assets/apple-touch-icon-180.png","./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png","./assets/kitsune/idle.png","./assets/kitsune/blink.png","./assets/kitsune/talk-small.png","./assets/kitsune/talk-wide.png","./assets/kitsune/talk-o.png","./assets/kitsune/happy.png","./assets/kitsune/explain.png","./assets/kitsune/idle-alt.png","./cloud-config-v230.js?v=2.3.0-alpha.2","./hybrid-infrastructure-v230.js?v=2.3.0-alpha.2",

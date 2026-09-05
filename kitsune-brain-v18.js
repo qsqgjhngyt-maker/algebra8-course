@@ -1072,6 +1072,9 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     chat:dialogReply,
     explainMath,
     dialogFallback
+    ,safetyCheck:childSafetyCheck
+    ,safeReply:childSafeReply
+    ,localMathExplanation
   };
 
   injectSettings();

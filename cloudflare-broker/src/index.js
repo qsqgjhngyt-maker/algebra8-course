@@ -1,3 +1,5 @@
+import {allowedMessage,chat} from "./chat.js";
+import {voiceText,synthesize,designVoice} from "./voice.js";
 const encoder=new TextEncoder();
 const MAX_BODY_BYTES=24*1024;
 const GOOGLE_ISSUERS=new Set(["accounts.google.com","https://accounts.google.com"]);
@@ -24,7 +26,7 @@ export default {
         await enforceRate(env.AUTH_RATE_LIMITER,rateKey(request,"challenge"));
         const body=await readJson(request);
         const purpose=String(body.purpose||"");
-        if(!["enroll","temporary-credential","qwen-test"].includes(purpose))throw httpError(400,"invalid_purpose");
+        if(!["enroll","temporary-credential","qwen-test","chat","tts","voice-design"].includes(purpose))throw httpError(400,"invalid_purpose");
         const now=Math.floor(Date.now()/1000);
         const nonce=randomId(18);
         const payload={
@@ -105,6 +107,39 @@ export default {
         if(!upstream.ok||!answer)throw httpError(502,"qwen_test_failed");
         return json({answer},200,origin,env);
       }
+      if(request.method==="POST"&&["/v1/qwen/tts","/v1/qwen/voice-design"].includes(url.pathname)){
+        const kind=url.pathname.endsWith("voice-design")?"voice-design":"tts";
+        if(kind==="tts"&&env.VOICE_ENABLED!=="true")throw httpError(403,"voice_disabled");
+        if(kind==="voice-design"&&env.VOICE_DESIGN_ENABLED!=="true")throw httpError(403,"voice_design_disabled");
+        const body=await readJson(request);
+        if(!body||Object.keys(body).some(k=>!["challengeToken","deviceCertificate","proof","text"].includes(k))||!voiceText(body.text))throw httpError(400,"invalid_voice_text");
+        if(kind==="voice-design"&&body.text!=="create-kitsune-fictional-voice")throw httpError(400,"invalid_design");
+        const challenge=await verifyObject(body.challengeToken,env.GRANT_SIGNING_SECRET);
+        validateChallenge(challenge,kind,env);
+        const certificate=await verifyObject(body.deviceCertificate,env.GRANT_SIGNING_SECRET);
+        validateCertificate(certificate,env);
+        await verifyDeviceProof(certificate.cnf.jwk,body.proof,`${kind}\n${body.challengeToken}\n${body.deviceCertificate}\n${await sha256Text(body.text)}`);
+        await enforceRate(env.TOKEN_RATE_LIMITER,certificate.cnf.jkt);
+        await rejectReplay(env,challenge.jti);
+        const signal=AbortSignal.any([request.signal,AbortSignal.timeout(25000)]);
+        return json(kind==="tts"?await synthesize(env,body.text,signal):await designVoice(env,signal),200,origin,env);
+      }
+      if(request.method==="POST"&&url.pathname==="/v1/qwen/chat"){
+        if(env.CHAT_ENABLED!=="true")throw httpError(403,"chat_disabled");
+        const body=await readJson(request);
+        if(!body||Object.keys(body).some(k=>!["challengeToken","deviceCertificate","proof","message"].includes(k))||!allowedMessage(body.message))throw httpError(400,"local_only");
+        const challenge=await verifyObject(body.challengeToken,env.GRANT_SIGNING_SECRET);
+        validateChallenge(challenge,"chat",env);
+        const certificate=await verifyObject(body.deviceCertificate,env.GRANT_SIGNING_SECRET);
+        validateCertificate(certificate,env);
+        await verifyDeviceProof(certificate.cnf.jwk,body.proof,`chat\n${body.challengeToken}\n${body.deviceCertificate}\n${await sha256Text(body.message)}`);
+        await enforceRate(env.TOKEN_RATE_LIMITER,certificate.cnf.jkt);
+        await rejectReplay(env,challenge.jti);
+        const signal=AbortSignal.any([request.signal,AbortSignal.timeout(20000)]);
+        const issued=await mintTemporaryCredential(env,signal);
+        const answer=await chat(env,body.message,issued.token,signal);
+        return json({answer},200,origin,env);
+      }
       return json({error:"not_found"},404,origin,env);
     }catch(error){
       const status=Number(error?.status)||500;
@@ -119,9 +154,9 @@ function requiredConfig(env){
     env.DASHSCOPE_API_KEY&&env.GRANT_SIGNING_SECRET&&env.PARENT_GOOGLE_SUB&&
     env.PARENT_GOOGLE_SUB!=="PENDING_REPLACE_AFTER_FIRST_GOOGLE_SIGNIN");
 }
-async function mintTemporaryCredential(env){
+async function mintTemporaryCredential(env,signal){
   const upstream=await fetch(env.QWEN_TEMP_TOKEN_URL,{
-    method:"POST",headers:{"Authorization":`Bearer ${env.DASHSCOPE_API_KEY}`},
+    method:"POST",signal,headers:{"Authorization":`Bearer ${env.DASHSCOPE_API_KEY}`},
     cf:{cacheTtl:0,cacheEverything:false}
   });
   const text=await upstream.text();

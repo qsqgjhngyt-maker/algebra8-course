@@ -263,6 +263,7 @@
     }
   }
   async function disconnect(){
+    window.KitsuneRouter?.cancel?.();
     try{window.google?.accounts?.id?.disableAutoSelect?.()}catch(e){}
     await dbClear();setConsent(false);
     Object.assign(state,{google:"not-authorized",device:"not-enrolled",qwen:"not-tested",answer:"not-tested",detail:"Cloud Brain отключён на этом устройстве.",directCors:"not-tested"});
@@ -276,11 +277,11 @@
   function panel(){
     const setup=configured();
     return `<section class="sx-adult-card khi-panel">
-      <span class="eyebrow">Hybrid Intelligence · Stage 1</span>
+      <span class="eyebrow">Hybrid Intelligence · Stage 2 beta</span>
       <h3>Cloud Brain</h3>
       <p>Облачный интеллект необязателен. Курс, Math Engine, локальный Brain, Whisper и голос продолжают работать без него.</p>
       ${setup?"":`<div class="khi-notice warn"><b>Нужна настройка владельца</b><span>Публичные адреса и Google Client ID ещё не заданы. Секреты сюда вводить нельзя.</span></div>`}
-      <label class="sx-switch"><input type="checkbox" id="khiConsent" ${consented()?"checked":""} ${setup?"":"disabled"}><span><b>Разрешить Cloud Brain на этом устройстве</b><small>На Stage 1 через Cloudflare проходит только фиксированная техническая фраза и короткий ответ. Текст ребёнка, raw-аудио, Mastery, ошибки, ДЗ и фото не отправляются.</small></span></label>
+      <label class="sx-switch"><input type="checkbox" id="khiConsent" ${consented()?"checked":""} ${setup?"":"disabled"}><span><b>Разрешить подключение Cloud Brain</b><small>Техническая проверка отправляет фиксированную фразу. Облачный разговор и голос включаются отдельно ниже.</small></span></label>
       <div class="khi-status-grid">
         <div><b>Google authorized</b>${badge(state.google)}</div>
         <div><b>Broker connected</b>${badge(state.broker)}</div>
@@ -301,6 +302,7 @@
   function bind(){
     document.querySelector("#khiConsent")?.addEventListener("change",event=>{
       setConsent(!!event.target.checked);
+      if(!event.target.checked)window.KitsuneRouter?.cancel?.();
       state.detail=event.target.checked?"Cloud Brain разрешён взрослым на этом устройстве.":"Cloud Brain выключен; локальные функции не изменены.";
       notify();
     });
@@ -333,7 +335,18 @@
     status:()=>({...state}),
     checkBroker,
     testQwen,
-    disconnect
+    disconnect,
+    async cloudRequest(kind,payload,{signal}={}){
+      if(!consented()||!window.KitsuneRouter?.consented?.())throw new Error("cloud_consent_required");
+      if(!["chat","tts","voice-design"].includes(kind))throw new Error("invalid_kind");
+      const record=await dbGet("current");
+      if(!record?.certificate||record.certificateExpiresAt<=Date.now()/1000)throw new Error("enrollment_required");
+      const nonce=await brokerFetch("v1/auth/challenge",{method:"POST",signal,body:JSON.stringify({purpose:kind,clientNonce:randomId()})});
+      const hash=base64url(await crypto.subtle.digest("SHA-256",utf8(payload)));
+      const proof=await sign(record,`${kind}\n${nonce.challengeToken}\n${record.certificate}\n${hash}`);
+      const body={challengeToken:nonce.challengeToken,deviceCertificate:record.certificate,proof,[kind==="chat"?"message":"text"]:payload};
+      return brokerFetch(`v1/qwen/${kind}`,{method:"POST",signal,body:JSON.stringify(body)});
+    }
   };
   restore();
 })();

@@ -5,6 +5,9 @@
   "compatibility_date": "2026-08-01",
   "workers_dev": true,
   "vars": {
+    "CHAT_ENABLED": "true",
+    "VOICE_ENABLED": "true",
+    "VOICE_DESIGN_ENABLED": "true",
     "ALLOWED_ORIGIN": "https://qsqgjhngyt-maker.github.io",
     "GOOGLE_CLIENT_ID": "917733706537-8761p6aqah238r1g2anvlhupstu9s98t.apps.googleusercontent.com",
     "QWEN_TEMP_TOKEN_URL": "https://ws-xoczzsb7am4cyl8c.ap-southeast-1.maas.aliyuncs.com/api/v1/tokens?expire_in_seconds=60",
