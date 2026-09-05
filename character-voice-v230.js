@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.2 · Character Voice runtime
+   Kitsune v2.3.0-beta.2.1 · Character Voice runtime
    Cloud Qwen Character Voice -> local Piper/System fallback.
    Adult diagnostics expose the REAL engine and the last TTS failure.
    No voice identifier or secret is ever displayed.
@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.2";
+  const VERSION="2.3.0-beta.2.1";
   const fallback=window.v151Speak;
   const previousStop=window.v161StopSpeech;
 
@@ -274,13 +274,17 @@
     </div>`;
   }
 
+  function setText(el,value){
+    if(el&&el.textContent!==value)el.textContent=value;
+  }
+
   function updatePanel(){
     const e=document.querySelector("#kcvEngine");
     const c=document.querySelector("#kcvCloud");
     const x=document.querySelector("#kcvError");
-    if(e)e.textContent=`Фактический движок: ${engineLabel()}`;
-    if(c)c.textContent=`Cloud TTS: ${state.cloud}`;
-    if(x)x.textContent=state.lastError?`Последняя причина fallback: ${state.lastError}`:"";
+    setText(e,`Фактический движок: ${engineLabel()}`);
+    setText(c,`Cloud TTS: ${state.cloud}`);
+    setText(x,state.lastError?`Последняя причина fallback: ${state.lastError}`:"");
   }
 
   function addControls(){
@@ -332,6 +336,15 @@
   document.addEventListener("keydown",unlockAudio,{capture:true});
 
   window.addEventListener("pagehide",stop);
-  new MutationObserver(addControls).observe(document.body,{childList:true,subtree:true});
+  let controlsScheduled=false;
+  const controlsObserver=new MutationObserver(()=>{
+    if(controlsScheduled)return;
+    controlsScheduled=true;
+    requestAnimationFrame(()=>{
+      controlsScheduled=false;
+      addControls();
+    });
+  });
+  controlsObserver.observe(document.body,{childList:true,subtree:true});
   addControls();
 })();

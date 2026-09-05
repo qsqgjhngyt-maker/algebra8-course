@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.2 · Hybrid Intelligence Router
+   Kitsune v2.3.0-beta.2.1 · Hybrid Intelligence Router
    - Qwen Cloud for safe general dialogue, including while a lesson is open.
    - Exact math remains local/deterministic.
    - Only the current text is uploaded; ctx/history/Mastery/photos/audio remain local.
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.2";
+  const VERSION="2.3.0-beta.2.1";
   const KEY="kitsune_cloud_chat_consent_v230";
   const brain=window.KitsuneBrain;
   const local=brain.chat.bind(brain);
@@ -178,13 +178,17 @@
     </div>`;
   }
 
+  function setText(el,value){
+    if(el&&el.textContent!==value)el.textContent=value;
+  }
+
   function updateDiagnostics(){
     const r=document.querySelector("#khiRouterRoute");
     const d=document.querySelector("#khiRouterDetail");
     const e=document.querySelector("#khiRouterError");
-    if(r)r.textContent=`Последний маршрут: ${label(last.route)}`;
-    if(d)d.textContent=last.detail||"";
-    if(e)e.textContent=last.error?`Ошибка cloud: ${last.error}`:"";
+    setText(r,`Последний маршрут: ${label(last.route)}`);
+    setText(d,last.detail||"");
+    setText(e,last.error?`Ошибка cloud: ${last.error}`:"");
   }
 
   async function liveCloudTest(button,result){
@@ -260,7 +264,16 @@
 
   brain.chat=reply;
 
-  new MutationObserver(addControls).observe(document.body,{childList:true,subtree:true});
+  let controlsScheduled=false;
+  const controlsObserver=new MutationObserver(()=>{
+    if(controlsScheduled)return;
+    controlsScheduled=true;
+    requestAnimationFrame(()=>{
+      controlsScheduled=false;
+      addControls();
+    });
+  });
+  controlsObserver.observe(document.body,{childList:true,subtree:true});
   addControls();
   window.addEventListener("pagehide",cancel);
 })();
