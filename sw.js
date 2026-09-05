@@ -1,8 +1,8 @@
-const CACHE="algebra8-v2.3.0-beta.3.2";
+const CACHE="algebra8-v2.3.0-beta.3.3";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3.2";
+const RELEASE="2.3.0-beta.3.3";
 const ASSETS=[
-  "./index.html?v=2.3.0-beta.3.2",
+  "./index.html?v=2.3.0-beta.3.3",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
@@ -57,8 +57,8 @@ const ASSETS=[
   "./reveal-manager-v221.js?v=2.2.3",
   "./cloud-config-v230.js?v=2.3.0-alpha.2",
   "./hybrid-infrastructure-v230.js?v=2.3.0-beta",
-  "./intelligence-router-v230.js?v=2.3.0-beta.3.2", "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.2", "./local-voice-lab-v231.js?v=2.3.0-beta.3.2", "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.2",
-  "./version.json?v=2.3.0-beta.3.2"
+  "./intelligence-router-v230.js?v=2.3.0-beta.3.3", "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3", "./local-voice-lab-v231.js?v=2.3.0-beta.3.3", "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.3",
+  "./version.json?v=2.3.0-beta.3.3"
 ];
 
 const CHILD_CSP=[
@@ -117,7 +117,7 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
-  /* v2.3.0-beta.3.2: cache every same-origin release asset independently.
+  /* v2.3.0-beta.3.3: cache every same-origin release asset independently.
      One optional asset must not make the whole Service Worker install fail. */
   e.waitUntil((async()=>{
     const cache=await caches.open(CACHE);

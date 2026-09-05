@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.2",
+  "version": "2.3.0-beta.3.3",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-qwen-chat-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "QWEN_CHAT_AND_TEMP_CREDENTIAL_DIAGNOSTICS",
+  "release": "QWEN_NON_THINKING_RELIABILITY_FIX",
   "features": [
     "single-adult-cloud-consent",
     "qwen-cloud-primary-general-chat",
@@ -22,6 +22,10 @@
     "no-opfs-clear",
     "no-analytics",
     "safe-qwen-chat-provider-diagnostics",
-    "safe-temp-credential-diagnostics"
+    "safe-temp-credential-diagnostics",
+    "qwen3.7-plus-non-thinking-general-chat",
+    "45s-worker-chat-timeout",
+    "50s-client-chat-timeout",
+    "explicit-chat-timeout-diagnostic"
   ]
 }

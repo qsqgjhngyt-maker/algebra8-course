@@ -9,7 +9,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.2";
+  const VERSION="2.3.0-beta.3.3";
   const brain=window.KitsuneBrain;
   const local=brain.chat.bind(brain);
 
@@ -42,6 +42,7 @@
 
   function formatCloudError(error){
     const raw=String(error||"");
+    if(raw==="chat_timeout")return "Qwen Cloud: превышено время ожидания ответа (45 секунд).";
     const prefixes={
       "chat_provider_diag":"Alibaba Qwen Chat",
       "chat_stream_diag":"Alibaba Qwen Stream",
@@ -154,7 +155,7 @@
 
     /* General safe conversation: Qwen is the primary lane. */
     if(cloudReady(text)){
-      const timeout=setTimeout(()=>controller.abort(),24000);
+      const timeout=setTimeout(()=>controller.abort(),50000);
       try{
         const result=await window.KitsuneHybridInfrastructure.cloudRequest(
           "chat",
