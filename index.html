@@ -7,6 +7,7 @@
     content="default-src 'self';
              base-uri 'self';
              object-src 'none';
+             frame-src 'none';
              form-action 'none';
              manifest-src 'self';
              img-src 'self' data: blob:;
@@ -18,7 +19,7 @@
              child-src 'self' blob: https://cdn.jsdelivr.net;
              frame-src https://accounts.google.com;
              connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com;" />
-  <meta name="kitsune-app-version" content="2.3.0-beta" />
+  <meta name="kitsune-app-version" content="2.3.0-beta.2" />
   <script src="./security-bootstrap-v1111.js?v=2.3.0-alpha"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#49b447" />
@@ -29,7 +30,6 @@
   <link rel="preload" as="image" href="./assets/kitsune/kitsune-sprite-v1101.png" />
   <link rel="stylesheet" href="./styles.css?v=2.3.0-alpha" />
   <title>Алгебра 8 — Учись · Понимай · Решай</title>
-  <style>body:not(.kitsune-adult-tools) #v18KitsuneBrain,body:not(.kitsune-adult-tools) #v17NeuralVoice,body:not(.kitsune-adult-tools) #v19VoiceSettings{display:none!important}</style>
 </head>
 <body>
   <canvas id="particlesCanvas" class="particles-canvas" aria-hidden="true"></canvas>
@@ -68,7 +68,7 @@
         <button id="themeBtn" class="ghost">🌙 Тёмная тема</button>
         <button id="effectsBtn" class="ghost">✨ Эффекты: авто</button>
         <button id="privacyBtn" class="ghost">🔒 Приватность</button>
-        <button id="updateBtn" class="ghost" type="button">🔄 Версия v2.3.0-alpha</button>
+        <button id="updateBtn" class="ghost" type="button">🔄 Версия v2.3.0-beta.2</button>
         <button id="installBtn" class="ghost hidden">⬇️ Установить приложение</button>
       </div>
     </aside>
@@ -154,7 +154,7 @@
           <span class="eyebrow">Полный курс</span>
           <h3>Все 6 глав</h3>
         </div>
-        <span class="status-chip">все главы готовы · v2.3.0-alpha</span>
+        <span class="status-chip">все главы готовы · v2.3.0-beta.2</span>
       </div>
       <div id="homeTopics" class="cards-grid"></div>
     </section>
@@ -189,8 +189,8 @@
   <script src="./reliability-center-v220.js?v=2.3.0-alpha"></script>
   <script src="./cloud-config-v230.js?v=2.3.0-alpha.2"></script>
   <script src="./hybrid-infrastructure-v230.js?v=2.3.0-beta"></script>
-  <script src="./intelligence-router-v230.js?v=2.3.0-beta"></script>
-  <script src="./character-voice-v230.js?v=2.3.0-beta"></script>
+  <script src="./intelligence-router-v230.js?v=2.3.0-beta.2"></script>
+  <script src="./character-voice-v230.js?v=2.3.0-beta.2"></script>
   <script src="./student-experience-v220.js?v=2.3.0-alpha"></script>
   <script src="./app-kernel-v200.js?v=2.2.3"></script>
   <script src="./auto-setup-v210.js?v=2.2.3"></script>
