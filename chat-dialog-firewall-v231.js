@@ -1,7 +1,7 @@
-/* Kitsune v2.3.0-beta.3.1 · Chat Dialog Navigation Firewall */
+/* Kitsune v2.3.0-beta.3.2 · Chat Dialog Navigation Firewall */
 (() => {
   "use strict";
-  const VERSION="2.3.0-beta.3.1";
+  const VERSION="2.3.0-beta.3.2";
   const TYPES=["click","pointerup","pointerdown","touchend","submit","keydown"];
 
   function bind(dialog){

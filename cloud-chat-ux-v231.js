@@ -1,7 +1,7 @@
-/* Kitsune v2.3.0-beta.3.1 · Cloud route visibility in chat */
+/* Kitsune v2.3.0-beta.3.2 · Cloud route visibility in chat */
 (() => {
   "use strict";
-  const VERSION="2.3.0-beta.3.1";
+  const VERSION="2.3.0-beta.3.2";
   let current={route:"local",detail:""};
 
   const LABELS={

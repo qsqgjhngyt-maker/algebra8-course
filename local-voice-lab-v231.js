@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.1 · LOCAL VOICE LAB
+   Kitsune v2.3.0-beta.3.2 · LOCAL VOICE LAB
    Cloud TTS is not used.
    Piper Irina runs directly in the browser.
    Silero Xenia/Kseniya are actual Silero voices via optional 127.0.0.1
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.1";
+  const VERSION="2.3.0-beta.3.2";
   const KEY="a8_local_voice_v231";
   const PIPER_URL="https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm";
   const IRINA_ID="ru_RU-irina-medium";

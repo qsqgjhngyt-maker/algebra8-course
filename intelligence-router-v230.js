@@ -9,7 +9,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.1";
+  const VERSION="2.3.0-beta.3.2";
   const brain=window.KitsuneBrain;
   const local=brain.chat.bind(brain);
 
@@ -38,6 +38,24 @@
 
   function setText(el,value){
     if(el&&el.textContent!==value)el.textContent=value;
+  }
+
+  function formatCloudError(error){
+    const raw=String(error||"");
+    const prefixes={
+      "chat_provider_diag":"Alibaba Qwen Chat",
+      "chat_stream_diag":"Alibaba Qwen Stream",
+      "credential_provider_diag":"Alibaba Temporary Credential"
+    };
+    const prefix=Object.keys(prefixes).find(key=>raw.startsWith(key+"|"));
+    if(prefix){
+      const parts=raw.split("|");
+      const http=parts[1]||"HTTP ?";
+      const code=parts[2]||"unknown";
+      const message=parts.slice(3).join("|")||"no message";
+      return `${prefixes[prefix]}: ${http} · ${code} · ${message}`;
+    }
+    return raw;
   }
 
   function setRoute(next,detail="",error=""){
@@ -123,7 +141,7 @@
         return brain.safeReply(brain.localMathExplanation(text,result));
       }catch(error){
         if(error?.name==="AbortError")throw error;
-        setRoute("math","Math Engine не смог надёжно разобрать запись.",String(error?.message||error));
+        setRoute("math","Math Engine не смог надёжно разобрать запись.",formatCloudError(error?.message||error));
         return "Не удалось надёжно разобрать выражение. Запиши его в Math Lab — проверим шаг за шагом.";
       }
     }
@@ -160,7 +178,7 @@
         setRoute(
           "local-fallback",
           "Cloud Brain не ответил — только тогда включён локальный fallback.",
-          String(error?.message||error||"cloud_failed")
+          formatCloudError(error?.message||error||"cloud_failed")
         );
       }finally{
         clearTimeout(timeout);
@@ -218,7 +236,7 @@
           :`⚠️ Реплика не дошла до Qwen. Маршрут: ${label(last.route)}. ${last.error||last.detail}`;
       }
     }catch(error){
-      if(result)result.textContent=`❌ Тест: ${String(error?.message||error)}`;
+      if(result)result.textContent=`❌ Тест: ${formatCloudError(error?.message||error)}`;
     }finally{
       if(button)button.disabled=false;
       updateDiagnostics();
