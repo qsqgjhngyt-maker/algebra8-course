@@ -1,26 +1,22 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.2.1 · Hybrid Intelligence Router
-   - Qwen Cloud for safe general dialogue, including while a lesson is open.
-   - Exact math remains local/deterministic.
-   - Only the current text is uploaded; ctx/history/Mastery/photos/audio remain local.
-   - Adult Center shows the real route used by the last request.
+   Kitsune v2.3.0-beta.3 · Universal Cloud Chat Router
+   - Safe ordinary conversation uses Qwen Cloud by default when adult consent
+     is enabled, even while an exercise is open.
+   - Explicit task help stays in local Tutor/Math Engine.
+   - Exact math stays deterministic/local.
+   - Cloud receives ONLY the current text message. No task ctx/history/Mastery.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.2.1";
+  const VERSION="2.3.0-beta.3";
   const KEY="kitsune_cloud_chat_consent_v230";
   const brain=window.KitsuneBrain;
   const local=brain.chat.bind(brain);
 
   let active=null;
   let route="local";
-  let last={
-    route:"local",
-    detail:"Ещё не было пользовательских запросов.",
-    error:"",
-    ts:0
-  };
+  let last={route:"local",detail:"Ещё не было пользовательских запросов.",error:"",ts:0};
 
   const LABELS={
     "course":"Course tools · local",
@@ -34,13 +30,15 @@
   function consented(){
     try{return localStorage.getItem(KEY)==="1"}catch{return false}
   }
-
   function label(value){return LABELS[value]||value}
 
   function cancel(){
     active?.abort();
     active=null;
-    window.KitsuneCharacterVoice?.stop?.();
+  }
+
+  function setText(el,value){
+    if(el&&el.textContent!==value)el.textContent=value;
   }
 
   function setRoute(next,detail="",error=""){
@@ -65,9 +63,17 @@
     );
   }
 
+  /* Only phrases that clearly refer to the currently opened exercise stay
+     in the local tutor lane. Everything else is ordinary conversation. */
+  function isTaskIntent(text,ctx){
+    if(!ctx?.exercise)return false;
+    const s=String(text||"").toLowerCase();
+    return /(?:это\s+задани|это\s+упражн|этот\s+пример|в\s+этом\s+(?:задани|пример)|вот\s+здесь|почему\s+здесь|почему\s+тут|что\s+дальше|следующ(?:ий|его)\s+шаг|дай\s+подсказ|подсказк|разбер(?:и|ём)\s+(?:это|задани|пример)|объясни\s+(?:это|задани|пример|шаг)|не\s+понимаю\s+(?:задани|пример|этот\s+шаг)|проверь\s+(?:мой|этот)\s+шаг|мой\s+ответ|правильн(?:ый|о)\s+ли\s+(?:ответ|решение)|почему\s+(?:меняется|поменялся)\s+знак)/i.test(s);
+  }
+
   function eligible(text){
     const s=String(text||"").trim();
-    if(!s||s.length>500||obviousMath(s))return false;
+    if(!s||s.length>700||obviousMath(s))return false;
     if(/https?:|www\./i.test(s))return false;
     if(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(s))return false;
     if(/(?:\+?\d[\d\s()\-]{8,}\d)/.test(s))return false;
@@ -83,6 +89,21 @@
       eligible(text);
   }
 
+  async function localTaskReply(text,ctx,controller){
+    const tool=await Promise.resolve(window.KitsuneTutorTools?.dispatch?.(text,ctx)).catch(()=>null);
+    if(controller.signal.aborted)throw new DOMException("Cancelled","AbortError");
+    if(tool?.handled){
+      setRoute("course","Вопрос относится к открытому заданию; ответ получен из локальных инструментов курса.");
+      return brain.safeReply(tool.text);
+    }
+    try{
+      setRoute("local","Вопрос относится к открытому заданию; использован локальный Tutor.");
+      return await local(text,ctx,[]);
+    }catch{
+      return brain.dialogFallback(text,ctx);
+    }
+  }
+
   async function reply(message,ctx=null,history=[]){
     cancel();
     const controller=new AbortController();
@@ -95,17 +116,7 @@
       return safety.reply;
     }
 
-    const tool=await Promise.resolve(
-      window.KitsuneTutorTools?.dispatch?.(text,ctx)
-    ).catch(()=>null);
-
-    if(controller.signal.aborted)throw new DOMException("Cancelled","AbortError");
-
-    if(tool?.handled){
-      setRoute("course","Ответ получен из локальных инструментов курса.");
-      return brain.safeReply(tool.text);
-    }
-
+    /* Deterministic math always has priority over language models. */
     if(obviousMath(text)){
       setRoute("math","Конкретную математику считает только детерминированный Math Engine.");
       try{
@@ -119,10 +130,16 @@
       }
     }
 
+    /* Explicit help with the current exercise stays local. General chat does
+       NOT get captured by TutorTools merely because an exercise is open. */
+    if(isTaskIntent(text,ctx)){
+      return localTaskReply(text,ctx,controller);
+    }
+
+    /* General safe conversation: Qwen is the primary lane. */
     if(cloudReady(text)){
-      const timeout=setTimeout(()=>controller.abort(),22000);
+      const timeout=setTimeout(()=>controller.abort(),24000);
       try{
-        /* Privacy invariant: only text. Never pass ctx/history here. */
         const result=await window.KitsuneHybridInfrastructure.cloudRequest(
           "chat",
           text,
@@ -136,14 +153,17 @@
         setRoute(
           "cloud",
           ctx
-            ?"Qwen Cloud ответил на текущую реплику внутри урока. Условие задания и история не отправлялись."
-            :"Qwen Cloud ответил на текущую безопасную реплику."
+            ?"Qwen Cloud ответил на обычный вопрос внутри урока. Условие задания и история чата не отправлялись."
+            :"Qwen Cloud ответил на обычный безопасный вопрос."
         );
         return brain.safeReply(answer);
       }catch(error){
         if(active!==controller)throw new DOMException("Cancelled","AbortError");
-        const msg=String(error?.message||error||"cloud_failed");
-        setRoute("local-fallback","Cloud Brain не ответил — использован локальный fallback.",msg);
+        setRoute(
+          "local-fallback",
+          "Cloud Brain не ответил — только тогда включён локальный fallback.",
+          String(error?.message||error||"cloud_failed")
+        );
       }finally{
         clearTimeout(timeout);
       }
@@ -151,14 +171,14 @@
       setRoute(
         "local",
         navigator.onLine
-          ?"Router оставил реплику локально по правилам приватности/безопасности."
+          ?"Cloud недоступен/не разрешён для этой реплики; используется локальный fallback."
           :"Нет сети — используется локальный интеллект."
       );
     }
 
     try{
       return await local(text,ctx,history);
-    }catch(error){
+    }catch{
       return brain.dialogFallback(text,ctx);
     }
   }
@@ -173,22 +193,15 @@
         <button class="secondary" id="khiLiveCloudTest" type="button">Проверить реальный Cloud Brain</button>
       </div>
       <div id="khiLiveCloudResult" style="margin-top:6px;color:var(--muted)">
-        Этот тест проходит через тот же Router, что и обычный разговор, а не через технический /test.
+        Тест проходит через тот же Router, что и обычный разговор.
       </div>
     </div>`;
   }
 
-  function setText(el,value){
-    if(el&&el.textContent!==value)el.textContent=value;
-  }
-
   function updateDiagnostics(){
-    const r=document.querySelector("#khiRouterRoute");
-    const d=document.querySelector("#khiRouterDetail");
-    const e=document.querySelector("#khiRouterError");
-    setText(r,`Последний маршрут: ${label(last.route)}`);
-    setText(d,last.detail||"");
-    setText(e,last.error?`Ошибка cloud: ${last.error}`:"");
+    setText(document.querySelector("#khiRouterRoute"),`Последний маршрут: ${label(last.route)}`);
+    setText(document.querySelector("#khiRouterDetail"),last.detail||"");
+    setText(document.querySelector("#khiRouterError"),last.error?`Ошибка cloud: ${last.error}`:"");
   }
 
   async function liveCloudTest(button,result){
@@ -196,18 +209,18 @@
     if(result)result.textContent="Проверяю настоящий пользовательский маршрут…";
     try{
       const answer=await reply(
-        "Привет! Ответь одной короткой фразой, что облачный диалог Kitsune работает.",
+        "Привет! Скажи одной короткой фразой, что ты отвечаешь сейчас именно через облачный интеллект.",
         null,
         []
       );
       const ok=last.route==="cloud";
       if(result){
         result.textContent=ok
-          ?`✅ Реальный Cloud Brain работает. Ответ: ${String(answer).slice(0,180)}`
-          :`⚠️ Тест не дошёл до Qwen Cloud. Фактический маршрут: ${label(last.route)}. ${last.error||last.detail}`;
+          ?`✅ Реальный Cloud Brain работает. Ответ: ${String(answer).slice(0,220)}`
+          :`⚠️ Реплика не дошла до Qwen. Маршрут: ${label(last.route)}. ${last.error||last.detail}`;
       }
     }catch(error){
-      if(result)result.textContent=`❌ Тест прерван: ${String(error?.message||error)}`;
+      if(result)result.textContent=`❌ Тест: ${String(error?.message||error)}`;
     }finally{
       if(button)button.disabled=false;
       updateDiagnostics();
@@ -222,7 +235,7 @@
     if(!host.querySelector("#khiChatConsent")){
       const labelEl=document.createElement("label");
       labelEl.className="sx-switch";
-      labelEl.innerHTML='<input type="checkbox" id="khiChatConsent"><span><b>Разрешить облачный разговор и голос</b><small>В Cloudflare и Alibaba передаётся только текущая безопасная текстовая реплика и текст ответа для озвучивания. История, профиль, условие задания, Mastery, фото и запись микрофона остаются на устройстве.</small></span>';
+      labelEl.innerHTML='<input type="checkbox" id="khiChatConsent"><span><b>Разрешить облачный разговор</b><small>Для обычного безопасного разговора Qwen становится основным собеседником. В облако уходит только текущая текстовая реплика; история, профиль, условие задания, Mastery, фото и raw-аудио остаются на устройстве.</small></span>';
       const input=labelEl.querySelector("input");
       input.checked=consented();
       input.onchange=()=>{
@@ -234,8 +247,8 @@
         setRoute(
           "local",
           input.checked
-            ?"Cloud Qwen разрешён взрослым; Router может использовать его автоматически."
-            :"Cloud Qwen отключён взрослым; ответы остаются локальными."
+            ?"Cloud Qwen разрешён взрослым и будет основным для обычного разговора."
+            :"Cloud Qwen отключён; общение остаётся локальным."
         );
       };
       host.append(labelEl);
@@ -250,20 +263,6 @@
     updateDiagnostics();
   }
 
-  window.KitsuneRouter={
-    version:VERSION,
-    reply,
-    cancel,
-    consented,
-    route:()=>route,
-    lastRoute:()=>({...last}),
-    eligible,
-    obviousMath,
-    liveCloudTest:()=>reply("Привет! Ответь одной короткой фразой, что облачный диалог Kitsune работает.",null,[])
-  };
-
-  brain.chat=reply;
-
   let controlsScheduled=false;
   const controlsObserver=new MutationObserver(()=>{
     if(controlsScheduled)return;
@@ -274,6 +273,20 @@
     });
   });
   controlsObserver.observe(document.body,{childList:true,subtree:true});
+
+  window.KitsuneRouter={
+    version:VERSION,
+    reply,
+    cancel,
+    consented,
+    route:()=>route,
+    lastRoute:()=>({...last}),
+    eligible,
+    obviousMath,
+    isTaskIntent
+  };
+
+  brain.chat=reply;
   addControls();
   window.addEventListener("pagehide",cancel);
 })();
