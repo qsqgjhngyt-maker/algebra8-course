@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.2.2 · Character Voice runtime
+   Kitsune v2.3.0-beta.2.3 · Character Voice runtime
    Cloud Qwen Character Voice -> local Piper/System fallback.
    Adult diagnostics expose the REAL engine and the last TTS failure.
    No voice identifier or secret is ever displayed.
@@ -7,7 +7,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.2.2";
+  const VERSION="2.3.0-beta.2.3";
   const fallback=window.v151Speak;
   const previousStop=window.v161StopSpeech;
 
@@ -28,6 +28,15 @@
 
   function publicError(error){
     const raw=String(error?.message||error||"voice_failed");
+
+    if(raw.startsWith("provider_diag|")){
+      const parts=raw.split("|");
+      const http=parts[1]||"HTTP ?";
+      const code=parts[2]||"unknown";
+      const message=parts.slice(3).join("|")||"no message";
+      return `Alibaba TTS: ${http} · ${code} · ${message}`;
+    }
+
     const map={
       voice_not_configured:"QWEN_VOICE_ID не настроен в Worker",
       voice_disabled:"VOICE_ENABLED выключен",
@@ -48,7 +57,7 @@
       rate_limited:"Сработало ограничение частоты запросов",
       empty_audio:"Worker не вернул аудио"
     };
-    return map[raw]||raw.slice(0,180);
+    return map[raw]||raw.slice(0,240);
   }
 
   function emit(){
