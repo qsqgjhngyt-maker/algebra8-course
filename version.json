@@ -1,27 +1,25 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3",
+  "version": "2.3.0-beta.3.1",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-qwen-chat-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "UNIVERSAL_CLOUD_CHAT_LOCAL_VOICE_LAB",
+  "release": "CLOUD_CHAT_STICKY_DIALOG_FIX",
   "features": [
+    "single-adult-cloud-consent",
     "qwen-cloud-primary-general-chat",
     "cloud-chat-inside-lessons",
-    "cloud-route-chip-in-dialog",
+    "chat-dialog-navigation-firewall",
+    "visible-route-chip",
     "local-math-engine-authority",
-    "current-message-only-cloud-privacy",
+    "task-help-local",
     "piper-irina-local-browser",
-    "silero-xenia-local-desktop-bridge",
-    "silero-kseniya-local-desktop-bridge",
+    "silero-local-desktop-options",
     "no-cloud-tts-client",
-    "local-whisper",
-    "local-fallbacks",
-    "child-safety",
-    "no-analytics",
-    "github-pages-pwa"
+    "no-opfs-clear",
+    "no-analytics"
   ]
 }

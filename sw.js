@@ -1,8 +1,8 @@
-const CACHE="algebra8-v2.3.0-beta.3";
+const CACHE="algebra8-v2.3.0-beta.3.1";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3";
+const RELEASE="2.3.0-beta.3.1";
 const ASSETS=[
-  "./index.html?v=2.3.0-beta.3",
+  "./index.html?v=2.3.0-beta.3.1",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
@@ -57,8 +57,8 @@ const ASSETS=[
   "./reveal-manager-v221.js?v=2.2.3",
   "./cloud-config-v230.js?v=2.3.0-alpha.2",
   "./hybrid-infrastructure-v230.js?v=2.3.0-beta",
-  "./intelligence-router-v230.js?v=2.3.0-beta.3", "./cloud-chat-ux-v231.js?v=2.3.0-beta.3", "./local-voice-lab-v231.js?v=2.3.0-beta.3",
-  "./version.json?v=2.3.0-beta.3"
+  "./intelligence-router-v230.js?v=2.3.0-beta.3.1", "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.1", "./local-voice-lab-v231.js?v=2.3.0-beta.3.1", "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.1",
+  "./version.json?v=2.3.0-beta.3.1"
 ];
 
 const CHILD_CSP=[
@@ -76,7 +76,7 @@ const CHILD_CSP=[
   "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://accounts.google.com",
   "worker-src 'self' blob: https://cdn.jsdelivr.net",
   "child-src 'self' blob: https://cdn.jsdelivr.net",
-  "connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com",
+  "connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com http://127.0.0.1:17865",
   "upgrade-insecure-requests"
 ].join("; ");
 
@@ -117,7 +117,7 @@ function secureSameOriginResponse(request,response){
 }
 
 self.addEventListener("install",e=>{
-  /* v2.3.0-beta.3: cache every same-origin release asset independently.
+  /* v2.3.0-beta.3.1: cache every same-origin release asset independently.
      One optional asset must not make the whole Service Worker install fail. */
   e.waitUntil((async()=>{
     const cache=await caches.open(CACHE);

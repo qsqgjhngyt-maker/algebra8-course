@@ -9,8 +9,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3";
-  const KEY="kitsune_cloud_chat_consent_v230";
+  const VERSION="2.3.0-beta.3.1";
   const brain=window.KitsuneBrain;
   const local=brain.chat.bind(brain);
 
@@ -28,7 +27,7 @@
   };
 
   function consented(){
-    try{return localStorage.getItem(KEY)==="1"}catch{return false}
+    return !!window.KitsuneHybridInfrastructure?.consented?.();
   }
   function label(value){return LABELS[value]||value}
 
@@ -84,7 +83,6 @@
 
   function cloudReady(text){
     return consented() &&
-      window.KitsuneHybridInfrastructure?.consented?.() &&
       navigator.onLine &&
       eligible(text);
   }
@@ -232,27 +230,21 @@
     document.body.classList?.toggle("kitsune-adult-tools",!!host);
     if(!host)return;
 
-    if(!host.querySelector("#khiChatConsent")){
-      const labelEl=document.createElement("label");
-      labelEl.className="sx-switch";
-      labelEl.innerHTML='<input type="checkbox" id="khiChatConsent"><span><b>Разрешить облачный разговор</b><small>Для обычного безопасного разговора Qwen становится основным собеседником. В облако уходит только текущая текстовая реплика; история, профиль, условие задания, Mastery, фото и raw-аудио остаются на устройстве.</small></span>';
-      const input=labelEl.querySelector("input");
-      input.checked=consented();
-      input.onchange=()=>{
-        try{
-          if(input.checked)localStorage.setItem(KEY,"1");
-          else localStorage.removeItem(KEY);
-        }catch{}
-        cancel();
-        setRoute(
-          "local",
-          input.checked
-            ?"Cloud Qwen разрешён взрослым и будет основным для обычного разговора."
-            :"Cloud Qwen отключён; общение остаётся локальным."
-        );
-      };
-      host.append(labelEl);
+    if(!host.querySelector("#khiChatPolicy")){
+      const box=document.createElement("div");
+      box.id="khiChatPolicy";
+      box.className="khi-detail show";
+      box.style.marginTop="10px";
+      box.innerHTML='<b>☁️ Универсальный Cloud Chat</b><div id="khiChatPolicyText" style="margin-top:5px;color:var(--muted)"></div>';
+      host.append(box);
     }
+    const policyText=host.querySelector("#khiChatPolicyText");
+    setText(
+      policyText,
+      consented()
+        ?"Разрешение взрослого активно: обычный безопасный разговор идёт в Qwen Cloud. Явная помощь по заданию и точная математика остаются локальными."
+        :"Cloud Brain пока не разрешён взрослым — разговор останется локальным."
+    );
 
     if(!host.querySelector("#khiRouterRuntime")){
       host.insertAdjacentHTML("beforeend",diagnosticsMarkup());
@@ -274,6 +266,7 @@
   });
   controlsObserver.observe(document.body,{childList:true,subtree:true});
 
+  window.__KITSUNE_ROUTER_ACTIVE_VERSION__=VERSION;
   window.KitsuneRouter={
     version:VERSION,
     reply,
