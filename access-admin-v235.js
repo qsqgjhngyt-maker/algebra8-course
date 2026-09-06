@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.6 · Owner Approval, Session & View Stability
+   Kitsune v2.3.0-beta.3.6.1 · Owner Approval, Session & View Stability
    - External Google accounts can request access.
    - Only the owner sees the Admin tab.
    - Admin API is also protected server-side; hiding the tab is NOT security.
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.6";
+  const VERSION="2.3.0-beta.3.6.1";
   const DB_NAME="kitsune-hybrid-device-v230";
   const STORE="device";
   const config=window.KITSUNE_HYBRID_CONFIG||{};
@@ -444,10 +444,75 @@
     });
   }
 
+
+  async function probeRole({silent=false}={}){
+    try{
+      await ensureFreshCertificate().catch(()=>false);
+      const record=await dbGet();
+
+      if(!record?.certificate||!record?.privateKey){
+        isOwner=false;
+        renderOwnerDiagnostic("Устройство ещё не авторизовано через Google.","idle");
+        return null;
+      }
+
+      const nonce=await challenge("admin-whoami");
+      const proof=await sign(
+        record,
+        `admin-whoami\n${nonce.challengeToken}\n${record.certificate}`
+      );
+      const result=await brokerFetch("v1/admin/whoami",{
+        method:"POST",
+        body:JSON.stringify({
+          challengeToken:nonce.challengeToken,
+          deviceCertificate:record.certificate,
+          proof
+        })
+      });
+
+      record.role=String(result.role||record.role||"user");
+      await dbSet(record);
+      isOwner=!!result.admin;
+
+      if(isOwner){
+        ensureAdminButton();
+        renderOwnerDiagnostic("✅ Роль владельца подтверждена сервером. Админ-панель доступна.","ok");
+      }else{
+        document.querySelector("#v235AdminBtn")?.remove();
+        renderOwnerDiagnostic(`Роль этого аккаунта: ${result.role||"user"}. Админ-панель скрыта.`,"idle");
+      }
+      return result;
+    }catch(error){
+      isOwner=false;
+      document.querySelector("#v235AdminBtn")?.remove();
+      const msg=String(error?.message||error);
+      if(!silent)renderOwnerDiagnostic(`Проверка Owner: ${msg}`,"warn");
+      return null;
+    }
+  }
+
+  function renderOwnerDiagnostic(text,type=""){
+    const panel=document.querySelector(".khi-panel");
+    if(!panel)return;
+    let box=document.querySelector("#v2361OwnerDiagnostic");
+    if(!box){
+      box=document.createElement("div");
+      box.id="v2361OwnerDiagnostic";
+      box.className="khi-detail show";
+      box.style.marginTop="8px";
+      panel.append(box);
+    }
+    box.dataset.type=type;
+    box.innerHTML=`<b>🛡️ Owner/Admin</b><div style="margin-top:4px">${esc(text)}</div>`;
+  }
+
   async function loadAdmin({silent=false}={}){
     try{
+      if(!isOwner){
+        const identity=await probeRole({silent:true});
+        if(!identity?.admin)return null;
+      }
       adminData=await adminSigned("v1/admin/list","admin-list");
-      isOwner=true;
       ensureAdminButton();
       updateAdminBadge();
       if(document.querySelector("#v235AdminModal.show"))renderAdminModal();
@@ -642,8 +707,9 @@
     installStabilityLayers();
     await ensureFreshCertificate().catch(()=>false);
 
-    /* Probe owner role only after the device session has been restored. */
-    await loadAdmin({silent:true});
+    /* Server-verified role after trusted device session restoration. */
+    await probeRole({silent:false});
+    if(isOwner)await loadAdmin({silent:true});
     await renderAccessCard();
 
     const record=await dbGet().catch(()=>null);
@@ -661,7 +727,7 @@
     },250);
 
     /* Retry Owner detection after startup/session renewal. */
-    setTimeout(()=>loadAdmin({silent:true}),1200);
+    setTimeout(()=>probeRole({silent:true}).then(()=>isOwner?loadAdmin({silent:true}):null),1200);
 
     /* While the owner's app is open, pending badge updates automatically. */
     setInterval(()=>{
@@ -690,6 +756,7 @@
     version:VERSION,
     checkStatus:checkAccessStatus,
     refreshAdmin:()=>loadAdmin(),
+    probeRole:options=>probeRole(options),
     ensureFresh:options=>ensureFreshCertificate(options),
     isOwner:()=>isOwner,
     stability:()=>({cloudWrapped,viewGuardInstalled})

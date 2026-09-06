@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.6",
+  "version": "2.3.0-beta.3.6.1",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "SESSION_ADMIN_VIEW_STABILITY",
+  "release": "OWNER_SESSION_ROLE_DIAGNOSTICS",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -32,6 +32,9 @@
     "50s-client-chat-timeout",
     "trusted-device-session-refresh",
     "owner-admin-restore-after-pwa-restart",
-    "conversation-view-stability-guard"
+    "conversation-view-stability-guard",
+    "native-device-session-refresh",
+    "server-verified-owner-whoami",
+    "owner-admin-diagnostics"
   ]
 }

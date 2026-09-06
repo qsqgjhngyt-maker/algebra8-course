@@ -21,7 +21,7 @@
    - QWEN_REGION
    - CHAT_ENABLED
    ===================================================================== */
-const VERSION="2.3.0-beta.3.6";
+const VERSION="2.3.0-beta.3.6.1";
 const encoder=new TextEncoder();
 const MAX_BODY_BYTES=28*1024;
 const GOOGLE_ISSUERS=new Set(["accounts.google.com","https://accounts.google.com"]);
@@ -65,7 +65,7 @@ export default {
         const purpose=String(body.purpose||"");
         const allowed=new Set([
           "enroll","temporary-credential","qwen-test","chat",
-          "access-request","admin-list","admin-action","device-refresh"
+          "access-request","admin-list","admin-action","admin-whoami","device-refresh"
         ]);
         if(!allowed.has(purpose))throw httpError(400,"invalid_purpose");
 
@@ -208,6 +208,32 @@ export default {
           status:"approved",
           deviceCertificate:await signObject(certificatePayload,env.GRANT_SIGNING_SECRET),
           expiresAt:certificatePayload.exp
+        },200,origin,env);
+      }
+
+
+      if(request.method==="POST"&&url.pathname==="/v1/admin/whoami"){
+        const body=await readJson(request);
+        const challenge=await verifyObject(body.challengeToken,env.GRANT_SIGNING_SECRET);
+        validateChallenge(challenge,"admin-whoami",env);
+
+        const certificate=await verifyObject(body.deviceCertificate,env.GRANT_SIGNING_SECRET);
+        validateCertificate(certificate,env);
+        await ensureCertificateAccess(certificate,env);
+
+        await verifyDeviceProof(
+          certificate.cnf.jwk,
+          body.proof,
+          `admin-whoami\n${body.challengeToken}\n${body.deviceCertificate}`
+        );
+        await rejectReplay(env,challenge.jti);
+
+        const owner=await isOwnerCertificate(certificate,env);
+        return json({
+          ok:true,
+          role:owner?"owner":String(certificate.role||"user"),
+          admin:owner,
+          registryReady:!!env.KITSUNE_DB
         },200,origin,env);
       }
 
