@@ -1,8 +1,9 @@
-const CACHE="algebra8-v2.3.0-beta.3.3";
-const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3.3";
-const ASSETS=[
-  "./index.html?v=2.3.0-beta.3.3",
+const CACHE = "algebra8-v2.3.0-beta.3.5";
+const NEURAL_CACHE = "algebra8-ai-runtime-v1";
+const RELEASE = "2.3.0-beta.3.5";
+
+const ASSETS = [
+  "./index.html?v=2.3.0-beta.3.5",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
@@ -57,11 +58,15 @@ const ASSETS=[
   "./reveal-manager-v221.js?v=2.2.3",
   "./cloud-config-v230.js?v=2.3.0-alpha.2",
   "./hybrid-infrastructure-v230.js?v=2.3.0-beta",
-  "./intelligence-router-v230.js?v=2.3.0-beta.3.3", "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3", "./local-voice-lab-v231.js?v=2.3.0-beta.3.3", "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.3",
-  "./version.json?v=2.3.0-beta.3.3"
+  "./access-admin-v235.js?v=2.3.0-beta.3.5",
+  "./intelligence-router-v230.js?v=2.3.0-beta.3.3",
+  "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3",
+  "./local-voice-lab-v231.js?v=2.3.0-beta.3.3",
+  "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.3",
+  "./version.json?v=2.3.0-beta.3.5"
 ];
 
-const CHILD_CSP=[
+const CHILD_CSP = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
@@ -80,7 +85,7 @@ const CHILD_CSP=[
   "upgrade-insecure-requests"
 ].join("; ");
 
-const CHILD_PERMISSIONS=[
+const CHILD_PERMISSIONS = [
   "camera=(self)",
   "geolocation=()",
   "payment=()",
@@ -95,132 +100,171 @@ const CHILD_PERMISSIONS=[
   "autoplay=(self)"
 ].join(", ");
 
-function secureSameOriginResponse(request,response){
-  if(!response)return response;
-
-  const headers=new Headers(response.headers);
-  headers.set("X-Content-Type-Options","nosniff");
-  headers.set("Referrer-Policy","no-referrer");
-
-  const isDocument=request.mode==="navigate"||request.destination==="document";
-  if(isDocument){
-    headers.set("Content-Security-Policy",CHILD_CSP);
-    headers.set("Permissions-Policy",CHILD_PERMISSIONS);
-    headers.set("X-Frame-Options","DENY");
+function secureSameOriginResponse(request, response) {
+  if (!response) {
+    return new Response("Kitsune временно недоступна офлайн.", {
+      status: 503,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store"
+      }
+    });
   }
 
-  return new Response(response.body,{
-    status:response.status,
-    statusText:response.statusText,
+  const headers = new Headers(response.headers);
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("Referrer-Policy", "no-referrer");
+
+  const isDocument =
+    request.mode === "navigate" ||
+    request.destination === "document";
+
+  if (isDocument) {
+    headers.set("Content-Security-Policy", CHILD_CSP);
+    headers.set("Permissions-Policy", CHILD_PERMISSIONS);
+    headers.set("X-Frame-Options", "DENY");
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
     headers
   });
 }
 
-self.addEventListener("install",e=>{
-  /* v2.3.0-beta.3.3: cache every same-origin release asset independently.
-     One optional asset must not make the whole Service Worker install fail. */
-  e.waitUntil((async()=>{
-    const cache=await caches.open(CACHE);
-    const failures=[];
-    for(const url of ASSETS){
-      try{
-        const req=new Request(url,{cache:"reload"});
-        const resp=await fetch(req);
-        if(resp&&resp.ok)await cache.put(req,resp.clone());
-        else failures.push(url);
-      }catch(err){failures.push(url)}
+self.addEventListener("install", event => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    const failures = [];
+
+    for (const url of ASSETS) {
+      try {
+        const request = new Request(url, { cache: "reload" });
+        const response = await fetch(request);
+
+        if (response && response.ok) {
+          await cache.put(request, response.clone());
+        } else {
+          failures.push(url);
+        }
+      } catch {
+        failures.push(url);
+      }
     }
-    if(failures.length)console.warn("[Kitsune SW] optional cache failures",failures);
+
+    if (failures.length) {
+      console.warn("[Kitsune SW] optional cache failures", failures);
+    }
   })());
 });
 
-self.addEventListener("message",e=>{
-  const data=e.data||{};
-  if(data.type==="SKIP_WAITING"){
+self.addEventListener("message", event => {
+  const data = event.data || {};
+  if (data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-self.addEventListener("activate",e=>{
-  e.waitUntil(
-    caches.keys().then(keys=>Promise.all(
-      keys
-        /* Delete only obsolete caches owned by this course. Never wipe
-           unknown CacheStorage entries created by AI runtimes/model loaders. */
-        .filter(k=>
-          (k.startsWith("algebra8-v")&&k!==CACHE) ||
-          (k.startsWith("algebra8-ai-runtime-")&&k!==NEURAL_CACHE)
-        )
-        .map(k=>caches.delete(k))
-    )).then(()=>self.clients.claim())
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(
+        keys
+          .filter(key =>
+            (key.startsWith("algebra8-v") && key !== CACHE) ||
+            (key.startsWith("algebra8-ai-runtime-") && key !== NEURAL_CACHE)
+          )
+          .map(key => caches.delete(key))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener("fetch",e=>{
-  if(e.request.method!=="GET")return;
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
 
-  const url=new URL(e.request.url);
-  const sameOrigin=url.origin===self.location.origin;
-  const neuralRuntime=url.hostname==="cdn.jsdelivr.net";
-  /* Auth / broker / Qwen / private TTS responses are always network-only
-     and are never written to the application cache. */
-  if(url.pathname.startsWith("/v1/auth/")||
-     url.pathname.startsWith("/v1/enroll")||
-     url.pathname.startsWith("/v1/temporary-credential")||
-     url.pathname.startsWith("/v1/qwen/")||
-     url.pathname.startsWith("/v1/tts/"))return;
+  const url = new URL(event.request.url);
+  const sameOrigin = url.origin === self.location.origin;
+  const neuralRuntime = url.hostname === "cdn.jsdelivr.net";
 
-  if(sameOrigin){
-    const isNavigation=e.request.mode==="navigate"||e.request.destination==="document";
+  if (
+    url.pathname.startsWith("/v1/auth/") ||
+    url.pathname.startsWith("/v1/enroll") ||
+    url.pathname.startsWith("/v1/access/") ||
+    url.pathname.startsWith("/v1/admin/") ||
+    url.pathname.startsWith("/v1/temporary-credential") ||
+    url.pathname.startsWith("/v1/qwen/") ||
+    url.pathname.startsWith("/v1/tts/")
+  ) {
+    return;
+  }
 
-    if(isNavigation){
-      /* Always ask the network for the app shell first. This prevents an old
-         installed iPhone PWA from booting an obsolete index.html forever. */
-      e.respondWith((async()=>{
-        try{
-          const resp=await fetch(e.request,{cache:"no-store"});
-          if(resp&&resp.ok){
-            const copy=resp.clone();
-            caches.open(CACHE).then(c=>c.put("./index.html?v="+RELEASE,copy)).catch(()=>{});
+  if (sameOrigin) {
+    const isNavigation =
+      event.request.mode === "navigate" ||
+      event.request.destination === "document";
+
+    if (isNavigation) {
+      event.respondWith((async () => {
+        try {
+          const response = await fetch(event.request, { cache: "no-store" });
+
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE)
+              .then(cache => cache.put("./index.html?v=" + RELEASE, copy))
+              .catch(() => {});
           }
-          return secureSameOriginResponse(e.request,resp);
-        }catch(err){
-          const fallback=
-            await caches.match("./index.html?v="+RELEASE) ||
-            await caches.match("./index.html",{ignoreSearch:true});
-          return secureSameOriginResponse(e.request,fallback);
+
+          return secureSameOriginResponse(event.request, response);
+        } catch {
+          const fallback =
+            await caches.match("./index.html?v=" + RELEASE) ||
+            await caches.match("./index.html", { ignoreSearch: true });
+
+          return secureSameOriginResponse(event.request, fallback);
         }
       })());
       return;
     }
 
-    e.respondWith((async()=>{
-      const releaseCache=await caches.open(CACHE);
-      const cached=await releaseCache.match(e.request);
-      if(cached)return secureSameOriginResponse(e.request,cached);
+    event.respondWith((async () => {
+      const releaseCache = await caches.open(CACHE);
+      const cached = await releaseCache.match(event.request);
 
-      try{
-        const resp=await fetch(e.request,{cache:"no-store"});
-        if(resp&&resp.ok)releaseCache.put(e.request,resp.clone()).catch(()=>{});
-        return secureSameOriginResponse(e.request,resp);
-      }catch(err){
-        const fallback=await caches.match(e.request,{ignoreSearch:true});
-        return secureSameOriginResponse(e.request,fallback);
+      if (cached) {
+        return secureSameOriginResponse(event.request, cached);
+      }
+
+      try {
+        const response = await fetch(event.request, { cache: "no-store" });
+
+        if (response && response.ok) {
+          releaseCache.put(event.request, response.clone()).catch(() => {});
+        }
+
+        return secureSameOriginResponse(event.request, response);
+      } catch {
+        const fallback = await caches.match(event.request, { ignoreSearch: true });
+        return secureSameOriginResponse(event.request, fallback);
       }
     })());
     return;
   }
 
-  /* jsDelivr-модули Piper, WebLLM и Transformers.js кэшируем после первого запуска.
-     Большие модели Piper/WebLLM/Whisper используют собственные browser caches/OPFS.
-     Поэтому большие ответы Hugging Face здесь намеренно не дублируем. */
-  if(neuralRuntime){
-    e.respondWith(
-      caches.open(NEURAL_CACHE).then(cache=>
-        cache.match(e.request).then(cached=>cached||fetch(e.request).then(resp=>{
-          if(resp&&(resp.ok||resp.type==="opaque"))cache.put(e.request,resp.clone()).catch(()=>{});
-          return resp;
-        }))
+  if (neuralRuntime) {
+    event.respondWith(
+      caches.open(NEURAL_CACHE).then(cache =>
+        cache.match(event.request).then(cached => {
+          if (cached) return cached;
+
+          return fetch(event.request).then(response => {
+            if (response && (response.ok || response.type === "opaque")) {
+              cache.put(event.request, response.clone()).catch(() => {});
+            }
+            return response;
+          });
+        })
       )
     );
   }
