@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.5 · Owner Approval & Admin UI
+   Kitsune v2.3.0-beta.3.6 · Owner Approval, Session & View Stability
    - External Google accounts can request access.
    - Only the owner sees the Admin tab.
    - Admin API is also protected server-side; hiding the tab is NOT security.
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.5";
+  const VERSION="2.3.0-beta.3.6";
   const DB_NAME="kitsune-hybrid-device-v230";
   const STORE="device";
   const config=window.KITSUNE_HYBRID_CONFIG||{};
@@ -17,6 +17,9 @@
   let isOwner=false;
   let adminData=null;
   let polling=false;
+  let refreshPromise=null;
+  let cloudWrapped=false;
+  let viewGuardInstalled=false;
 
   function esc(value){
     return String(value??"").replace(/[&<>"']/g,ch=>({
@@ -103,6 +106,135 @@
       method:"POST",
       body:JSON.stringify({purpose,clientNonce:randomId()})
     });
+  }
+
+
+  function certificateFresh(record,marginSeconds=600){
+    const exp=Number(record?.certificateExpiresAt||0);
+    return !!(record?.certificate&&record?.privateKey&&exp>(Date.now()/1000+marginSeconds));
+  }
+
+  async function ensureFreshCertificate({force=false}={}){
+    if(refreshPromise)return refreshPromise;
+
+    refreshPromise=(async()=>{
+      const record=await dbGet();
+      if(!record?.certificate||!record?.privateKey)return false;
+      if(!force&&certificateFresh(record))return true;
+
+      const authChallenge=await challenge("device-refresh");
+      const proof=await sign(
+        record,
+        `device-refresh\n${authChallenge.challengeToken}\n${record.certificate}`
+      );
+
+      const result=await brokerFetch("v1/device/refresh",{
+        method:"POST",
+        body:JSON.stringify({
+          challengeToken:authChallenge.challengeToken,
+          deviceCertificate:record.certificate,
+          proof
+        })
+      });
+
+      record.certificate=result.deviceCertificate;
+      record.certificateExpiresAt=result.expiresAt;
+      if(result.role)record.role=result.role;
+      await dbSet(record);
+
+      window.dispatchEvent(new CustomEvent("kitsune-device-session",{
+        detail:{status:"refreshed",expiresAt:result.expiresAt,role:result.role||record.role||""}
+      }));
+      return true;
+    })();
+
+    try{
+      return await refreshPromise;
+    }finally{
+      refreshPromise=null;
+    }
+  }
+
+  function installCloudSessionWrapper(){
+    const infra=window.KitsuneHybridInfrastructure;
+    if(!infra?.cloudRequest||infra.__kitsuneBeta36SessionWrapped)return false;
+
+    const original=infra.cloudRequest.bind(infra);
+    infra.cloudRequest=async function(kind,payload,options={}){
+      await ensureFreshCertificate().catch(()=>false);
+      try{
+        return await original(kind,payload,options);
+      }catch(error){
+        const message=String(error?.message||error);
+        if(/enrollment_required|expired_device_certificate|device_reauth_required/i.test(message)){
+          const refreshed=await ensureFreshCertificate({force:true}).catch(()=>false);
+          if(refreshed)return original(kind,payload,options);
+        }
+        throw error;
+      }
+    };
+    infra.__kitsuneBeta36SessionWrapped=true;
+    cloudWrapped=true;
+    return true;
+  }
+
+  function activeView(){
+    return document.querySelector(".main-nav .nav-btn.active")?.dataset?.view||"";
+  }
+
+  function installConversationViewGuard(){
+    const brain=window.KitsuneBrain;
+    if(!brain?.chat||brain.chat.__kitsuneBeta36ViewGuard)return false;
+
+    const originalChat=brain.chat.bind(brain);
+
+    async function guardedChat(...args){
+      const heldView=activeView();
+      const originalGo=window.go;
+      let locked=!!heldView&&heldView!=="home";
+
+      if(locked&&typeof originalGo==="function"){
+        const guardedGo=function(next,...rest){
+          const requested=String(next||"");
+          if(locked&&requested==="home"&&heldView!=="home"){
+            console.warn("[Kitsune beta.3.6] blocked unintended home navigation during reply");
+            return;
+          }
+          return originalGo.call(this,next,...rest);
+        };
+        guardedGo.__kitsuneBeta36Wrapped=true;
+        window.go=guardedGo;
+      }
+
+      try{
+        return await originalChat(...args);
+      }finally{
+        /* UI renders the returned text after the promise resolves, so the guard
+           deliberately survives that render window. */
+        setTimeout(()=>{
+          locked=false;
+          if(typeof originalGo==="function"&&window.go?.__kitsuneBeta36Wrapped){
+            window.go=originalGo;
+          }
+          const nowView=activeView();
+          if(heldView&&heldView!=="home"&&nowView==="home"&&typeof originalGo==="function"){
+            try{originalGo(heldView)}catch{}
+          }
+        },1800);
+      }
+    }
+
+    guardedChat.__kitsuneBeta36ViewGuard=true;
+    brain.chat=guardedChat;
+    viewGuardInstalled=true;
+    return true;
+  }
+
+  function installStabilityLayers(){
+    installCloudSessionWrapper();
+    /* Router is loaded after this file. Poll briefly until it has replaced
+       KitsuneBrain.chat, then wrap the final conversation entry point. */
+    if(window.KitsuneRouter?.reply)installConversationViewGuard();
   }
 
   function loadGoogle(){
@@ -287,6 +419,7 @@
   }
 
   async function adminSigned(path,purpose,payload={}){
+    await ensureFreshCertificate().catch(()=>false);
     const record=await dbGet();
     if(!record?.certificate||!record?.privateKey)throw new Error("Устройство не авторизовано");
 
@@ -506,7 +639,10 @@
     if(!config?.brokerOrigin||!config?.googleClientId)return;
     ensureAdminModal();
 
-    /* Probe owner role using the current signed device certificate. */
+    installStabilityLayers();
+    await ensureFreshCertificate().catch(()=>false);
+
+    /* Probe owner role only after the device session has been restored. */
     await loadAdmin({silent:true});
     await renderAccessCard();
 
@@ -515,11 +651,26 @@
       setTimeout(()=>checkAccessStatus({silent:true}),1200);
     }
 
+    /* Router loads after this module. Ensure the final chat implementation is
+       guarded rather than a pre-router placeholder. */
+    let attempts=0;
+    const installer=setInterval(()=>{
+      attempts++;
+      installStabilityLayers();
+      if(viewGuardInstalled||attempts>=20)clearInterval(installer);
+    },250);
+
+    /* Retry Owner detection after startup/session renewal. */
+    setTimeout(()=>loadAdmin({silent:true}),1200);
+
     /* While the owner's app is open, pending badge updates automatically. */
     setInterval(()=>{
-      if(document.visibilityState==="visible"&&isOwner&&!polling){
+      if(document.visibilityState==="visible"&&!polling){
         polling=true;
-        loadAdmin({silent:true}).finally(()=>{polling=false});
+        Promise.resolve()
+          .then(()=>ensureFreshCertificate().catch(()=>false))
+          .then(()=>isOwner?loadAdmin({silent:true}):null)
+          .finally(()=>{polling=false});
       }
     },60000);
   }
@@ -539,7 +690,9 @@
     version:VERSION,
     checkStatus:checkAccessStatus,
     refreshAdmin:()=>loadAdmin(),
-    isOwner:()=>isOwner
+    ensureFresh:options=>ensureFreshCertificate(options),
+    isOwner:()=>isOwner,
+    stability:()=>({cloudWrapped,viewGuardInstalled})
   };
 
   setTimeout(init,500);
