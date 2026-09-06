@@ -1,9 +1,9 @@
-const CACHE = "algebra8-v2.3.0-beta.3.7.1";
+const CACHE = "algebra8-v2.3.0-beta.3.7.2";
 const NEURAL_CACHE = "algebra8-ai-runtime-v1";
-const RELEASE = "2.3.0-beta.3.7.1";
+const RELEASE = "2.3.0-beta.3.7.2";
 
 const ASSETS = [
-  "./index.html?v=2.3.0-beta.3.7.1",
+  "./index.html?v=2.3.0-beta.3.7.2",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
@@ -57,14 +57,14 @@ const ASSETS = [
   "./student-experience-v220.js?v=2.3.0-alpha",
   "./reveal-manager-v221.js?v=2.2.3",
   "./cloud-config-v230.js?v=2.3.0-alpha.2",
-  "./hybrid-infrastructure-v230.js?v=2.3.0-beta.3.6.1",
+  "./hybrid-infrastructure-v230.js?v=2.3.0-beta.3.7.2",
   "./access-admin-v235.js?v=2.3.0-beta.3.6.2",
   "./intelligence-router-v230.js?v=2.3.0-beta.3.3",
   "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3",
   "./local-voice-lab-v231.js?v=2.3.0-beta.3.3",
-  "./voice-conversation-v237.js?v=2.3.0-beta.3.7.1",
+  "./voice-conversation-v237.js?v=2.3.0-beta.3.7.2",
   "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.6.2",
-  "./version.json?v=2.3.0-beta.3.7.1"
+  "./version.json?v=2.3.0-beta.3.7.2"
 ];
 
 const CHILD_CSP = [

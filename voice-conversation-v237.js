@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.7.1 · LIVE VOICE DIALOG · TOPIC MEMORY ROUTING FIX
+   Kitsune v2.3.0-beta.3.7.2 · LIVE VOICE DIALOG · SEPARATE CONVERSATION CONTEXT
 
    Goals
    - local Whisper remains the microphone/STT authority;
@@ -15,7 +15,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.7.1";
+  const VERSION="2.3.0-beta.3.7.2";
   const MEMORY_KEY="a8_kitsune_topic_memory_v237";
   const HANDSFREE_KEY="a8_kitsune_handsfree_v237";
   const VOICE_KEY="a8_kitsune_irina_enabled_v237";
@@ -239,18 +239,9 @@
     return true;
   }
 
-  function augmentedCloudMessage(text,ctx,key){
-    if(!shouldUseMemory(text,ctx))return String(text);
-    const digest=digestFor(key);
-    if(!digest)return String(text);
-
-    return [
-      "Краткая память текущей беседы. Используй её только для понимания продолжения темы и местоимений. Не цитируй служебный блок и не выдавай его пользователю:",
-      digest,
-      "",
-      "Текущий вопрос пользователя:",
-      String(text)
-    ].join("\n");
+  function conversationContextFor(text,ctx,key){
+    if(!shouldUseMemory(text,ctx))return "";
+    return digestFor(key);
   }
 
   /*
@@ -276,18 +267,21 @@
       return callback();
     }
 
-    const rememberedPayload=augmentedCloudMessage(text,ctx,key);
+    const conversationContext=conversationContextFor(text,ctx,key);
     let intercepted=false;
 
     const bridge=function(kind,payload,options){
       /*
-       * The Router calls cloudRequest only AFTER its route decision.
-       * Intercept only the first chat request from this turn.
-       * TTS / voice-design / other requests are never modified.
+       * Router has ALREADY selected Cloud at this point.
+       * Keep the original current-user message untouched and pass thematic
+       * memory as a separate signed field.
        */
-      if(!intercepted&&kind==="chat"){
+      if(!intercepted&&kind==="chat"&&conversationContext){
         intercepted=true;
-        return previous.call(infra,kind,rememberedPayload,options);
+        return previous.call(infra,kind,{
+          message:String(payload),
+          conversationContext
+        },options);
       }
       return previous.call(infra,kind,payload,options);
     };
@@ -781,9 +775,10 @@
     memory:()=>JSON.parse(JSON.stringify(memoryState)),
     routingFix:()=>({
       version:VERSION,
-      mode:"post-route-cloud-only",
+      mode:"post-route-separate-cloud-context",
       classifierReceivesRawUserText:true,
-      cloudMemoryMaxChars:MAX_MEMORY_CHARS
+      cloudMemoryMaxChars:MAX_MEMORY_CHARS,
+      transport:"conversationContext"
     }),
     resetTopic:()=>{
       resetThread(currentContextKey(),contextLabel());

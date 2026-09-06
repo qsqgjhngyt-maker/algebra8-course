@@ -1,11 +1,11 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.6.1 · Hybrid Intelligence infrastructure client
+   Kitsune v2.3.0-beta.3.7.2 · Hybrid Intelligence infrastructure client
    Stable trusted-device session + Cloud Brain diagnostics.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.6.1";
+  const VERSION="2.3.0-beta.3.7.2";
   const DB_NAME="kitsune-hybrid-device-v230";
   const STORE="device";
   const CONSENT_KEY="a8_cloud_brain_parent_consent_v230";
@@ -564,8 +564,31 @@
       }
 
       const nonce=await challenge(kind,signal);
+
+      let bodyPayload;
+      let proofMaterial;
+
+      if(kind==="chat"&&payload&&typeof payload==="object"&&!Array.isArray(payload)){
+        const message=String(payload.message||"");
+        const conversationContext=String(payload.conversationContext||"");
+
+        bodyPayload={
+          message,
+          ...(conversationContext?{conversationContext}:{})
+        };
+
+        proofMaterial=conversationContext
+          ?JSON.stringify({message,conversationContext})
+          :message;
+      }else{
+        bodyPayload={
+          [kind==="chat"?"message":"text"]:payload
+        };
+        proofMaterial=String(payload??"");
+      }
+
       const hash=base64url(
-        await crypto.subtle.digest("SHA-256",utf8(payload))
+        await crypto.subtle.digest("SHA-256",utf8(proofMaterial))
       );
       const proof=await sign(
         record,
@@ -575,7 +598,7 @@
         challengeToken:nonce.challengeToken,
         deviceCertificate:record.certificate,
         proof,
-        [kind==="chat"?"message":"text"]:payload
+        ...bodyPayload
       };
       return brokerFetch(`v1/qwen/${kind}`,{
         method:"POST",
