@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Kitsune 2.3.0-beta.2.3 — Character Voice diagnostic hotfix
 
 Цель: один раз показать безопасную исходную ошибку Alibaba TTS вместо общего
@@ -8,11 +10,11 @@
 Variables/Secrets не трогать.
 
 ## GitHub Pages
-Замените `character-voice-v230.js` в корне.
+Замените `https://github.com/qsqgjhngyt-maker/algebra8-course/blob/0eac7a6c4c86e5ae6300f65fef3bc0d66f6df2ff/character-voice-v230.js` в корне.
 Чтобы браузер точно взял новую версию, в `index.html` замените query:
-`character-voice-v230.js?v=2.3.0-beta.2.2`
+`https://github.com/qsqgjhngyt-maker/algebra8-course/blob/0eac7a6c4c86e5ae6300f65fef3bc0d66f6df2ff/character-voice-v230.js?v=2.3.0-beta.2.2`
 на
-`character-voice-v230.js?v=2.3.0-beta.2.3`
+`https://github.com/qsqgjhngyt-maker/algebra8-course/blob/0eac7a6c4c86e5ae6300f65fef3bc0d66f6df2ff/character-voice-v230.js?v=2.3.0-beta.2.3`
 
 Если используете service worker, аналогично обновите запись Character Voice в ASSETS
 или выполните обычный release bump.

@@ -1,0 +1,91 @@
+{
+  "analytics-v111.js": [
+    {
+      "file": "README.md",
+      "line": 1066,
+      "text": "`analytics-v111.js` использует allow-list только технических полей."
+    }
+  ],
+  "character-voice-v230.js": [
+    {
+      "file": "BETA2_AUDIT.md",
+      "line": 4,
+      "text": "- [x] character-voice-v230.js"
+    },
+    {
+      "file": "DEPLOY_BETA2.md",
+      "line": 44,
+      "text": "- `character-voice-v230.js`"
+    },
+    {
+      "file": "DEPLOY_FREEZE_FIX.md",
+      "line": 16,
+      "text": "- `character-voice-v230.js`"
+    },
+    {
+      "file": "DEPLOY_TTS_DIAGNOSTIC.md",
+      "line": 11,
+      "text": "Замените `character-voice-v230.js` в корне."
+    },
+    {
+      "file": "DEPLOY_TTS_DIAGNOSTIC.md",
+      "line": 13,
+      "text": "`character-voice-v230.js?v=2.3.0-beta.2.2`"
+    },
+    {
+      "file": "DEPLOY_TTS_DIAGNOSTIC.md",
+      "line": 15,
+      "text": "`character-voice-v230.js?v=2.3.0-beta.2.3`"
+    },
+    {
+      "file": "DEPLOY_VOICE_FIX.md",
+      "line": 19,
+      "text": "- character-voice-v230.js"
+    }
+  ],
+  "BASELINE_AUDIT_v2.3.0-alpha.md": [
+    {
+      "file": "README.md",
+      "line": 19,
+      "text": "Файлы `STAGE1_EXTERNAL_SETUP.md` и `BASELINE_AUDIT_v2.3.0-alpha.md`"
+    }
+  ],
+  "BETA2_AUDIT.md": [],
+  "CHILD_SAFETY.md": [],
+  "DEPLOY_BETA1_PATCH.md": [],
+  "DEPLOY_BETA2.md": [],
+  "DEPLOY_BETA3_1.md": [],
+  "DEPLOY_BETA3_2.md": [],
+  "DEPLOY_BETA3_3.md": [],
+  "DEPLOY_FREEZE_FIX.md": [],
+  "DEPLOY_GITHUB_PAGES.md": [
+    {
+      "file": "README.md",
+      "line": 136,
+      "text": "- добавлены `.nojekyll` и инструкция `DEPLOY_GITHUB_PAGES.md`;"
+    }
+  ],
+  "DEPLOY_TTS_DIAGNOSTIC.md": [],
+  "DEPLOY_VOICE_FIX.md": [],
+  "FINAL_AUDIT.md": [],
+  "KITSUNE_ANALYTICS.md": [],
+  "KITSUNE_BRAIN_SETUP.md": [],
+  "KITSUNE_BRAIN_SOURCES.md": [],
+  "KITSUNE_LIVE_ANIMATION.md": [],
+  "KITSUNE_VOICE_SETUP.md": [],
+  "KITSUNE_VOICE_SOURCES.md": [],
+  "NEURAL_VOICE_SETUP.md": [],
+  "NEURAL_VOICE_SOURCES.md": [],
+  "OFFLINE_ARCHITECTURE.md": [],
+  "README.md": [],
+  "README_КУДА_ЗАГРУЗИТЬ.txt": [],
+  "README_СИНХРОНИЗАЦИЯ.txt": [],
+  "STAGE1_EXTERNAL_SETUP.md": [
+    {
+      "file": "README.md",
+      "line": 19,
+      "text": "Файлы `STAGE1_EXTERNAL_SETUP.md` и `BASELINE_AUDIT_v2.3.0-alpha.md`"
+    }
+  ],
+  "STAGE2_STATUS.md": []
+}

@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Kitsune Voice Dialogue — components
 
 - Transformers.js: `@huggingface/transformers@4.2.0`

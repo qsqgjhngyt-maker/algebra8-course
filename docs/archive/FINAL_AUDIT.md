@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Kitsune Algebra 8 — FINAL RELEASE AUDIT
 
 Release: v2.2.3 DYNAMIC REVEAL / LAYOUT FIX

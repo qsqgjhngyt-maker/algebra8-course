@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # v2.3.0-beta.2.2 — Qwen Character Voice hotfix
 
 По результату beta.2.1:
@@ -16,7 +18,7 @@ Hotfix:
 - секреты и QWEN_VOICE_ID никогда не возвращаются в UI.
 
 Заменить в GitHub:
-- character-voice-v230.js
+- https://github.com/qsqgjhngyt-maker/algebra8-course/blob/0eac7a6c4c86e5ae6300f65fef3bc0d66f6df2ff/character-voice-v230.js
 - index.html
 - sw.js
 - version.json

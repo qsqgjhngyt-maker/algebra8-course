@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune Hybrid Broker · v2.3.0-beta.3.5
+   Kitsune Hybrid Broker · v2.3.0-beta.3.7
    Owner approval + in-app admin UI backend.
    Single-file Cloudflare Worker build.
 
@@ -21,7 +21,7 @@
    - QWEN_REGION
    - CHAT_ENABLED
    ===================================================================== */
-const VERSION="2.3.0-beta.3.6.2";
+const VERSION="2.3.0-beta.3.7";
 const encoder=new TextEncoder();
 const MAX_BODY_BYTES=28*1024;
 const GOOGLE_ISSUERS=new Set(["accounts.google.com","https://accounts.google.com"]);

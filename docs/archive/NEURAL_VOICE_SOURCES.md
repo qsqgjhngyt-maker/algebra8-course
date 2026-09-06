@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Neural Voice sources / license notes
 
 This project does not redistribute the neural voice model inside the repository ZIP.

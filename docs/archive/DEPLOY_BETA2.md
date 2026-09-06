@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Kitsune v2.3.0-beta.2 — Cloud Runtime Diagnostics & Character Voice Activation
 
 Это PATCH поверх текущего public `main` v2.3.0-beta. Он не содержит секретов.
@@ -41,7 +43,7 @@
 - `index.html`
 - `sw.js`
 - `intelligence-router-v230.js`
-- `character-voice-v230.js`
+- `https://github.com/qsqgjhngyt-maker/algebra8-course/blob/0eac7a6c4c86e5ae6300f65fef3bc0d66f6df2ff/character-voice-v230.js`
 - `version.json`
 
 Остальные файлы курса НЕ заменяйте этим архивом.

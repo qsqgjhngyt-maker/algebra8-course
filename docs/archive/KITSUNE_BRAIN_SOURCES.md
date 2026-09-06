@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Kitsune Brain — components / license notes
 
 Kitsune is an original SVG fox character created specifically for this course.

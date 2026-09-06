@@ -1,3 +1,5 @@
+> Исторический документ. Не применять к beta.3.7. Актуальная инструкция: [развертывание](../DEPLOY.md). Исходные пути и команды относятся к версии на момент написания.
+
 # Stage 1 · external setup stop point
 
 Do not paste API keys, Google ID tokens, 2FA codes or Cloudflare signing secrets
