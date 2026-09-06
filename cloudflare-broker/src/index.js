@@ -21,7 +21,7 @@
    - QWEN_REGION
    - CHAT_ENABLED
    ===================================================================== */
-const VERSION="2.3.0-beta.3.6.1";
+const VERSION="2.3.0-beta.3.6.2";
 const encoder=new TextEncoder();
 const MAX_BODY_BYTES=28*1024;
 const GOOGLE_ISSUERS=new Set(["accounts.google.com","https://accounts.google.com"]);
@@ -239,8 +239,8 @@ export default {
 
       if(request.method==="POST"&&url.pathname==="/v1/admin/list"){
         requireRegistry(env);
-        await ensureSchema(env);
         const {certificate}=await verifyAdminRequest(request,env,"admin-list",[]);
+        await ensureSchema(env);
         const rows=await env.KITSUNE_DB.prepare(`
           SELECT account_hash,email,status,requested_at,updated_at,approved_at,denied_at,revoked_at
           FROM access_accounts
@@ -269,7 +269,6 @@ export default {
 
       if(request.method==="POST"&&url.pathname==="/v1/admin/action"){
         requireRegistry(env);
-        await ensureSchema(env);
         const body=await readJson(request);
         const action=String(body.action||"");
         const target=String(body.accountHash||"");
@@ -280,6 +279,7 @@ export default {
           action,
           target
         ],body);
+        await ensureSchema(env);
 
         const now=Date.now();
 
@@ -451,27 +451,50 @@ export default {
 
 /* ------------------------- Access registry / D1 ------------------------- */
 
+let schemaReady=false;
+let schemaPromise=null;
+
 async function ensureSchema(env){
   requireRegistry(env);
-  await env.KITSUNE_DB.exec(`
-    CREATE TABLE IF NOT EXISTS access_accounts(
-      account_hash TEXT PRIMARY KEY,
-      email TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'pending',
-      requested_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      approved_at INTEGER,
-      denied_at INTEGER,
-      revoked_at INTEGER
-    );
-    CREATE INDEX IF NOT EXISTS idx_access_status_updated
-      ON access_accounts(status, updated_at DESC);
-    CREATE TABLE IF NOT EXISTS settings(
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
-    INSERT OR IGNORE INTO settings(key,value) VALUES('registration_open','1');
-  `);
+  if(schemaReady)return true;
+  if(schemaPromise)return schemaPromise;
+
+  schemaPromise=(async()=>{
+    const statements=[
+      `CREATE TABLE IF NOT EXISTS access_accounts(
+        account_hash TEXT PRIMARY KEY,
+        email TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        requested_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        approved_at INTEGER,
+        denied_at INTEGER,
+        revoked_at INTEGER
+      )`,
+      `CREATE INDEX IF NOT EXISTS idx_access_status_updated
+       ON access_accounts(status, updated_at DESC)`,
+      `CREATE TABLE IF NOT EXISTS settings(
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )`,
+      `INSERT OR IGNORE INTO settings(key,value)
+       VALUES('registration_open','1')`
+    ];
+
+    for(const sql of statements){
+      await env.KITSUNE_DB.prepare(sql).run();
+    }
+    schemaReady=true;
+    return true;
+  })();
+
+  try{
+    return await schemaPromise;
+  }catch(error){
+    schemaPromise=null;
+    schemaReady=false;
+    throw httpError(503,`registry_schema_failed:${String(error?.message||error).slice(0,160)}`);
+  }
 }
 
 function requireRegistry(env){

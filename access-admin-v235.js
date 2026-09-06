@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.6.1 · Owner Approval, Session & View Stability
+   Kitsune v2.3.0-beta.3.6.2 · Owner Approval & Admin Reliability
    - External Google accounts can request access.
    - Only the owner sees the Admin tab.
    - Admin API is also protected server-side; hiding the tab is NOT security.
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.6.1";
+  const VERSION="2.3.0-beta.3.6.2";
   const DB_NAME="kitsune-hybrid-device-v230";
   const STORE="device";
   const config=window.KITSUNE_HYBRID_CONFIG||{};
@@ -20,6 +20,7 @@
   let refreshPromise=null;
   let cloudWrapped=false;
   let viewGuardInstalled=false;
+  let lastAdminError="";
 
   function esc(value){
     return String(value??"").replace(/[&<>"']/g,ch=>({
@@ -38,17 +39,53 @@
     return new URL(path,config.brokerOrigin.replace(/\/?$/,"/")).toString();
   }
   async function brokerFetch(path,options={}){
-    const response=await fetch(brokerUrl(path),{
-      ...options,
-      cache:"no-store",
-      credentials:"omit",
-      headers:{"Content-Type":"application/json",...(options.headers||{})}
-    });
-    const text=await response.text();
-    let body={};
-    try{body=text?JSON.parse(text):{}}catch{}
-    if(!response.ok)throw new Error(body.error||`Broker HTTP ${response.status}`);
-    return body;
+    const {
+      timeoutMs=15000,
+      signal:externalSignal,
+      ...fetchOptions
+    }=options;
+
+    const controller=new AbortController();
+    let timedOut=false;
+    let timer=null;
+    const abortExternal=()=>controller.abort(externalSignal?.reason);
+
+    if(externalSignal){
+      if(externalSignal.aborted)controller.abort(externalSignal.reason);
+      else externalSignal.addEventListener("abort",abortExternal,{once:true});
+    }
+
+    if(timeoutMs>0){
+      timer=setTimeout(()=>{
+        timedOut=true;
+        controller.abort();
+      },timeoutMs);
+    }
+
+    try{
+      const response=await fetch(brokerUrl(path),{
+        ...fetchOptions,
+        signal:controller.signal,
+        cache:"no-store",
+        credentials:"omit",
+        headers:{"Content-Type":"application/json",...(fetchOptions.headers||{})}
+      });
+      const text=await response.text();
+      let body={};
+      try{body=text?JSON.parse(text):{}}catch{}
+      if(!response.ok){
+        const error=new Error(body.error||`Broker HTTP ${response.status}`);
+        error.httpStatus=response.status;
+        throw error;
+      }
+      return body;
+    }catch(error){
+      if(timedOut)throw new Error("admin_request_timeout");
+      throw error;
+    }finally{
+      if(timer)clearTimeout(timer);
+      externalSignal?.removeEventListener?.("abort",abortExternal);
+    }
   }
 
   function openDb(){
@@ -231,10 +268,11 @@
   }
 
   function installStabilityLayers(){
+    /* beta.3.6.2: this module owns session stability only.
+       Navigation protection is installed by chat-dialog-firewall-v231.js
+       after App Kernel and every legacy route wrapper have loaded. */
     installCloudSessionWrapper();
-    /* Router is loaded after this file. Poll briefly until it has replaced
-       KitsuneBrain.chat, then wrap the final conversation entry point. */
-    if(window.KitsuneRouter?.reply)installConversationViewGuard();
+    viewGuardInstalled=!!window.KitsuneDialogFirewall?.installed?.();
   }
 
   function loadGoogle(){
@@ -507,23 +545,35 @@
   }
 
   async function loadAdmin({silent=false}={}){
+    lastAdminError="";
     try{
       if(!isOwner){
         const identity=await probeRole({silent:true});
-        if(!identity?.admin)return null;
+        if(!identity?.admin){
+          lastAdminError="owner_role_not_confirmed";
+          return null;
+        }
       }
+
       adminData=await adminSigned("v1/admin/list","admin-list");
       ensureAdminButton();
       updateAdminBadge();
-      if(document.querySelector("#v235AdminModal.show"))renderAdminModal();
+
+      if(document.querySelector("#v235AdminModal.show")){
+        renderAdminModal();
+      }
       return adminData;
     }catch(error){
       const msg=String(error?.message||error);
+      lastAdminError=msg;
+
       if(["admin_forbidden","invalid_device_certificate","expired_device_certificate"].includes(msg)){
         isOwner=false;
         document.querySelector("#v235AdminBtn")?.remove();
-      }else if(!silent){
-        setAdminStatus(`Ошибка админ-панели: ${msg}`);
+      }
+
+      if(!silent&&document.querySelector("#v235AdminModal.show")){
+        renderAdminError(msg);
       }
       return null;
     }
@@ -596,9 +646,11 @@
     ensureAdminModal();
     document.querySelector("#v235AdminModal")?.classList.add("show");
     document.body.style.overflow="hidden";
-    setAdminStatus("Обновляю данные…");
-    await loadAdmin();
-    renderAdminModal();
+    renderAdminLoading("Загружаю заявки и пользователей…");
+
+    const data=await loadAdmin({silent:false});
+    if(data)renderAdminModal();
+    else renderAdminError(lastAdminError||"admin_data_unavailable");
   }
   function closeAdmin(){
     document.querySelector("#v235AdminModal")?.classList.remove("show");
@@ -622,6 +674,67 @@
   function setAdminStatus(text){
     const el=document.querySelector("#v235AdminStatus");
     if(el)el.textContent=text;
+  }
+
+  function friendlyAdminError(message){
+    const msg=String(message||"admin_data_unavailable");
+    const known={
+      admin_request_timeout:"Сервер не ответил за 15 секунд.",
+      registry_not_configured:"База заявок KITSUNE_DB не подключена к Worker.",
+      admin_forbidden:"Сервер не подтвердил права владельца.",
+      invalid_device_certificate:"Сертификат этого устройства недействителен.",
+      expired_device_certificate:"Срок сертификата устройства истёк.",
+      owner_role_not_confirmed:"Роль владельца не была подтверждена.",
+      admin_data_unavailable:"Не удалось получить данные админ-панели."
+    };
+    return known[msg]||msg;
+  }
+
+  function renderAdminLoading(text="Загрузка…"){
+    const body=document.querySelector("#v235AdminBody");
+    if(!body)return;
+    body.innerHTML=`
+      <div style="padding:18px 2px">
+        <p id="v235AdminStatus" style="margin:0 0 8px">${esc(text)}</p>
+        <small style="color:var(--muted)">Owner уже подтверждён. Получаю список заявок из D1…</small>
+      </div>
+    `;
+  }
+
+  function renderAdminError(message){
+    const body=document.querySelector("#v235AdminBody");
+    if(!body)return;
+    const friendly=friendlyAdminError(message);
+    body.innerHTML=`
+      <div class="khi-notice warn" style="margin-top:12px">
+        <b>Не удалось загрузить админ-панель</b>
+        <span>${esc(friendly)}</span>
+      </div>
+      <div style="margin-top:10px;font-size:9px;color:var(--muted);word-break:break-word">
+        Код диагностики: <code>${esc(String(message||"unknown"))}</code>
+      </div>
+      <div class="v235-admin-actions" style="margin-top:12px">
+        <button class="primary" id="v235AdminRetry" type="button">↻ Повторить</button>
+        <button class="secondary" id="v235AdminRoleCheck" type="button">Проверить Owner</button>
+      </div>
+    `;
+    body.querySelector("#v235AdminRetry")?.addEventListener("click",async()=>{
+      renderAdminLoading("Повторная загрузка…");
+      const data=await loadAdmin({silent:false});
+      if(data)renderAdminModal();
+      else renderAdminError(lastAdminError||"admin_data_unavailable");
+    });
+    body.querySelector("#v235AdminRoleCheck")?.addEventListener("click",async()=>{
+      renderAdminLoading("Проверяю роль владельца…");
+      const identity=await probeRole({silent:false});
+      if(identity?.admin){
+        const data=await loadAdmin({silent:false});
+        if(data)renderAdminModal();
+        else renderAdminError(lastAdminError||"admin_data_unavailable");
+      }else{
+        renderAdminError("owner_role_not_confirmed");
+      }
+    });
   }
 
   function renderAdminModal(){
@@ -659,7 +772,12 @@
       ${other.length?other.map(user=>userRow(user,false)).join(""):'<div class="ml-empty">Список пока пуст.</div>'}
     `;
 
-    body.querySelector("#v235AdminRefresh")?.addEventListener("click",()=>loadAdmin());
+    body.querySelector("#v235AdminRefresh")?.addEventListener("click",async()=>{
+      renderAdminLoading("Обновляю данные…");
+      const data=await loadAdmin({silent:false});
+      if(data)renderAdminModal();
+      else renderAdminError(lastAdminError||"admin_data_unavailable");
+    });
     body.querySelector("#v235RegistrationToggle")?.addEventListener("click",async()=>{
       const action=adminData.registrationOpen?"close-registration":"reopen-registration";
       await adminAction(action,"");
@@ -716,15 +834,6 @@
     if(record?.accessPendingToken&&!record?.certificate){
       setTimeout(()=>checkAccessStatus({silent:true}),1200);
     }
-
-    /* Router loads after this module. Ensure the final chat implementation is
-       guarded rather than a pre-router placeholder. */
-    let attempts=0;
-    const installer=setInterval(()=>{
-      attempts++;
-      installStabilityLayers();
-      if(viewGuardInstalled||attempts>=20)clearInterval(installer);
-    },250);
 
     /* Retry Owner detection after startup/session renewal. */
     setTimeout(()=>probeRole({silent:true}).then(()=>isOwner?loadAdmin({silent:true}):null),1200);

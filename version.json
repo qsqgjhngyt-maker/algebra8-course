@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.6.1",
+  "version": "2.3.0-beta.3.6.2",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "OWNER_SESSION_ROLE_DIAGNOSTICS",
+  "release": "ADMIN_DIALOG_RELIABILITY",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -35,6 +35,11 @@
     "conversation-view-stability-guard",
     "native-device-session-refresh",
     "server-verified-owner-whoami",
-    "owner-admin-diagnostics"
+    "owner-admin-diagnostics",
+    "admin-visible-error-retry",
+    "admin-request-timeout",
+    "d1-idempotent-schema-init",
+    "final-dialog-home-firewall",
+    "lesson-dialog-context-lock"
   ]
 }
