@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.8",
+  "version": "2.3.0-beta.3.8.1",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "IN_APP_WAKE_AND_COLLAPSIBLE_LIVE_MASCOT",
+  "release": "WAKE_AND_COLLAPSIBLE_MASCOT_STARTUP_FREEZE_FIX",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -70,6 +70,10 @@
     "saved-mascot-dock-position",
     "visual-viewport-safe-mascot",
     "live-mascot-during-dialog",
-    "wake-pauses-during-dialog-and-speech"
+    "wake-pauses-during-dialog-and-speech",
+    "startup-freeze-fix",
+    "no-global-mutation-observer-loop",
+    "bounded-presence-bootstrap",
+    "idempotent-presence-maintenance"
   ]
 }

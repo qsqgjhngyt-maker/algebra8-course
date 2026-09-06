@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.8 · IN-APP WAKE PHRASE + COLLAPSIBLE LIVE MASCOT
+   Kitsune v2.3.0-beta.3.8.1 · IN-APP WAKE PHRASE + COLLAPSIBLE LIVE MASCOT · STARTUP FREEZE FIX
 
    - keeps the original animated Kitsune;
    - adds a compact edge-docked state so the mascot does not cover lessons;
@@ -14,7 +14,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.8";
+  const VERSION="2.3.0-beta.3.8.1";
 
   const COLLAPSED_KEY="a8_kitsune_collapsed_v238";
   const POSITION_KEY="a8_kitsune_dock_v238";
@@ -30,6 +30,10 @@
   const ENROLL_SAMPLES=3;
 
   let installed=false;
+  let startupTimer=null;
+  let maintenanceTimer=null;
+  let runtimeSyncBusy=false;
+  let lastLiveState="";
   let root=null;
   let mascot=null;
   let collapseBtn=null;
@@ -136,7 +140,10 @@
   }
 
   function setLiveState(name){
-    try{window.KitsuneLive?.setState?.(name)}catch{}
+    const next=String(name||"");
+    if(!next||next===lastLiveState)return;
+    lastLiveState=next;
+    try{window.KitsuneLive?.setState?.(next)}catch{}
   }
 
   function injectStyle(){
@@ -703,10 +710,12 @@
       const small=article.querySelector("small");
       if(!small)return;
       if(/Микрофон/.test(title)){
-        small.textContent="Для обычного голосового ввода — после нажатия. Если взрослый отдельно включил «Привет, Китсуне», микрофон может локально ждать фразу активации, но только пока приложение открыто и видно на экране.";
+        const next="Для обычного голосового ввода — после нажатия. Если взрослый отдельно включил «Привет, Китсуне», микрофон может локально ждать фразу активации, но только пока приложение открыто и видно на экране.";
+        if(small.textContent!==next)small.textContent=next;
       }
       if(/Разрешения/.test(title)){
-        small.textContent="Геолокация, платежи и USB запрещены. Камера запрашивается только функцией «Из учебника». Микрофон — при голосовом вводе или при явно включённой локальной фразе активации.";
+        const next="Геолокация, платежи и USB запрещены. Камера запрашивается только функцией «Из учебника». Микрофон — при голосовом вводе или при явно включённой локальной фразе активации.";
+        if(small.textContent!==next)small.textContent=next;
       }
     });
   }
@@ -714,8 +723,8 @@
   function setWakeStatus(text,kind=""){
     const el=document.querySelector("#v238WakeStatus");
     if(el){
-      el.textContent=text;
-      el.dataset.kind=kind;
+      if(el.textContent!==text)el.textContent=text;
+      if(el.dataset.kind!==kind)el.dataset.kind=kind;
     }
     wakeIndicator?.classList.toggle("show",wakeEnabled||enrollActive||wakeListening);
     if(wakeIndicator){
@@ -1295,8 +1304,10 @@
     return raw.slice(0,130);
   }
 
-  function observe(){
-    const observer=new MutationObserver(()=>{
+  function runtimeSync(){
+    if(runtimeSyncBusy)return;
+    runtimeSyncBusy=true;
+    try{
       if(!ensureControls())return;
       bindDrag();
       injectSettings();
@@ -1307,19 +1318,30 @@
         if(wakeListening)stopWakeListener("paused").catch(()=>{});
       }else if(
         wakeEnabled&&profileReady()&&!wakeListening&&!enrollActive&&
-        !document.hidden&&!dialogOpen()&&!isSpeaking()
+        !document.hidden&&!dialogOpen()&&!isSpeaking()&&!wakeRestartTimer
       ){
-        scheduleWakeRestart(650);
+        scheduleWakeRestart(700);
       }
 
       updateWakeUi();
-    });
-    observer.observe(document.body,{
-      subtree:true,
-      childList:true,
-      attributes:true,
-      attributeFilter:["class","data-mode"]
-    });
+    }finally{
+      runtimeSyncBusy=false;
+    }
+  }
+
+  function observe(){
+    /*
+     * beta.3.8 used a broad MutationObserver over the whole document.
+     * Its callback changed the same DOM subtree (privacy text, classes,
+     * dialog state), which could schedule itself indefinitely and freeze
+     * the application during startup.
+     *
+     * A small maintenance tick is deliberately used instead. It is
+     * deterministic, cannot recursively trigger itself and is cheap:
+     * most operations are idempotent and settings are injected once.
+     */
+    clearInterval(maintenanceTimer);
+    maintenanceTimer=setInterval(runtimeSync,650);
   }
 
   function handleViewport(){
@@ -1357,13 +1379,10 @@
   }
 
   function install(){
-    if(installed)return;
+    if(installed)return true;
     injectStyle();
 
-    if(!ensureControls()){
-      setTimeout(install,100);
-      return;
-    }
+    if(!ensureControls())return false;
 
     installed=true;
     bindDrag();
@@ -1380,6 +1399,21 @@
     else updateWakeUi();
 
     dispatchState();
+    return true;
+  }
+
+  function bootstrap(){
+    if(install())return;
+
+    clearInterval(startupTimer);
+    let tries=0;
+    startupTimer=setInterval(()=>{
+      tries++;
+      if(install()||tries>=80){
+        clearInterval(startupTimer);
+        startupTimer=null;
+      }
+    },250);
   }
 
   window.KitsunePresence={
@@ -1435,18 +1469,8 @@
   };
 
   if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",install,{once:true});
+    document.addEventListener("DOMContentLoaded",bootstrap,{once:true});
   }else{
-    install();
+    bootstrap();
   }
-
-  let tries=0;
-  const timer=setInterval(()=>{
-    tries++;
-    install();
-    injectSettings();
-    if((installed&&document.querySelector("#v238WakeSettings"))||tries>40){
-      clearInterval(timer);
-    }
-  },250);
 })();
