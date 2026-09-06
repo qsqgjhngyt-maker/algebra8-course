@@ -1,15 +1,21 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.3",
+  "version": "2.3.0-beta.3.5",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
-  "backend": "optional-stateless-qwen-chat-broker",
+  "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "QWEN_NON_THINKING_RELIABILITY_FIX",
+  "release": "OWNER_APPROVAL_ADMIN",
   "features": [
-    "single-adult-cloud-consent",
+    "owner-only-admin-ui",
+    "google-access-requests",
+    "pending-approved-denied-revoked-access",
+    "cloudflare-d1-access-registry",
+    "server-side-admin-authorization",
+    "device-proof-of-possession",
+    "trusted-google-email-bypass",
     "qwen-cloud-primary-general-chat",
     "cloud-chat-inside-lessons",
     "chat-dialog-navigation-firewall",
@@ -21,11 +27,8 @@
     "no-cloud-tts-client",
     "no-opfs-clear",
     "no-analytics",
-    "safe-qwen-chat-provider-diagnostics",
-    "safe-temp-credential-diagnostics",
     "qwen3.7-plus-non-thinking-general-chat",
     "45s-worker-chat-timeout",
-    "50s-client-chat-timeout",
-    "explicit-chat-timeout-diagnostic"
+    "50s-client-chat-timeout"
   ]
 }
