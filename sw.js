@@ -1,9 +1,9 @@
-const CACHE = "algebra8-v2.3.0-beta.3.7";
+const CACHE = "algebra8-v2.3.0-beta.3.7.1";
 const NEURAL_CACHE = "algebra8-ai-runtime-v1";
-const RELEASE = "2.3.0-beta.3.7";
+const RELEASE = "2.3.0-beta.3.7.1";
 
 const ASSETS = [
-  "./index.html?v=2.3.0-beta.3.7",
+  "./index.html?v=2.3.0-beta.3.7.1",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
@@ -62,9 +62,9 @@ const ASSETS = [
   "./intelligence-router-v230.js?v=2.3.0-beta.3.3",
   "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3",
   "./local-voice-lab-v231.js?v=2.3.0-beta.3.3",
-  "./voice-conversation-v237.js?v=2.3.0-beta.3.7",
+  "./voice-conversation-v237.js?v=2.3.0-beta.3.7.1",
   "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.6.2",
-  "./version.json?v=2.3.0-beta.3.7"
+  "./version.json?v=2.3.0-beta.3.7.1"
 ];
 
 const CHILD_CSP = [

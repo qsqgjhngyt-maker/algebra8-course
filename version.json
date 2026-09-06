@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.7",
+  "version": "2.3.0-beta.3.7.1",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "LIVE_VOICE_DIALOG_TOPIC_MEMORY",
+  "release": "TOPIC_MEMORY_POST_ROUTE_FIX",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -49,6 +49,10 @@
     "local-thematic-memory",
     "privacy-filtered-cloud-memory-digest",
     "topic-reset",
-    "lesson-scoped-conversation-memory"
+    "lesson-scoped-conversation-memory",
+    "topic-memory-post-route-injection",
+    "raw-user-message-routing",
+    "cloud-only-memory-digest",
+    "memory-classifier-isolation"
   ]
 }

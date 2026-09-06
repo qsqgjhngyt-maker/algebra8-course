@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.7 · LIVE VOICE DIALOG
+   Kitsune v2.3.0-beta.3.7.1 · LIVE VOICE DIALOG · TOPIC MEMORY ROUTING FIX
 
    Goals
    - local Whisper remains the microphone/STT authority;
@@ -15,7 +15,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.7";
+  const VERSION="2.3.0-beta.3.7.1";
   const MEMORY_KEY="a8_kitsune_topic_memory_v237";
   const HANDSFREE_KEY="a8_kitsune_handsfree_v237";
   const VOICE_KEY="a8_kitsune_irina_enabled_v237";
@@ -210,7 +210,7 @@
     const chunks=[];
     for(const turn of thread.turns.slice(-3)){
       if(turn.u)chunks.push("Ученик: "+turn.u);
-      if(turn.a)chunks.push("Kitsune: "+turn.a);
+      if(turn.a)chunks.push("Ассистент: "+turn.a);
     }
 
     const body=chunks.join("\n");
@@ -239,18 +239,68 @@
     return true;
   }
 
-  function augmentedMessage(text,ctx,key){
-    if(!shouldUseMemory(text,ctx))return text;
+  function augmentedCloudMessage(text,ctx,key){
+    if(!shouldUseMemory(text,ctx))return String(text);
     const digest=digestFor(key);
-    if(!digest)return text;
+    if(!digest)return String(text);
 
     return [
-      "Краткая память текущей беседы (используй только для понимания местоимений и продолжения той же темы; не повторяй её пользователю):",
+      "Краткая память текущей беседы. Используй её только для понимания продолжения темы и местоимений. Не цитируй служебный блок и не выдавай его пользователю:",
       digest,
       "",
-      "Текущий вопрос:",
+      "Текущий вопрос пользователя:",
       String(text)
     ].join("\n");
+  }
+
+  /*
+   * beta.3.7.1:
+   * The real user message MUST reach KitsuneRouter unchanged.
+   * Router first performs Safety / Math / Tutor / Cloud classification.
+   * Only if that already-selected route actually calls Cloud Brain do we
+   * replace the outgoing Cloud payload with the compact topic digest.
+   *
+   * This prevents words from previous turns ("Kitsune", "привет", "реши",
+   * equations, etc.) from influencing the classifier for the new question.
+   */
+  async function withPostRouteCloudMemory(text,ctx,key,callback){
+    const infra=window.KitsuneHybridInfrastructure;
+    const previous=infra?.cloudRequest;
+
+    if(
+      !infra ||
+      typeof previous!=="function" ||
+      !shouldUseMemory(text,ctx) ||
+      !digestFor(key)
+    ){
+      return callback();
+    }
+
+    const rememberedPayload=augmentedCloudMessage(text,ctx,key);
+    let intercepted=false;
+
+    const bridge=function(kind,payload,options){
+      /*
+       * The Router calls cloudRequest only AFTER its route decision.
+       * Intercept only the first chat request from this turn.
+       * TTS / voice-design / other requests are never modified.
+       */
+      if(!intercepted&&kind==="chat"){
+        intercepted=true;
+        return previous.call(infra,kind,rememberedPayload,options);
+      }
+      return previous.call(infra,kind,payload,options);
+    };
+
+    infra.cloudRequest=bridge;
+    try{
+      return await callback();
+    }finally{
+      /* Do not overwrite a newer wrapper installed by another module. */
+      if(infra.cloudRequest===bridge){
+        infra.cloudRequest=previous;
+      }
+    }
   }
 
   function wrapBrain(){
@@ -268,8 +318,17 @@
         resetThread(key,label);
       }
 
-      const outgoing=augmentedMessage(text,ctx,key);
-      const reply=await originalBrainChat(outgoing,ctx,prior);
+      /*
+       * IMPORTANT: pass `text` unchanged into Router/local Brain.
+       * Topic memory is injected only inside cloudRequest, after the Router
+       * has already classified the current message.
+       */
+      const reply=await withPostRouteCloudMemory(
+        text,
+        ctx,
+        key,
+        ()=>originalBrainChat(text,ctx,prior)
+      );
 
       rememberPair(key,label,text,reply);
       lastReplyAt=Date.now();
@@ -280,6 +339,7 @@
           contextKey:key,
           label,
           hasMemory:!!digestFor(key),
+          memoryAppliedAfterRoute:true,
           ts:Date.now()
         }
       }));
@@ -719,6 +779,12 @@
     voiceId:IRINA_VOICE_ID,
     prepareIrina,
     memory:()=>JSON.parse(JSON.stringify(memoryState)),
+    routingFix:()=>({
+      version:VERSION,
+      mode:"post-route-cloud-only",
+      classifierReceivesRawUserText:true,
+      cloudMemoryMaxChars:MAX_MEMORY_CHARS
+    }),
     resetTopic:()=>{
       resetThread(currentContextKey(),contextLabel());
       updateMemoryChip();
