@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.7.2",
+  "version": "2.3.0-beta.3.8",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "SEPARATE_CONVERSATION_CONTEXT",
+  "release": "IN_APP_WAKE_AND_COLLAPSIBLE_LIVE_MASCOT",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -58,6 +58,18 @@
     "signed-message-and-context",
     "context-max-1200",
     "invalid-context-soft-drop",
-    "qwen-untrusted-memory-system-block"
+    "qwen-untrusted-memory-system-block",
+    "in-app-wake-phrase",
+    "wake-only-while-app-visible",
+    "personalized-local-wake-template",
+    "no-cloud-wake-audio",
+    "three-sample-wake-enrollment",
+    "collapsible-original-animated-mascot",
+    "draggable-compact-mascot",
+    "edge-snap-mascot",
+    "saved-mascot-dock-position",
+    "visual-viewport-safe-mascot",
+    "live-mascot-during-dialog",
+    "wake-pauses-during-dialog-and-speech"
   ]
 }
