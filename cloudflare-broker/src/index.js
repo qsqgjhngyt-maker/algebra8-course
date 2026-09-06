@@ -21,7 +21,7 @@
    - QWEN_REGION
    - CHAT_ENABLED
    ===================================================================== */
-const VERSION="2.3.0-beta.3.5";
+const VERSION="2.3.0-beta.3.6";
 const encoder=new TextEncoder();
 const MAX_BODY_BYTES=28*1024;
 const GOOGLE_ISSUERS=new Set(["accounts.google.com","https://accounts.google.com"]);
@@ -65,7 +65,7 @@ export default {
         const purpose=String(body.purpose||"");
         const allowed=new Set([
           "enroll","temporary-credential","qwen-test","chat",
-          "access-request","admin-list","admin-action"
+          "access-request","admin-list","admin-action","device-refresh"
         ]);
         if(!allowed.has(purpose))throw httpError(400,"invalid_purpose");
 
@@ -202,7 +202,7 @@ export default {
           cnf:pending.cnf,
           aud:env.ALLOWED_ORIGIN,
           iat:now,
-          exp:now+boundedInt(env.DEVICE_CERT_TTL_SECONDS,43200,300,86400)
+          exp:now+sessionCertificateTtl(env)
         };
         return json({
           status:"approved",
@@ -283,6 +283,46 @@ export default {
         }
 
         return json({ok:true,action,accountHash:target},200,origin,env);
+      }
+
+      /* beta.3.6: trusted device session renewal.
+         Google is NOT required on every PWA restart. The old signed
+         certificate is accepted only inside a limited refresh grace period
+         and only together with proof from the same non-exportable device key. */
+      if(request.method==="POST"&&url.pathname==="/v1/device/refresh"){
+        const body=await readJson(request);
+        const challenge=await verifyObject(body.challengeToken,env.GRANT_SIGNING_SECRET);
+        validateChallenge(challenge,"device-refresh",env);
+
+        const certificate=await verifyObject(body.deviceCertificate,env.GRANT_SIGNING_SECRET);
+        validateRefreshableCertificate(certificate,env);
+
+        await verifyDeviceProof(
+          certificate.cnf.jwk,
+          body.proof,
+          `device-refresh\n${body.challengeToken}\n${body.deviceCertificate}`
+        );
+        await rejectReplay(env,challenge.jti);
+        await ensureCertificateAccess(certificate,env);
+
+        const now=Math.floor(Date.now()/1000);
+        const owner=await isOwnerCertificate(certificate,env);
+        const refreshed={
+          typ:"device",
+          role:owner?"owner":String(certificate.role||""),
+          accountHash:String(certificate.accountHash||certificate.parentSubHash||""),
+          parentSubHash:String(certificate.parentSubHash||certificate.accountHash||""),
+          cnf:certificate.cnf,
+          aud:env.ALLOWED_ORIGIN,
+          iat:now,
+          exp:now+sessionCertificateTtl(env)
+        };
+
+        return json({
+          role:refreshed.role||undefined,
+          deviceCertificate:await signObject(refreshed,env.GRANT_SIGNING_SECRET),
+          expiresAt:refreshed.exp
+        },200,origin,env);
       }
 
       if(request.method==="POST"&&url.pathname==="/v1/temporary-credential"){
@@ -457,7 +497,7 @@ async function issueDeviceCertificate({env,google,publicJwk,thumbprint,role,acco
     cnf:{jkt:thumbprint,jwk:publicJwk},
     aud:env.ALLOWED_ORIGIN,
     iat:now,
-    exp:now+boundedInt(env.DEVICE_CERT_TTL_SECONDS,43200,300,86400)
+    exp:now+sessionCertificateTtl(env)
   };
   /* Keep legacy field so already deployed client code remains compatible. */
   payload.parentSubHash=hash;
@@ -677,6 +717,18 @@ function validateChallenge(payload,purpose,env){
     throw httpError(401,"invalid_challenge");
   if(!payload.exp||payload.exp<now||payload.iat>now+30)
     throw httpError(401,"expired_challenge");
+}
+function sessionCertificateTtl(env){
+  /* Default 7 days. Can be overridden independently from legacy beta values. */
+  return boundedInt(env.SESSION_CERT_TTL_SECONDS,604800,3600,2592000);
+}
+function validateRefreshableCertificate(payload,env){
+  const now=Math.floor(Date.now()/1000);
+  const grace=boundedInt(env.DEVICE_REFRESH_GRACE_SECONDS,2592000,86400,7776000);
+  if(payload.typ!=="device"||payload.aud!==env.ALLOWED_ORIGIN||!payload.cnf?.jwk||!payload.cnf?.jkt)
+    throw httpError(401,"invalid_device_certificate");
+  if(!payload.exp||payload.exp<(now-grace)||payload.iat>now+30)
+    throw httpError(401,"device_reauth_required");
 }
 function validateCertificate(payload,env){
   const now=Math.floor(Date.now()/1000);
