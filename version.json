@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.8.3",
+  "version": "2.3.0-beta.3.8.4",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "cloudflare-worker-d1-owner-approval",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "UNIFIED_VOICE_IPHONE_STABILITY",
+  "release": "IPHONE_PINNED_ASR_NO_PER_TURN_RELOAD",
   "features": [
     "owner-only-admin-ui",
     "google-access-requests",
@@ -85,6 +85,12 @@
     "asr-release-before-piper-on-ios",
     "transcript-hallucination-gate",
     "voice-session-interruption-marker",
-    "no-cloud-stt"
+    "no-cloud-stt",
+    "iphone-pinned-whisper-per-dialog",
+    "no-per-turn-whisper-reload",
+    "iphone-system-tts-during-dialog",
+    "piper-restored-after-dialog",
+    "wake-release-once-per-dialog",
+    "legacy-whisper-release-once-per-dialog"
   ]
 }
