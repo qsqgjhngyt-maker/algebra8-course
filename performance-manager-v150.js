@@ -1,289 +1,55 @@
 /* =====================================================================
-   Kitsune Performance Manager v2.3.0-beta.3.9.1
-   Adaptive Stability · iPhone / Android / low-power PC
+   Kitsune Performance Manager v2.3.0-beta.3.9.2 · SMOOTH RUNTIME
 
-   Goals:
-   - preserve the visual identity and all learning features;
-   - reduce peak RAM/CPU/GPU pressure only when the device needs it;
-   - keep course checks and Tutor usable even if local voice models were loaded;
-   - restore the learner to the same lesson after an abnormal WebKit reload;
-   - never delete progress, local models, D1/auth data, or user settings.
+   Philosophy:
+   - prevent WebKit/low-memory crashes instead of restoring after them;
+   - preserve visual identity, but reduce invisible/compositor work;
+   - one heavy voice/AI lifetime at a time;
+   - never unload/reload voice on every exercise button press;
+   - no scroll-position recovery, no lesson DOM snapshots, no 4-second
+     localStorage checkpoints.
    ===================================================================== */
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.9.1";
-  const AUTO_KEY="a8_performance_auto_v150";
-  const PROFILE_KEY="a8_performance_profile_v2390";
-  const STATE_KEY="a8_runtime_restore_v2391";
-  const ALIVE_KEY="a8_runtime_alive_v2391";
-  const CRASH_WINDOW_MS=120000;
+  const VERSION="2.3.0-beta.3.9.2";
+  const AUTO_KEY="a8_perf_auto_v2392";
+  const PROFILE_KEY="a8_perf_profile_v2392";
 
-  let auto=localStorage.getItem(AUTO_KEY)!=="0";
-  let busy=0;
-  let pressure=0; // 0 normal, 1 elevated, 2 emergency
-  let lastPressureAt=0;
-  let restoredAfterCrash=false;
-  let currentState=loadJson(STATE_KEY,{view:"home",lessonId:"",scrollY:0,lessonUi:null,ts:0});
+  let auto=readBool(AUTO_KEY,true);
+  let forcedProfile="";
+  try{forcedProfile=localStorage.getItem(PROFILE_KEY)||""}catch{}
+
   let baseProfile=detectProfile();
-  let forcedProfile=localStorage.getItem(PROFILE_KEY)||"";
-  let effectiveProfile="full";
-  let lastEffectsKey="";
-  let effectResetTimer=null;
-  let actionReplay=false;
-  let wrapperTimer=null;
-  let lastWrapped={openLesson:null,go:null,renderCourse:null,renderHome:null};
-  let lagSamples=[];
-  let lastTick=performance.now();
+  let effectiveProfile=baseProfile;
+  let pressure=0;
+  let lastPressureAt=0;
+  let busy=0;
+  let learningMode=false;
+  let currentView="home";
+  let currentLesson="";
   let lastInteraction=Date.now();
+  let lastTick=performance.now();
+  let lagSamples=[];
+  let wrapperTimer=null;
+  let wrapperTries=0;
+  let scrollTimer=null;
+  let heavyReleasePromise=null;
+  let lastHeavyReleaseAt=0;
+  let dialogObserver=null;
+  let dialogNode=null;
+  let effectResetTimer=null;
+  let lastEffectsKey="";
 
-  const previousAlive=loadJson(ALIVE_KEY,null);
-  const previousCrash=!!(
-    previousAlive &&
-    Number(previousAlive.ts)>0 &&
-    Date.now()-Number(previousAlive.ts)<CRASH_WINDOW_MS
-  );
-
-  function loadJson(key,fallback){
+  function readBool(key,fallback){
     try{
-      const value=JSON.parse(localStorage.getItem(key)||"null");
-      return value&&typeof value==="object"?value:fallback;
+      const value=localStorage.getItem(key);
+      return value===null?fallback:value==="1";
     }catch{return fallback}
   }
 
-  function saveJson(key,value){
-    try{localStorage.setItem(key,JSON.stringify(value))}catch{}
-  }
-
-
-  function safeText(value,max=600){
-    return String(value??"").slice(0,max);
-  }
-
-  function captureLessonUi(){
-    if(currentState.view!=="lesson")return null;
-
-    const lessonId=currentState.lessonId||localStorage.getItem("a8_lastLesson")||"";
-    if(!lessonId)return null;
-
-    const ui={
-      lessonId,
-      inputs:{},
-      hints:[],
-      feedback:{},
-      activeExercise:"",
-      activeInput:"",
-      levelIndex:0,
-      tutor:null
-    };
-
-    /* Preserve every typed answer in this lesson. Usually there are only
-       2–4 inputs, so this is tiny but prevents the learner losing work. */
-    document.querySelectorAll('.exercise[data-ex] input[id^="ans-"]').forEach(input=>{
-      if(input.value!==""){
-        ui.inputs[input.id]=safeText(input.value,240);
-      }
-    });
-
-    document.querySelectorAll('.exercise[data-ex] .hint.show[id]').forEach(hint=>{
-      ui.hints.push(hint.id);
-    });
-
-    document.querySelectorAll('.exercise[data-ex] .feedback[id]').forEach(fb=>{
-      if(!fb.textContent?.trim())return;
-      ui.feedback[fb.id]={
-        text:safeText(fb.textContent,700),
-        className:safeText(fb.className,120)
-      };
-    });
-
-    const focused=document.activeElement;
-    if(focused?.matches?.('.exercise[data-ex] input, .v173-inline-tutor textarea')){
-      ui.activeInput=focused.id||"";
-      ui.activeExercise=focused.closest?.(".exercise[data-ex]")?.dataset?.ex||"";
-    }
-
-    const visibleTutor=document.querySelector(".exercise[data-ex] .v173-inline-tutor.show");
-    if(visibleTutor){
-      const box=visibleTutor.closest(".exercise[data-ex]");
-      const ex=box?.dataset?.ex||"";
-      if(ex)ui.activeExercise=ex;
-
-      const normalSteps=[...visibleTutor.querySelectorAll(".v173-step.show:not(.answer-step)")].length;
-      const answerShown=!!visibleTutor.querySelector(".v173-step.answer-step.show");
-      const workResult=visibleTutor.querySelector(".v173-work-result");
-
-      ui.tutor={
-        exercise:ex,
-        show:true,
-        level:Math.max(1,Math.min(3,normalSteps||1)),
-        answerShown,
-        whyShown:!!visibleTutor.querySelector(".v173-why-box.show"),
-        workShown:!!visibleTutor.querySelector(".v173-work-box.show"),
-        workText:safeText(visibleTutor.querySelector("textarea")?.value||"",1200),
-        workResultText:safeText(workResult?.textContent||"",1000),
-        workResultClass:safeText(workResult?.className||"",140),
-        diagnosis:safeText(visibleTutor.querySelector(".v173-diagnosis")?.textContent||"",1000)
-      };
-    }
-
-    if(!ui.activeExercise){
-      const candidate=document.querySelector(
-        ".exercise[data-ex]:has(.feedback.ok),"+
-        ".exercise[data-ex]:has(.feedback.bad),"+
-        ".exercise[data-ex]:has(.hint.show)"
-      );
-      if(candidate)ui.activeExercise=candidate.dataset.ex||"";
-    }
-
-    const levelButtons=[...document.querySelectorAll(".level-switch button")];
-    const activeLevel=levelButtons.findIndex(b=>b.classList.contains("active"));
-    if(activeLevel>=0)ui.levelIndex=activeLevel;
-
-    return ui;
-  }
-
-  function applyBasicLessonUi(ui){
-    if(!ui||ui.lessonId!==currentState.lessonId)return;
-
-    for(const [id,value] of Object.entries(ui.inputs||{})){
-      const input=document.getElementById(id);
-      if(input)input.value=value;
-    }
-
-    for(const id of ui.hints||[]){
-      document.getElementById(id)?.classList.add("show");
-    }
-
-    for(const [id,state] of Object.entries(ui.feedback||{})){
-      const fb=document.getElementById(id);
-      if(!fb)continue;
-      fb.className=state.className||"feedback";
-      fb.textContent=state.text||"";
-    }
-
-    const levelButtons=[...document.querySelectorAll(".level-switch button")];
-    const levelIndex=Number(ui.levelIndex||0);
-    const button=levelButtons[levelIndex];
-    if(button&&!button.classList.contains("active")){
-      try{button.click()}catch{}
-    }
-  }
-
-  async function waitFor(selector,{root=document,timeout=2600,step=80}={}){
-    const start=performance.now();
-    while(performance.now()-start<timeout){
-      const found=root.querySelector(selector);
-      if(found)return found;
-      await new Promise(resolve=>setTimeout(resolve,step));
-    }
-    return null;
-  }
-
-  async function restoreTutorUi(ui){
-    const tutor=ui?.tutor;
-    if(!tutor?.show||!tutor.exercise)return false;
-
-    const box=await waitFor(`.exercise[data-ex="${CSS.escape(tutor.exercise)}"]`,{timeout:2200});
-    if(!box)return false;
-
-    let panel=box.querySelector(".v173-inline-tutor.show");
-    if(!panel){
-      const tutorButton=await waitFor(".v16-tutor-btn",{root:box,timeout:2600});
-      if(!tutorButton)return false;
-
-      /* Bypass the heavy-action capture guard only for this recovery click.
-         We are restoring an already-open helper, not starting a new action. */
-      tutorButton.dataset.kitsunePerfReplay="1";
-      try{tutorButton.click()}catch{}
-      delete tutorButton.dataset.kitsunePerfReplay;
-
-      panel=await waitFor(".v173-inline-tutor.show",{root:box,timeout:1800});
-    }
-
-    if(!panel)return false;
-
-    /* Rebuild Tutor's own in-memory state by using its controls, rather than
-       only painting old HTML. This means «Следующий шаг» keeps working after
-       recovery instead of jumping backwards. */
-    let level=Math.max(1,Math.min(3,Number(tutor.level||1)));
-    for(let i=1;i<level;i++){
-      try{panel.querySelector(".v173-next")?.click()}catch{}
-      await new Promise(resolve=>setTimeout(resolve,30));
-      panel=box.querySelector(".v173-inline-tutor.show")||panel;
-    }
-
-    if(tutor.answerShown){
-      try{panel.querySelector(".v173-answer")?.click()}catch{}
-      await new Promise(resolve=>setTimeout(resolve,30));
-      panel=box.querySelector(".v173-inline-tutor.show")||panel;
-    }
-
-    if(tutor.whyShown&&!panel.querySelector(".v173-why-box.show")){
-      try{panel.querySelector(".v173-why")?.click()}catch{}
-    }
-
-    if(tutor.workShown&&!panel.querySelector(".v173-work-box.show")){
-      try{panel.querySelector(".v173-work")?.click()}catch{}
-    }
-
-    const textarea=panel.querySelector(".v173-work-box textarea");
-    if(textarea&&tutor.workText)textarea.value=tutor.workText;
-
-    const result=panel.querySelector(".v173-work-result");
-    if(result&&tutor.workResultText){
-      result.className=tutor.workResultClass||"v173-work-result show";
-      result.textContent=tutor.workResultText;
-    }
-
-    const diagnosis=panel.querySelector(".v173-diagnosis");
-    if(diagnosis&&tutor.diagnosis)diagnosis.textContent=tutor.diagnosis;
-
-    return true;
-  }
-
-  async function restoreLessonUi(ui,scrollY){
-    if(!ui||ui.lessonId!==currentState.lessonId){
-      window.scrollTo({top:Number(scrollY||0),behavior:"auto"});
-      return false;
-    }
-
-    /* Tutor-lite and Tutor-smart decorate exercises asynchronously after
-       openLesson(), so restore in two phases. */
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    applyBasicLessonUi(ui);
-
-    const tutorRestored=await restoreTutorUi(ui);
-
-    /* Restore basic values again in case Tutor rerender touched feedback. */
-    applyBasicLessonUi(ui);
-
-    const anchor=ui.tutor?.show
-      ?document.querySelector(`.exercise[data-ex="${CSS.escape(ui.tutor.exercise||"")}"] .v173-inline-tutor.show`)
-      :ui.activeExercise
-        ?document.querySelector(`.exercise[data-ex="${CSS.escape(ui.activeExercise)}"]`)
-        :null;
-
-    if(anchor){
-      anchor.scrollIntoView({behavior:"auto",block:"center"});
-    }else{
-      window.scrollTo({top:Number(scrollY||0),behavior:"auto"});
-    }
-
-    if(ui.activeInput){
-      const input=document.getElementById(ui.activeInput);
-      if(input){
-        setTimeout(()=>{
-          try{
-            input.focus({preventScroll:true});
-            const n=String(input.value||"").length;
-            input.setSelectionRange?.(n,n);
-          }catch{}
-        },80);
-      }
-    }
-
-    return tutorRestored||!!anchor;
+  function sleep(ms){
+    return new Promise(resolve=>setTimeout(resolve,ms));
   }
 
   function isIOS(){
@@ -295,10 +61,6 @@
 
   function isAndroid(){
     return /Android/i.test(String(navigator.userAgent||""));
-  }
-
-  function isMobile(){
-    return isIOS()||isAndroid()||/Mobile/i.test(String(navigator.userAgent||""));
   }
 
   function memoryGB(){
@@ -315,8 +77,8 @@
     const mem=memoryGB();
     const cpu=cores();
 
-    /* WebKit PWA memory limits can be lower than the physical iPhone RAM.
-       Start iOS in careful mode even on a fast phone. */
+    /* iOS WebKit may kill a page well before physical RAM is exhausted.
+       Start conservative, but keep the same visual language. */
     if(isIOS())return "careful";
 
     if(isAndroid()){
@@ -340,52 +102,60 @@
 
   function computeProfile(){
     if(!auto)return "full";
-
-    const base=(["full","balanced","careful"].includes(forcedProfile))
+    const base=["full","balanced","careful"].includes(forcedProfile)
       ?forcedProfile
       :baseProfile;
-
     const rank=Math.max(profileRank(base),pressure===2?3:pressure===1?2:0);
     return rankProfile(rank);
   }
 
   function injectStyles(){
-    if(document.querySelector("#kitsuneAdaptivePerf2391"))return;
+    if(document.querySelector("#kitsuneSmoothPerf2392"))return;
     const style=document.createElement("style");
-    style.id="kitsuneAdaptivePerf2391";
+    style.id="kitsuneSmoothPerf2392";
     style.textContent=`
-      /* Keep the design; only skip paint/layout for cards far below viewport. */
+      /*
+       * COURSE MAP: skip layout/paint for distant cards.
+       * LESSONS: intentionally NOT content-visibility:auto — on iOS it can
+       * cause visible jumps while intrinsic heights are corrected.
+       */
       @supports (content-visibility:auto){
         body.kitsune-perf-balanced .course-grid > *,
         body.kitsune-perf-balanced .chapter-card,
         body.kitsune-perf-balanced .chapter-summary-card,
         body.kitsune-perf-careful .course-grid > *,
         body.kitsune-perf-careful .chapter-card,
-        body.kitsune-perf-careful .lesson-panel,
-        body.kitsune-perf-careful .example-card,
-        body.kitsune-perf-careful .practice-card,
         body.kitsune-perf-careful .chapter-summary-card{
           content-visibility:auto;
-          contain-intrinsic-size:auto 320px;
+          contain-intrinsic-size:auto 300px;
         }
+      }
+
+      /*
+       * Keep the large shell glass beautiful. On careful devices the many
+       * small cards inside a lesson become "glass-look" surfaces without a
+       * separate GPU backdrop texture for every exercise.
+       */
+      body.kitsune-perf-careful .exercise,
+      body.kitsune-perf-careful .example-card,
+      body.kitsune-perf-careful .practice-card,
+      body.kitsune-perf-careful .topic-row,
+      body.kitsune-perf-careful .v173-inline-tutor,
+      body.kitsune-perf-careful .chapter-summary-card{
+        -webkit-backdrop-filter:none!important;
+        backdrop-filter:none!important;
+        background:color-mix(in srgb,var(--card) 94%,transparent)!important;
       }
 
       body.kitsune-perf-careful .glass-panel,
       body.kitsune-perf-careful .glass-topbar,
-      body.kitsune-perf-careful .chapter-card,
-      body.kitsune-perf-careful .v173-inline-tutor{
-        -webkit-backdrop-filter:blur(9px)!important;
-        backdrop-filter:blur(9px)!important;
+      body.kitsune-perf-careful .sidebar{
+        -webkit-backdrop-filter:blur(8px)!important;
+        backdrop-filter:blur(8px)!important;
       }
 
       body.kitsune-perf-careful .reveal{
         transition-duration:.16s!important;
-      }
-
-      body.kitsune-perf-careful.kitsune-perf-busy .reveal{
-        opacity:1!important;
-        transform:none!important;
-        transition-duration:.001ms!important;
       }
 
       body.kitsune-perf-careful .chapter-card:hover,
@@ -394,26 +164,48 @@
         transform:none!important;
       }
 
-      body.kitsune-perf-busy .bg-orb{
-        animation-play-state:paused!important;
-        opacity:.18!important;
-      }
-
+      /*
+       * During a finger scroll or a heavy navigation we freeze decorative
+       * motion for a fraction of a second. The scene stays visible, so there
+       * is no "lite mode" look; animation resumes immediately after movement.
+       */
+      body.kitsune-perf-scrolling .bg-orb,
+      body.kitsune-perf-scrolling .learning-fx,
+      body.kitsune-perf-busy .bg-orb,
       body.kitsune-perf-busy .learning-fx,
       body.kitsune-perf-busy .celebration,
       body.kitsune-perf-busy .confetti{
         animation-play-state:paused!important;
       }
 
-      /* Emergency is temporary and automatic. The UI stays fully usable. */
-      body.kitsune-perf-emergency .particles-canvas,
-      body.kitsune-perf-emergency .bg-orb{
-        display:none!important;
+      body.kitsune-perf-scrolling .particles-canvas{
+        opacity:.38!important;
       }
-      body.kitsune-perf-emergency .glass-panel,
-      body.kitsune-perf-emergency .glass-topbar,
-      body.kitsune-perf-emergency .chapter-card,
-      body.kitsune-perf-emergency .v173-inline-tutor{
+
+      body.kitsune-perf-busy .particles-canvas{
+        opacity:.22!important;
+      }
+
+      body.kitsune-perf-busy .reveal{
+        opacity:1!important;
+        transform:none!important;
+        transition-duration:.001ms!important;
+      }
+
+      /* Emergency is temporary and only used after real runtime pressure. */
+      body.kitsune-perf-emergency .particles-canvas{
+        visibility:hidden!important;
+      }
+      body.kitsune-perf-emergency .bg-orb{
+        opacity:.08!important;
+        animation-play-state:paused!important;
+      }
+      body.kitsune-perf-emergency .exercise,
+      body.kitsune-perf-emergency .example-card,
+      body.kitsune-perf-emergency .practice-card,
+      body.kitsune-perf-emergency .topic-row,
+      body.kitsune-perf-emergency .v173-inline-tutor,
+      body.kitsune-perf-emergency .chapter-card{
         -webkit-backdrop-filter:none!important;
         backdrop-filter:none!important;
       }
@@ -425,58 +217,42 @@
         transition-duration:.001ms!important;
       }
 
-      .kitsune-perf-toast{
-        position:fixed;
-        left:50%;
-        bottom:max(18px,env(safe-area-inset-bottom));
-        z-index:11000;
-        max-width:min(92vw,560px);
-        transform:translate(-50%,18px);
-        opacity:0;
-        pointer-events:none;
-        padding:9px 12px;
-        border:1px solid var(--line);
-        border-radius:12px;
-        background:color-mix(in srgb,var(--card-strong) 94%,transparent);
-        color:var(--text);
-        box-shadow:0 12px 32px rgba(0,0,0,.16);
-        -webkit-backdrop-filter:blur(10px);
-        backdrop-filter:blur(10px);
-        font-size:10px;
-        font-weight:800;
-        transition:.18s ease;
-      }
-      .kitsune-perf-toast.show{
-        opacity:1;
-        transform:translate(-50%,0);
+      /*
+       * Learning mode deliberately keeps voice models dormant. This class is
+       * also a hook for future components; it does not hide any functionality.
+       */
+      body.kitsune-learning-mode{
+        --kitsune-learning-runtime:1;
       }
     `;
     document.head.appendChild(style);
+  }
+
+  function patchEffects(){
+    const fn=window.effectiveEffects;
+    if(typeof fn!=="function"||fn.__kitsunePerf2392)return;
+
+    const base=fn.bind(window);
+    const wrapped=function(){
+      const normal=base();
+      if(effectiveProfile==="emergency")return "off";
+      if((busy>0||document.body?.classList.contains("kitsune-perf-scrolling")) &&
+         profileRank(effectiveProfile)>=2){
+        return normal==="off"?"off":"soft";
+      }
+      if(effectiveProfile==="careful"&&normal==="auto")return "soft";
+      return normal;
+    };
+    wrapped.__kitsunePerf2392=true;
+    wrapped.__base=base;
+    try{window.effectiveEffects=wrapped}catch{}
   }
 
   function resetEffectsSoon(){
     clearTimeout(effectResetTimer);
     effectResetTimer=setTimeout(()=>{
       try{window.dispatchEvent(new Event("resize"))}catch{}
-    },80);
-  }
-
-  function patchEffects(){
-    const fn=window.effectiveEffects;
-    if(typeof fn!=="function"||fn.__kitsunePerf2391)return;
-
-    const base=fn.bind(window);
-    const wrapped=function(){
-      const normal=base();
-      const p=effectiveProfile;
-      if(p==="emergency"||(busy>0&&p==="careful"))return "off";
-      if(p==="careful"&&normal==="auto")return "soft";
-      return normal;
-    };
-    wrapped.__kitsunePerf2391=true;
-    wrapped.__base=base;
-
-    try{window.effectiveEffects=wrapped}catch{}
+    },70);
   }
 
   function apply(){
@@ -491,13 +267,14 @@
     body.classList.toggle("kitsune-perf-balanced",auto&&effectiveProfile==="balanced");
     body.classList.toggle("kitsune-perf-careful",auto&&effectiveProfile==="careful");
     body.classList.toggle("kitsune-perf-emergency",auto&&effectiveProfile==="emergency");
+    body.classList.toggle("kitsune-learning-mode",learningMode);
     body.dataset.kitsunePerf=auto?effectiveProfile:"off";
 
     patchEffects();
 
-    const effectKey=`${effectiveProfile}:${busy>0}`;
-    if(effectKey!==lastEffectsKey){
-      lastEffectsKey=effectKey;
+    const key=`${effectiveProfile}:${busy>0}:${learningMode}`;
+    if(key!==lastEffectsKey){
+      lastEffectsKey=key;
       resetEffectsSoon();
     }
   }
@@ -505,7 +282,6 @@
   function begin(kind="work"){
     busy++;
     apply();
-    saveRuntimeState();
     try{
       window.dispatchEvent(new CustomEvent("kitsune-performance",{
         detail:{busy:true,kind,count:busy,profile:effectiveProfile}
@@ -548,143 +324,93 @@
     );
   }
 
-  async function releaseHeavyVoice(reason="course"){
+  async function releaseHeavyVoice(reason="learning"){
     if(dialogOpen())return false;
 
-    const jobs=[];
+    /* Never create the beta.3.9.0 unload/reload churn around every button. */
+    if(heavyReleasePromise)return heavyReleasePromise;
+    if(Date.now()-lastHeavyReleaseAt<1400)return false;
+
+    lastHeavyReleaseAt=Date.now();
+
+    heavyReleasePromise=(async()=>{
+      const jobs=[];
+
+      try{
+        const wake=window.KitsunePresence?.wake;
+        if(wake?.stop)jobs.push(Promise.resolve(wake.stop("performance-"+reason,true)));
+      }catch{}
+
+      try{
+        if(window.KitsuneUnifiedVoice?.release){
+          jobs.push(Promise.resolve(window.KitsuneUnifiedVoice.release()));
+        }
+      }catch{}
+
+      try{
+        if(window.KitsuneVoiceDialogue?.release){
+          jobs.push(Promise.resolve(window.KitsuneVoiceDialogue.release()));
+        }
+      }catch{}
+
+      try{
+        if(window.KitsuneLiveConversation?.release){
+          jobs.push(Promise.resolve(window.KitsuneLiveConversation.release()));
+        }
+      }catch{}
+
+      try{
+        if(window.AlfiNeuralVoice?.release){
+          jobs.push(Promise.resolve(window.AlfiNeuralVoice.release()));
+        }
+      }catch{}
+
+      try{window.speechSynthesis?.cancel?.()}catch{}
+
+      if(!jobs.length)return false;
+
+      try{
+        await Promise.race([
+          Promise.allSettled(jobs),
+          sleep(520)
+        ]);
+      }catch{}
+
+      return true;
+    })();
 
     try{
-      const wake=window.KitsunePresence?.wake;
-      if(wake?.stop)jobs.push(Promise.resolve(wake.stop("performance-"+reason,true)));
-    }catch{}
-
-    try{
-      if(window.KitsuneUnifiedVoice?.release){
-        jobs.push(Promise.resolve(window.KitsuneUnifiedVoice.release()));
-      }
-    }catch{}
-
-    try{
-      if(window.KitsuneVoiceDialogue?.release){
-        jobs.push(Promise.resolve(window.KitsuneVoiceDialogue.release()));
-      }
-    }catch{}
-
-    try{
-      if(window.KitsuneLiveConversation?.release){
-        jobs.push(Promise.resolve(window.KitsuneLiveConversation.release()));
-      }
-    }catch{}
-
-    try{
-      if(window.AlfiNeuralVoice?.release){
-        jobs.push(Promise.resolve(window.AlfiNeuralVoice.release()));
-      }
-    }catch{}
-
-    try{window.speechSynthesis?.cancel?.()}catch{}
-
-    if(!jobs.length)return false;
-
-    try{
-      await Promise.race([
-        Promise.allSettled(jobs),
-        new Promise(resolve=>setTimeout(resolve,900))
-      ]);
-    }catch{}
-
-    return true;
-  }
-
-  function isHeavyCourseAction(button){
-    if(!button||button.disabled)return false;
-    if(button.closest("#v19Dialog"))return false;
-
-    const text=String(button.textContent||"")
-      .replace(/\s+/g," ")
-      .trim();
-    const action=String(button.dataset.action||button.dataset.tutorAction||"");
-
-    return (
-      /^Проверить\b/i.test(text) ||
-      /Проверить\s+(ответ|решение|задание)/i.test(text) ||
-      /Разобрать.*(?:Kitsune|Китсуне)/i.test(text) ||
-      /(?:Kitsune|Китсуне).*разобрат/i.test(text) ||
-      /check|verify|explain|tutor/i.test(action)
-    );
-  }
-
-  async function guardedReplay(button){
-    if(actionReplay||!button?.isConnected)return;
-    actionReplay=true;
-    begin("course-action");
-
-    try{
-      saveRuntimeState();
-      await releaseHeavyVoice("course-action");
-      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-
-      button.dataset.kitsunePerfReplay="1";
-      button.click();
-      delete button.dataset.kitsunePerfReplay;
+      return await heavyReleasePromise;
     }finally{
-      actionReplay=false;
-      setTimeout(()=>end("course-action"),1000);
+      heavyReleasePromise=null;
     }
   }
 
-  function onCaptureClick(event){
-    lastInteraction=Date.now();
+  function isLearningView(view){
+    return ["course","lesson","trainer","mastery","mathlab","chapterfinal"].includes(view);
+  }
 
-    const button=event.target.closest?.("button");
-    if(!button)return;
+  function setLearningMode(value,reason="navigation"){
+    const next=!!value;
+    const changed=next!==learningMode;
+    learningMode=next;
+    apply();
 
-    if(button.dataset.kitsunePerfReplay==="1")return;
-
-    const nav=button.closest(".nav-btn[data-view]");
-    if(nav){
-      currentState.view=nav.dataset.view||"home";
-      currentState.lessonId="";
-      currentState.scrollY=0;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
-
-      if(auto&&profileRank(effectiveProfile)>=2&&["course","trainer","mastery"].includes(currentState.view)){
-        setTimeout(()=>releaseHeavyVoice("navigation"),80);
-      }
-      return;
+    if(learningMode&&!dialogOpen()){
+      /* One cleanup when entering/returning to study, not one cleanup per
+         answer/check/tutor click. */
+      setTimeout(()=>releaseHeavyVoice(reason).catch(()=>{}),changed?70:180);
     }
+  }
 
-    const rawOnclick=button.getAttribute("onclick")||"";
-    const lessonMatch=rawOnclick.match(/openLesson\(['"]([^'"]+)['"]\)/);
-    if(lessonMatch){
-      currentState.view="lesson";
-      currentState.lessonId=lessonMatch[1];
-      currentState.scrollY=0;
-      currentState.lessonUi=null;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
-
-      if(auto&&profileRank(effectiveProfile)>=2){
-        setTimeout(()=>releaseHeavyVoice("lesson"),60);
-      }
-    }
-
-    if(
-      auto &&
-      profileRank(effectiveProfile)>=2 &&
-      isHeavyCourseAction(button)
-    ){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      guardedReplay(button).catch(()=>{});
-    }
+  function markNavigationBusy(kind="navigation"){
+    begin(kind);
+    setTimeout(()=>end(kind),260);
   }
 
   function wrapFunction(name,onBefore,onAfter){
     const fn=window[name];
-    if(typeof fn!=="function"||fn.__kitsunePerf2391)return;
-    if(lastWrapped[name]===fn)return;
+    if(typeof fn!=="function"||fn.__kitsunePerf2392)return false;
 
     const wrapped=function(...args){
       try{onBefore?.(args)}catch{}
@@ -693,169 +419,101 @@
       return result;
     };
 
-    wrapped.__kitsunePerf2391=true;
+    wrapped.__kitsunePerf2392=true;
     wrapped.__base=fn;
-    lastWrapped[name]=wrapped;
 
-    try{window[name]=wrapped}catch{}
+    try{
+      window[name]=wrapped;
+      return true;
+    }catch{
+      return false;
+    }
   }
 
   function installWrappers(){
-    wrapFunction("openLesson",args=>{
-      currentState.view="lesson";
-      currentState.lessonId=String(args?.[0]||localStorage.getItem("a8_lastLesson")||"");
-      currentState.scrollY=0;
-      currentState.lessonUi=null;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
-    },()=>{
-      if(auto&&profileRank(effectiveProfile)>=2){
-        setTimeout(()=>releaseHeavyVoice("lesson-opened"),120);
-      }
-    });
+    let found=0;
 
-    wrapFunction("go",args=>{
+    if(wrapFunction("openLesson",args=>{
+      currentView="lesson";
+      currentLesson=String(args?.[0]||localStorage.getItem("a8_lastLesson")||"");
+      markNavigationBusy("lesson-open");
+      setLearningMode(true,"lesson-open");
+    }))found++;
+
+    if(wrapFunction("go",args=>{
       const view=String(args?.[0]||"home");
-      currentState.view=view;
-      if(view!=="lesson"){
-        currentState.lessonId="";
-        currentState.lessonUi=null;
+      currentView=view;
+      if(view!=="lesson")currentLesson="";
+      markNavigationBusy("view-change");
+      setLearningMode(isLearningView(view),"view-"+view);
+    }))found++;
+
+    if(wrapFunction("renderCourse",()=>{
+      currentView="course";
+      currentLesson="";
+      markNavigationBusy("course");
+      setLearningMode(true,"course");
+    }))found++;
+
+    if(wrapFunction("renderHome",()=>{
+      currentView="home";
+      currentLesson="";
+      markNavigationBusy("home");
+      setLearningMode(false,"home");
+    }))found++;
+
+    return found;
+  }
+
+  function installDialogObserver(){
+    const dialog=document.querySelector("#v19Dialog");
+    if(!dialog||dialog===dialogNode)return false;
+
+    try{dialogObserver?.disconnect?.()}catch{}
+    dialogNode=dialog;
+
+    let wasOpen=dialogOpen();
+
+    dialogObserver=new MutationObserver(()=>{
+      const nowOpen=dialogOpen();
+
+      if(wasOpen&&!nowOpen&&learningMode){
+        /* Voice was intentionally used. Once the dialogue closes, return RAM
+           to the lesson in one operation. */
+        setTimeout(()=>releaseHeavyVoice("dialog-closed").catch(()=>{}),160);
       }
-      currentState.scrollY=0;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
+
+      wasOpen=nowOpen;
     });
 
-    wrapFunction("renderCourse",()=>{
-      currentState.view="course";
-      currentState.lessonId="";
-      currentState.lessonUi=null;
-      currentState.scrollY=0;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
+    dialogObserver.observe(dialog,{
+      attributes:true,
+      attributeFilter:["class"]
     });
 
-    wrapFunction("renderHome",()=>{
-      currentState.view="home";
-      currentState.lessonId="";
-      currentState.lessonUi=null;
-      currentState.scrollY=0;
-      currentState.ts=Date.now();
-      saveJson(STATE_KEY,currentState);
-    });
+    return true;
   }
 
-  function saveRuntimeState(){
-    const active=document.querySelector(".nav-btn.active[data-view]");
-    if(active&&!dialogOpen()&&currentState.view!=="lesson"){
-      currentState.view=active.dataset.view||currentState.view||"home";
-    }
+  function bootstrapWrappers(){
+    installWrappers();
+    installDialogObserver();
 
-    if(currentState.view==="lesson"&&!currentState.lessonId){
-      currentState.lessonId=localStorage.getItem("a8_lastLesson")||"";
-    }
+    wrapperTimer=setInterval(()=>{
+      wrapperTries++;
+      installWrappers();
+      installDialogObserver();
 
-    if(["lesson","course","trainer","mastery","mathlab"].includes(currentState.view)){
-      currentState.scrollY=Math.max(0,Math.round(window.scrollY||0));
-    }else{
-      currentState.scrollY=0;
-    }
-
-    if(currentState.view==="lesson"){
-      currentState.lessonUi=captureLessonUi();
-    }else{
-      currentState.lessonUi=null;
-    }
-
-    currentState.ts=Date.now();
-    saveJson(STATE_KEY,currentState);
-  }
-
-  function toast(text){
-    let el=document.querySelector("#kitsunePerfToast");
-    if(!el){
-      el=document.createElement("div");
-      el.id="kitsunePerfToast";
-      el.className="kitsune-perf-toast";
-      document.body.appendChild(el);
-    }
-    el.textContent=text;
-    requestAnimationFrame(()=>el.classList.add("show"));
-    setTimeout(()=>el.classList.remove("show"),3200);
-  }
-
-  function restoreAfterCrash(){
-    if(!previousCrash)return;
-    if(!currentState||Date.now()-Number(currentState.ts||0)>15*60*1000)return;
-
-    const view=currentState.view;
-    if(!view||view==="home")return;
-
-    pressure=Math.max(pressure,1);
-    lastPressureAt=Date.now();
-    apply();
-
-    let restored=false;
-
-    try{
-      if(view==="lesson"){
-        const lesson=currentState.lessonId||localStorage.getItem("a8_lastLesson")||"";
-        if(lesson&&typeof window.openLesson==="function"){
-          window.openLesson(lesson);
-          restored=true;
-        }
-      }else if(view==="course"&&typeof window.renderCourse==="function"){
-        window.renderCourse();
-        restored=true;
-      }else if(typeof window.go==="function"){
-        window.go(view);
-        restored=true;
+      /* No forever-running 900 ms wrapper poll. */
+      if(wrapperTries>=18){
+        clearInterval(wrapperTimer);
+        wrapperTimer=null;
       }
-    }catch{}
-
-    if(restored){
-      restoredAfterCrash=true;
-      const y=Number(currentState.scrollY||0);
-
-      if(view==="lesson"){
-        const ui=currentState.lessonUi;
-        setTimeout(()=>{
-          restoreLessonUi(ui,y)
-            .finally(()=>{
-              toast(
-                ui?.tutor?.show
-                  ?"↩️ Продолжаем с того же примера и шага."
-                  :"↩️ Продолжаем с того же места в уроке."
-              );
-            });
-        },260);
-      }else{
-        setTimeout(()=>window.scrollTo({top:y,behavior:"auto"}),320);
-        setTimeout(()=>toast("↩️ Продолжаем с того же места."),550);
-      }
-    }
-  }
-
-  function markAlive(){
-    if(document.hidden)return;
-
-    if(currentState.view==="lesson"){
-      saveRuntimeState();
-    }
-
-    saveJson(ALIVE_KEY,{
-      ts:Date.now(),
-      view:currentState.view,
-      lessonId:currentState.lessonId
-    });
-  }
-
-  function clearAlive(){
-    try{localStorage.removeItem(ALIVE_KEY)}catch{}
+    },450);
   }
 
   function notePressure(level,reason){
     if(!auto)return;
+
     const next=Math.max(pressure,level);
     if(next===pressure&&Date.now()-lastPressureAt<5000)return;
 
@@ -863,9 +521,8 @@
     lastPressureAt=Date.now();
     apply();
 
-    if(level>=2){
+    if(level>=2&&learningMode&&!dialogOpen()){
       releaseHeavyVoice("pressure").catch(()=>{});
-      saveRuntimeState();
     }
 
     try{
@@ -877,26 +534,26 @@
 
   function monitorEventLoop(){
     const now=performance.now();
-    const drift=now-lastTick-2000;
+    const drift=now-lastTick-2500;
     lastTick=now;
 
     if(document.hidden)return;
 
-    if(drift>180){
+    if(drift>220){
       lagSamples.push({ts:Date.now(),drift});
     }
 
-    const cutoff=Date.now()-20000;
+    const cutoff=Date.now()-22000;
     lagSamples=lagSamples.filter(x=>x.ts>=cutoff);
 
-    const severe=lagSamples.some(x=>x.drift>650);
+    const severe=lagSamples.some(x=>x.drift>750);
     if(severe||lagSamples.length>=6){
       notePressure(2,"event-loop");
     }else if(lagSamples.length>=3){
       notePressure(1,"event-loop");
     }
 
-    /* Chrome/Edge/Yandex expose heap stats. Safari does not. */
+    /* Chromium-only heap signal; Safari simply skips it. */
     const mem=performance.memory;
     if(mem?.jsHeapSizeLimit&&mem?.usedJSHeapSize){
       const ratio=mem.usedJSHeapSize/mem.jsHeapSizeLimit;
@@ -904,10 +561,9 @@
       else if(ratio>.72)notePressure(1,"heap");
     }
 
-    /* Recover visual quality automatically after a stable minute. */
     if(
       pressure>0 &&
-      Date.now()-lastPressureAt>60000 &&
+      Date.now()-lastPressureAt>50000 &&
       lagSamples.length===0 &&
       busy===0
     ){
@@ -917,38 +573,44 @@
     }
   }
 
-  function scheduleIdleCacheHint(){
-    const run=()=>{
-      if(
-        document.hidden ||
-        busy>0 ||
-        profileRank(effectiveProfile)>=2 ||
-        Date.now()-lastInteraction<5000
-      ){
-        setTimeout(run,7000);
-        return;
-      }
+  function installLongTaskObserver(){
+    if(!("PerformanceObserver" in window))return;
 
-      try{
-        const urls=[
-          ...document.querySelectorAll('script[src],link[rel="stylesheet"][href],link[rel="manifest"][href]')
-        ].map(el=>el.src||el.href)
-          .filter(Boolean)
-          .filter(url=>{
-            try{return new URL(url,location.href).origin===location.origin}catch{return false}
-          });
+    try{
+      const supported=PerformanceObserver.supportedEntryTypes||[];
+      if(!supported.includes("longtask"))return;
 
-        navigator.serviceWorker?.controller?.postMessage?.({
-          type:"CACHE_URLS",
-          urls:[...new Set(urls)].slice(0,80)
-        });
-      }catch{}
-    };
+      const observer=new PerformanceObserver(list=>{
+        if(document.hidden)return;
+        const entries=list.getEntries();
+        if(entries.some(x=>x.duration>700))notePressure(2,"longtask");
+        else if(entries.filter(x=>x.duration>180).length>=2)notePressure(1,"longtask");
+      });
+      observer.observe({entryTypes:["longtask"]});
+    }catch{}
+  }
 
-    if("requestIdleCallback" in window){
-      requestIdleCallback(()=>setTimeout(run,6000),{timeout:10000});
-    }else{
-      setTimeout(run,9000);
+  function onScroll(){
+    lastInteraction=Date.now();
+
+    const body=document.body;
+    if(!body)return;
+
+    body.classList.add("kitsune-perf-scrolling");
+    clearTimeout(scrollTimer);
+    scrollTimer=setTimeout(()=>{
+      body.classList.remove("kitsune-perf-scrolling");
+      patchEffects();
+      resetEffectsSoon();
+    },150);
+  }
+
+  function onRuntimeGroupLoaded(event){
+    const group=String(event?.detail?.group||"");
+    if(group==="assistant"&&learningMode&&!dialogOpen()){
+      /* Optional assistant scripts may have just created a wake/voice runtime.
+         Return it to dormant state while the learner is solving exercises. */
+      setTimeout(()=>releaseHeavyVoice("assistant-loaded").catch(()=>{}),140);
     }
   }
 
@@ -956,85 +618,61 @@
     return {
       version:VERSION,
       auto,
-      busy,
       profile:effectiveProfile,
       baseProfile,
       forcedProfile:forcedProfile||"auto",
       pressure,
-      mobile:isMobile(),
+      busy,
+      learningMode,
+      currentView,
+      currentLesson,
       ios:isIOS(),
       android:isAndroid(),
       deviceMemory:memoryGB(),
       cores:cores(),
-      restoredAfterCrash,
-      previousCrash,
-      continuityRecovery:true,
-      savedExercise:currentState.lessonUi?.activeExercise||"",
-      savedTutor:!!currentState.lessonUi?.tutor?.show
+      recovery:false,
+      scrollCheckpointing:false,
+      perActionVoiceRelease:false
     };
   }
 
   injectStyles();
   apply();
+  bootstrapWrappers();
+  installLongTaskObserver();
 
-  document.addEventListener("click",onCaptureClick,true);
-  document.addEventListener("pointerdown",()=>{lastInteraction=Date.now()},{passive:true});
-
-  /* Continuity checkpoints: keep the exact exercise/Tutor state current without
-     polling the whole DOM continuously. */
-  document.addEventListener("input",event=>{
-    if(event.target.closest?.(".exercise[data-ex], .v173-inline-tutor")){
-      lastInteraction=Date.now();
-      saveRuntimeState();
-    }
-  },true);
-
-  document.addEventListener("click",event=>{
-    if(event.target.closest?.(
-      ".exercise[data-ex], .v173-inline-tutor, .level-switch"
-    )){
-      setTimeout(saveRuntimeState,90);
-      setTimeout(saveRuntimeState,380);
-    }
-  });
-
-  let scrollTimer=null;
-  window.addEventListener("scroll",()=>{
-    clearTimeout(scrollTimer);
-    scrollTimer=setTimeout(saveRuntimeState,350);
+  document.addEventListener("pointerdown",()=>{
+    lastInteraction=Date.now();
   },{passive:true});
+
+  window.addEventListener("scroll",onScroll,{passive:true});
 
   document.addEventListener("visibilitychange",()=>{
     if(document.hidden){
-      saveRuntimeState();
-
-      if(auto&&profileRank(effectiveProfile)>=2&&!dialogOpen()){
+      if(learningMode&&!dialogOpen()){
         releaseHeavyVoice("background").catch(()=>{});
       }
     }else{
-      markAlive();
+      lastTick=performance.now();
     }
   });
 
-  window.addEventListener("pagehide",()=>{
-    saveRuntimeState();
-    clearAlive();
-  });
+  window.addEventListener("kitsune-runtime-group-loaded",onRuntimeGroupLoaded);
 
-  window.addEventListener("beforeunload",()=>{
-    saveRuntimeState();
-    clearAlive();
-  });
+  /*
+   * After all legacy modules have had a chance to initialize, make sure an
+   * iPhone/weak-device course session starts with AI voice engines dormant.
+   */
+  window.addEventListener("load",()=>{
+    setTimeout(()=>{
+      const active=document.querySelector(".nav-btn.active[data-view]");
+      const view=active?.dataset?.view||currentView;
+      currentView=view;
+      setLearningMode(isLearningView(view),"boot");
+    },550);
+  },{once:true});
 
-  setInterval(markAlive,4000);
-  setInterval(monitorEventLoop,2000);
-
-  wrapperTimer=setInterval(installWrappers,900);
-  setTimeout(()=>{
-    installWrappers();
-    restoreAfterCrash();
-    scheduleIdleCacheHint();
-  },1100);
+  setInterval(monitorEventLoop,2500);
 
   window.KitsunePerformance={
     version:VERSION,
@@ -1042,8 +680,8 @@
     end,
     setAuto,
     setProfile,
+    setLearningMode,
     releaseHeavy:releaseHeavyVoice,
-    saveState:saveRuntimeState,
     info
   };
 })();

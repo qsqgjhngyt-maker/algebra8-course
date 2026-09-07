@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.9.1",
+  "version": "2.3.0-beta.3.9.2",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "CONTINUITY_EXACT_LESSON_RECOVERY",
+  "release": "SMOOTH_RUNTIME_NO_RECOVERY",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -49,13 +49,15 @@
     "idle-cache-warming-on-capable-devices",
     "previous-release-offline-fallback",
     "neural-model-cache-preservation",
-    "exact-exercise-crash-recovery",
-    "typed-answer-recovery",
-    "hint-and-feedback-recovery",
-    "inline-tutor-reopen-after-reload",
-    "inline-tutor-step-level-recovery",
-    "inline-tutor-answer-why-work-recovery",
-    "active-exercise-anchor-recovery",
-    "learning-continuity-checkpoints"
+    "crash-auto-recovery-disabled",
+    "scroll-checkpointing-disabled",
+    "one-time-learning-voice-release",
+    "no-per-exercise-runtime-unload",
+    "progressive-optional-module-loading",
+    "course-first-paint-before-assistant-stack",
+    "ios-glass-look-without-card-backdrop-textures",
+    "lesson-content-visibility-disabled-to-avoid-scroll-jumps",
+    "cache-first-installed-navigation",
+    "no-cross-release-cache-mixing"
   ]
 }

@@ -1,22 +1,25 @@
 /* =====================================================================
-   Kitsune Service Worker v2.3.0-beta.3.9.1 · ADAPTIVE STABILITY
+   Kitsune Service Worker v2.3.0-beta.3.9.2 · SMOOTH RUNTIME
 
-   Key change: installation no longer warms the whole application at once.
-   Only the resilient shell is pre-cached. Everything else is cached naturally
-   as the user opens it, or gradually during a stable idle period.
+   - Small shell only.
+   - No previous-release mixing.
+   - No bulk idle warmup.
+   - Installed PWA navigation is cache-first and refreshed in background.
+   - Optional modules are cached naturally when Runtime Loader asks for them.
    ===================================================================== */
-const CACHE="algebra8-v2.3.0-beta.3.9.1";
-const RUNTIME_CACHE="algebra8-runtime-v2391";
+const CACHE="algebra8-v2.3.0-beta.3.9.2";
+const RUNTIME_CACHE="algebra8-runtime-v2392";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3.9.1";
+const RELEASE="2.3.0-beta.3.9.2";
 
 const CORE_ASSETS=[
-  "./index.html?v=2.3.0-beta.3.9.1",
+  "./index.html?v=2.3.0-beta.3.9.2",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
   "./course-v1.js?v=2.2.3",
-  "./performance-manager-v150.js?v=2.3.0-beta.3.9.1",
+  "./performance-manager-v150.js?v=2.3.0-beta.3.9.2",
+  "./runtime-loader-v2392.js?v=2.3.0-beta.3.9.2",
   "./manifest.json?v=2.3.0-alpha",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
@@ -24,7 +27,7 @@ const CORE_ASSETS=[
   "./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png",
   "./assets/kitsune/idle.png",
-  "./version.json?v=2.3.0-beta.3.9.1"
+  "./version.json?v=2.3.0-beta.3.9.2"
 ];
 
 const CHILD_CSP=[
@@ -91,55 +94,31 @@ function secureSameOriginResponse(request,response){
   });
 }
 
-function withTimeout(request,ms=4500){
-  const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),ms);
-  return fetch(request,{cache:"no-store",signal:controller.signal})
-    .finally(()=>clearTimeout(timer));
-}
-
-async function putIfOk(cache,request,response){
-  if(response&&response.ok){
-    try{await cache.put(request,response.clone())}catch{}
+async function networkAndCache(request,cache){
+  try{
+    const response=await fetch(request);
+    if(response&&response.ok){
+      cache.put(request,response.clone()).catch(()=>{});
+    }
+    return response;
+  }catch{
+    return null;
   }
-  return response;
-}
-
-async function matchPreviousApp(request,{ignoreSearch=false}={}){
-  const keys=(await caches.keys())
-    .filter(k=>k.startsWith("algebra8-v")&&k!==CACHE)
-    .sort()
-    .reverse();
-
-  for(const key of keys.slice(0,2)){
-    try{
-      const cache=await caches.open(key);
-      const hit=await cache.match(request,{ignoreSearch});
-      if(hit)return hit;
-    }catch{}
-  }
-  return null;
 }
 
 self.addEventListener("install",event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE);
-    const failures=[];
 
-    /* Deliberately sequential and deliberately small: no 60-file update storm. */
+    /* Sequential shell install: never create a 40-request burst on phones. */
     for(const url of CORE_ASSETS){
       try{
         const request=new Request(url,{cache:"reload"});
         const response=await fetch(request);
-        if(response&&response.ok)await cache.put(request,response.clone());
-        else failures.push(url);
-      }catch{
-        failures.push(url);
-      }
-    }
-
-    if(failures.length){
-      console.warn("[Kitsune SW 3.9.1] optional core cache failures",failures);
+        if(response&&response.ok){
+          await cache.put(request,response.clone());
+        }
+      }catch{}
     }
   })());
 });
@@ -152,31 +131,6 @@ self.addEventListener("message",event=>{
     return;
   }
 
-  if(data.type==="CACHE_URLS"){
-    const urls=Array.isArray(data.urls)?data.urls.slice(0,80):[];
-    event.waitUntil((async()=>{
-      const cache=await caches.open(RUNTIME_CACHE);
-
-      for(const raw of urls){
-        try{
-          const url=new URL(raw,self.location.origin);
-          if(url.origin!==self.location.origin||isPrivatePath(url.pathname))continue;
-
-          const request=new Request(url.href,{method:"GET",cache:"reload"});
-          const existing=await cache.match(request);
-          if(existing)continue;
-
-          const response=await fetch(request);
-          if(response&&response.ok)await cache.put(request,response.clone());
-
-          /* Yield between files so weak phones never get an idle-cache burst. */
-          await new Promise(resolve=>setTimeout(resolve,35));
-        }catch{}
-      }
-    })());
-    return;
-  }
-
   if(data.type==="TRIM_RUNTIME"){
     event.waitUntil(caches.delete(RUNTIME_CACHE));
   }
@@ -185,19 +139,14 @@ self.addEventListener("message",event=>{
 self.addEventListener("activate",event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    const appCaches=keys
-      .filter(k=>k.startsWith("algebra8-v"))
-      .sort()
-      .reverse();
 
-    /* Keep the current shell plus one previous release as a crash/offline
-       fallback. Never delete model-loader/browser caches here. */
-    const previous=appCaches.find(k=>k!==CACHE)||null;
-    const keep=new Set([CACHE,RUNTIME_CACHE,NEURAL_CACHE,previous].filter(Boolean));
-
+    /* Exact current-release cache only. Never combine old HTML and new JS. */
     await Promise.all(
       keys
-        .filter(k=>k.startsWith("algebra8-v")&&!keep.has(k))
+        .filter(k=>
+          (k.startsWith("algebra8-v")&&k!==CACHE) ||
+          (k.startsWith("algebra8-runtime-v")&&k!==RUNTIME_CACHE)
+        )
         .map(k=>caches.delete(k))
     );
 
@@ -211,73 +160,70 @@ self.addEventListener("fetch",event=>{
   const url=new URL(event.request.url);
   const sameOrigin=url.origin===self.location.origin;
 
-  /* Auth, broker, Qwen and TTS are always network-only. */
   if(sameOrigin&&isPrivatePath(url.pathname))return;
 
   if(sameOrigin){
-    const isNavigation=event.request.mode==="navigate"||event.request.destination==="document";
+    const isNavigation=
+      event.request.mode==="navigate" ||
+      event.request.destination==="document";
 
     if(isNavigation){
       event.respondWith((async()=>{
-        const releaseCache=await caches.open(CACHE);
-        const runtimeCache=await caches.open(RUNTIME_CACHE);
+        const shell=await caches.open(CACHE);
 
-        try{
-          const response=await withTimeout(event.request,4500);
-          if(response&&response.ok){
-            const copy=response.clone();
-            releaseCache.put("./index.html?v="+RELEASE,copy.clone()).catch(()=>{});
-            runtimeCache.put(event.request,copy).catch(()=>{});
-          }
-          return secureSameOriginResponse(event.request,response);
-        }catch{
-          const fallback=
-            await releaseCache.match("./index.html?v="+RELEASE) ||
-            await runtimeCache.match(event.request,{ignoreSearch:true}) ||
-            await matchPreviousApp(event.request,{ignoreSearch:true}) ||
-            await caches.match("./index.html",{ignoreSearch:true});
+        /*
+         * Installed app starts from local shell immediately. Refresh the shell
+         * in the background, never make the learner wait on GitHub Pages.
+         */
+        const cached=
+          await shell.match("./index.html?v="+RELEASE) ||
+          await shell.match(event.request,{ignoreSearch:true});
 
-          if(fallback)return secureSameOriginResponse(event.request,fallback);
-          return new Response("Kitsune offline shell unavailable",{
-            status:503,
-            headers:{"Content-Type":"text/plain; charset=utf-8"}
-          });
+        if(cached){
+          event.waitUntil((async()=>{
+            const fresh=await networkAndCache(
+              new Request("./index.html?v="+RELEASE,{cache:"no-cache"}),
+              shell
+            );
+            return fresh;
+          })());
+          return secureSameOriginResponse(event.request,cached);
         }
+
+        const fresh=await networkAndCache(event.request,shell);
+        if(fresh)return secureSameOriginResponse(event.request,fresh);
+
+        return new Response("Kitsune offline shell unavailable",{
+          status:503,
+          headers:{"Content-Type":"text/plain; charset=utf-8"}
+        });
       })());
       return;
     }
 
     event.respondWith((async()=>{
-      const releaseCache=await caches.open(CACHE);
-      const runtimeCache=await caches.open(RUNTIME_CACHE);
+      const shell=await caches.open(CACHE);
+      const runtime=await caches.open(RUNTIME_CACHE);
 
-      const coreHit=await releaseCache.match(event.request);
-      if(coreHit)return secureSameOriginResponse(event.request,coreHit);
+      const shellHit=await shell.match(event.request);
+      if(shellHit)return secureSameOriginResponse(event.request,shellHit);
 
-      const runtimeHit=await runtimeCache.match(event.request);
+      const runtimeHit=await runtime.match(event.request);
       if(runtimeHit)return secureSameOriginResponse(event.request,runtimeHit);
 
-      try{
-        const response=await fetch(event.request,{cache:"no-store"});
-        if(response&&response.ok){
-          runtimeCache.put(event.request,response.clone()).catch(()=>{});
-        }
-        return secureSameOriginResponse(event.request,response);
-      }catch{
-        const fallback=await matchPreviousApp(event.request,{ignoreSearch:true}) ||
-          await caches.match(event.request,{ignoreSearch:true});
-        if(fallback)return secureSameOriginResponse(event.request,fallback);
-        return new Response("Kitsune resource unavailable offline",{
-          status:503,
-          headers:{"Content-Type":"text/plain; charset=utf-8"}
-        });
-      }
+      const response=await networkAndCache(event.request,runtime);
+      if(response)return secureSameOriginResponse(event.request,response);
+
+      return new Response("Kitsune resource unavailable offline",{
+        status:503,
+        headers:{"Content-Type":"text/plain; charset=utf-8"}
+      });
     })());
     return;
   }
 
-  /* Cache only the small jsDelivr runtime code needed by local AI. Huge model
-     files use their own browser/HF caches and are intentionally not duplicated. */
+  /* Cache only runtime code from jsDelivr. Large HF model files keep their
+     dedicated browser/model caches and are not duplicated by this SW. */
   if(url.hostname==="cdn.jsdelivr.net"){
     const path=url.pathname.toLowerCase();
     const cacheable=
