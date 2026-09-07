@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.9.0",
+  "version": "2.3.0-beta.3.9.1",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "ADAPTIVE_RUNTIME_STABILITY",
+  "release": "CONTINUITY_EXACT_LESSON_RECOVERY",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -48,6 +48,14 @@
     "progressive-runtime-cache",
     "idle-cache-warming-on-capable-devices",
     "previous-release-offline-fallback",
-    "neural-model-cache-preservation"
+    "neural-model-cache-preservation",
+    "exact-exercise-crash-recovery",
+    "typed-answer-recovery",
+    "hint-and-feedback-recovery",
+    "inline-tutor-reopen-after-reload",
+    "inline-tutor-step-level-recovery",
+    "inline-tutor-answer-why-work-recovery",
+    "active-exercise-anchor-recovery",
+    "learning-continuity-checkpoints"
   ]
 }

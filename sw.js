@@ -1,22 +1,22 @@
 /* =====================================================================
-   Kitsune Service Worker v2.3.0-beta.3.9.0 · ADAPTIVE STABILITY
+   Kitsune Service Worker v2.3.0-beta.3.9.1 · ADAPTIVE STABILITY
 
    Key change: installation no longer warms the whole application at once.
    Only the resilient shell is pre-cached. Everything else is cached naturally
    as the user opens it, or gradually during a stable idle period.
    ===================================================================== */
-const CACHE="algebra8-v2.3.0-beta.3.9.0";
-const RUNTIME_CACHE="algebra8-runtime-v2390";
+const CACHE="algebra8-v2.3.0-beta.3.9.1";
+const RUNTIME_CACHE="algebra8-runtime-v2391";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3.9.0";
+const RELEASE="2.3.0-beta.3.9.1";
 
 const CORE_ASSETS=[
-  "./index.html?v=2.3.0-beta.3.9.0",
+  "./index.html?v=2.3.0-beta.3.9.1",
   "./styles.css?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
   "./chapter1-v02.js?v=2.2.3",
   "./course-v1.js?v=2.2.3",
-  "./performance-manager-v150.js?v=2.3.0-beta.3.9.0",
+  "./performance-manager-v150.js?v=2.3.0-beta.3.9.1",
   "./manifest.json?v=2.3.0-alpha",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
@@ -24,7 +24,7 @@ const CORE_ASSETS=[
   "./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png",
   "./assets/kitsune/idle.png",
-  "./version.json?v=2.3.0-beta.3.9.0"
+  "./version.json?v=2.3.0-beta.3.9.1"
 ];
 
 const CHILD_CSP=[
@@ -139,7 +139,7 @@ self.addEventListener("install",event=>{
     }
 
     if(failures.length){
-      console.warn("[Kitsune SW 3.9] optional core cache failures",failures);
+      console.warn("[Kitsune SW 3.9.1] optional core cache failures",failures);
     }
   })());
 });

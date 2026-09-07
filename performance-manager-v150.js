@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune Performance Manager v2.3.0-beta.3.9.0
+   Kitsune Performance Manager v2.3.0-beta.3.9.1
    Adaptive Stability · iPhone / Android / low-power PC
 
    Goals:
@@ -12,11 +12,11 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.9.0";
+  const VERSION="2.3.0-beta.3.9.1";
   const AUTO_KEY="a8_performance_auto_v150";
   const PROFILE_KEY="a8_performance_profile_v2390";
-  const STATE_KEY="a8_runtime_restore_v2390";
-  const ALIVE_KEY="a8_runtime_alive_v2390";
+  const STATE_KEY="a8_runtime_restore_v2391";
+  const ALIVE_KEY="a8_runtime_alive_v2391";
   const CRASH_WINDOW_MS=120000;
 
   let auto=localStorage.getItem(AUTO_KEY)!=="0";
@@ -24,7 +24,7 @@
   let pressure=0; // 0 normal, 1 elevated, 2 emergency
   let lastPressureAt=0;
   let restoredAfterCrash=false;
-  let currentState=loadJson(STATE_KEY,{view:"home",lessonId:"",scrollY:0,ts:0});
+  let currentState=loadJson(STATE_KEY,{view:"home",lessonId:"",scrollY:0,lessonUi:null,ts:0});
   let baseProfile=detectProfile();
   let forcedProfile=localStorage.getItem(PROFILE_KEY)||"";
   let effectiveProfile="full";
@@ -53,6 +53,237 @@
 
   function saveJson(key,value){
     try{localStorage.setItem(key,JSON.stringify(value))}catch{}
+  }
+
+
+  function safeText(value,max=600){
+    return String(value??"").slice(0,max);
+  }
+
+  function captureLessonUi(){
+    if(currentState.view!=="lesson")return null;
+
+    const lessonId=currentState.lessonId||localStorage.getItem("a8_lastLesson")||"";
+    if(!lessonId)return null;
+
+    const ui={
+      lessonId,
+      inputs:{},
+      hints:[],
+      feedback:{},
+      activeExercise:"",
+      activeInput:"",
+      levelIndex:0,
+      tutor:null
+    };
+
+    /* Preserve every typed answer in this lesson. Usually there are only
+       2–4 inputs, so this is tiny but prevents the learner losing work. */
+    document.querySelectorAll('.exercise[data-ex] input[id^="ans-"]').forEach(input=>{
+      if(input.value!==""){
+        ui.inputs[input.id]=safeText(input.value,240);
+      }
+    });
+
+    document.querySelectorAll('.exercise[data-ex] .hint.show[id]').forEach(hint=>{
+      ui.hints.push(hint.id);
+    });
+
+    document.querySelectorAll('.exercise[data-ex] .feedback[id]').forEach(fb=>{
+      if(!fb.textContent?.trim())return;
+      ui.feedback[fb.id]={
+        text:safeText(fb.textContent,700),
+        className:safeText(fb.className,120)
+      };
+    });
+
+    const focused=document.activeElement;
+    if(focused?.matches?.('.exercise[data-ex] input, .v173-inline-tutor textarea')){
+      ui.activeInput=focused.id||"";
+      ui.activeExercise=focused.closest?.(".exercise[data-ex]")?.dataset?.ex||"";
+    }
+
+    const visibleTutor=document.querySelector(".exercise[data-ex] .v173-inline-tutor.show");
+    if(visibleTutor){
+      const box=visibleTutor.closest(".exercise[data-ex]");
+      const ex=box?.dataset?.ex||"";
+      if(ex)ui.activeExercise=ex;
+
+      const normalSteps=[...visibleTutor.querySelectorAll(".v173-step.show:not(.answer-step)")].length;
+      const answerShown=!!visibleTutor.querySelector(".v173-step.answer-step.show");
+      const workResult=visibleTutor.querySelector(".v173-work-result");
+
+      ui.tutor={
+        exercise:ex,
+        show:true,
+        level:Math.max(1,Math.min(3,normalSteps||1)),
+        answerShown,
+        whyShown:!!visibleTutor.querySelector(".v173-why-box.show"),
+        workShown:!!visibleTutor.querySelector(".v173-work-box.show"),
+        workText:safeText(visibleTutor.querySelector("textarea")?.value||"",1200),
+        workResultText:safeText(workResult?.textContent||"",1000),
+        workResultClass:safeText(workResult?.className||"",140),
+        diagnosis:safeText(visibleTutor.querySelector(".v173-diagnosis")?.textContent||"",1000)
+      };
+    }
+
+    if(!ui.activeExercise){
+      const candidate=document.querySelector(
+        ".exercise[data-ex]:has(.feedback.ok),"+
+        ".exercise[data-ex]:has(.feedback.bad),"+
+        ".exercise[data-ex]:has(.hint.show)"
+      );
+      if(candidate)ui.activeExercise=candidate.dataset.ex||"";
+    }
+
+    const levelButtons=[...document.querySelectorAll(".level-switch button")];
+    const activeLevel=levelButtons.findIndex(b=>b.classList.contains("active"));
+    if(activeLevel>=0)ui.levelIndex=activeLevel;
+
+    return ui;
+  }
+
+  function applyBasicLessonUi(ui){
+    if(!ui||ui.lessonId!==currentState.lessonId)return;
+
+    for(const [id,value] of Object.entries(ui.inputs||{})){
+      const input=document.getElementById(id);
+      if(input)input.value=value;
+    }
+
+    for(const id of ui.hints||[]){
+      document.getElementById(id)?.classList.add("show");
+    }
+
+    for(const [id,state] of Object.entries(ui.feedback||{})){
+      const fb=document.getElementById(id);
+      if(!fb)continue;
+      fb.className=state.className||"feedback";
+      fb.textContent=state.text||"";
+    }
+
+    const levelButtons=[...document.querySelectorAll(".level-switch button")];
+    const levelIndex=Number(ui.levelIndex||0);
+    const button=levelButtons[levelIndex];
+    if(button&&!button.classList.contains("active")){
+      try{button.click()}catch{}
+    }
+  }
+
+  async function waitFor(selector,{root=document,timeout=2600,step=80}={}){
+    const start=performance.now();
+    while(performance.now()-start<timeout){
+      const found=root.querySelector(selector);
+      if(found)return found;
+      await new Promise(resolve=>setTimeout(resolve,step));
+    }
+    return null;
+  }
+
+  async function restoreTutorUi(ui){
+    const tutor=ui?.tutor;
+    if(!tutor?.show||!tutor.exercise)return false;
+
+    const box=await waitFor(`.exercise[data-ex="${CSS.escape(tutor.exercise)}"]`,{timeout:2200});
+    if(!box)return false;
+
+    let panel=box.querySelector(".v173-inline-tutor.show");
+    if(!panel){
+      const tutorButton=await waitFor(".v16-tutor-btn",{root:box,timeout:2600});
+      if(!tutorButton)return false;
+
+      /* Bypass the heavy-action capture guard only for this recovery click.
+         We are restoring an already-open helper, not starting a new action. */
+      tutorButton.dataset.kitsunePerfReplay="1";
+      try{tutorButton.click()}catch{}
+      delete tutorButton.dataset.kitsunePerfReplay;
+
+      panel=await waitFor(".v173-inline-tutor.show",{root:box,timeout:1800});
+    }
+
+    if(!panel)return false;
+
+    /* Rebuild Tutor's own in-memory state by using its controls, rather than
+       only painting old HTML. This means «Следующий шаг» keeps working after
+       recovery instead of jumping backwards. */
+    let level=Math.max(1,Math.min(3,Number(tutor.level||1)));
+    for(let i=1;i<level;i++){
+      try{panel.querySelector(".v173-next")?.click()}catch{}
+      await new Promise(resolve=>setTimeout(resolve,30));
+      panel=box.querySelector(".v173-inline-tutor.show")||panel;
+    }
+
+    if(tutor.answerShown){
+      try{panel.querySelector(".v173-answer")?.click()}catch{}
+      await new Promise(resolve=>setTimeout(resolve,30));
+      panel=box.querySelector(".v173-inline-tutor.show")||panel;
+    }
+
+    if(tutor.whyShown&&!panel.querySelector(".v173-why-box.show")){
+      try{panel.querySelector(".v173-why")?.click()}catch{}
+    }
+
+    if(tutor.workShown&&!panel.querySelector(".v173-work-box.show")){
+      try{panel.querySelector(".v173-work")?.click()}catch{}
+    }
+
+    const textarea=panel.querySelector(".v173-work-box textarea");
+    if(textarea&&tutor.workText)textarea.value=tutor.workText;
+
+    const result=panel.querySelector(".v173-work-result");
+    if(result&&tutor.workResultText){
+      result.className=tutor.workResultClass||"v173-work-result show";
+      result.textContent=tutor.workResultText;
+    }
+
+    const diagnosis=panel.querySelector(".v173-diagnosis");
+    if(diagnosis&&tutor.diagnosis)diagnosis.textContent=tutor.diagnosis;
+
+    return true;
+  }
+
+  async function restoreLessonUi(ui,scrollY){
+    if(!ui||ui.lessonId!==currentState.lessonId){
+      window.scrollTo({top:Number(scrollY||0),behavior:"auto"});
+      return false;
+    }
+
+    /* Tutor-lite and Tutor-smart decorate exercises asynchronously after
+       openLesson(), so restore in two phases. */
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    applyBasicLessonUi(ui);
+
+    const tutorRestored=await restoreTutorUi(ui);
+
+    /* Restore basic values again in case Tutor rerender touched feedback. */
+    applyBasicLessonUi(ui);
+
+    const anchor=ui.tutor?.show
+      ?document.querySelector(`.exercise[data-ex="${CSS.escape(ui.tutor.exercise||"")}"] .v173-inline-tutor.show`)
+      :ui.activeExercise
+        ?document.querySelector(`.exercise[data-ex="${CSS.escape(ui.activeExercise)}"]`)
+        :null;
+
+    if(anchor){
+      anchor.scrollIntoView({behavior:"auto",block:"center"});
+    }else{
+      window.scrollTo({top:Number(scrollY||0),behavior:"auto"});
+    }
+
+    if(ui.activeInput){
+      const input=document.getElementById(ui.activeInput);
+      if(input){
+        setTimeout(()=>{
+          try{
+            input.focus({preventScroll:true});
+            const n=String(input.value||"").length;
+            input.setSelectionRange?.(n,n);
+          }catch{}
+        },80);
+      }
+    }
+
+    return tutorRestored||!!anchor;
   }
 
   function isIOS(){
@@ -119,9 +350,9 @@
   }
 
   function injectStyles(){
-    if(document.querySelector("#kitsuneAdaptivePerf2390"))return;
+    if(document.querySelector("#kitsuneAdaptivePerf2391"))return;
     const style=document.createElement("style");
-    style.id="kitsuneAdaptivePerf2390";
+    style.id="kitsuneAdaptivePerf2391";
     style.textContent=`
       /* Keep the design; only skip paint/layout for cards far below viewport. */
       @supports (content-visibility:auto){
@@ -232,7 +463,7 @@
 
   function patchEffects(){
     const fn=window.effectiveEffects;
-    if(typeof fn!=="function"||fn.__kitsunePerf2390)return;
+    if(typeof fn!=="function"||fn.__kitsunePerf2391)return;
 
     const base=fn.bind(window);
     const wrapped=function(){
@@ -242,7 +473,7 @@
       if(p==="careful"&&normal==="auto")return "soft";
       return normal;
     };
-    wrapped.__kitsunePerf2390=true;
+    wrapped.__kitsunePerf2391=true;
     wrapped.__base=base;
 
     try{window.effectiveEffects=wrapped}catch{}
@@ -430,6 +661,7 @@
       currentState.view="lesson";
       currentState.lessonId=lessonMatch[1];
       currentState.scrollY=0;
+      currentState.lessonUi=null;
       currentState.ts=Date.now();
       saveJson(STATE_KEY,currentState);
 
@@ -451,7 +683,7 @@
 
   function wrapFunction(name,onBefore,onAfter){
     const fn=window[name];
-    if(typeof fn!=="function"||fn.__kitsunePerf2390)return;
+    if(typeof fn!=="function"||fn.__kitsunePerf2391)return;
     if(lastWrapped[name]===fn)return;
 
     const wrapped=function(...args){
@@ -461,7 +693,7 @@
       return result;
     };
 
-    wrapped.__kitsunePerf2390=true;
+    wrapped.__kitsunePerf2391=true;
     wrapped.__base=fn;
     lastWrapped[name]=wrapped;
 
@@ -473,6 +705,7 @@
       currentState.view="lesson";
       currentState.lessonId=String(args?.[0]||localStorage.getItem("a8_lastLesson")||"");
       currentState.scrollY=0;
+      currentState.lessonUi=null;
       currentState.ts=Date.now();
       saveJson(STATE_KEY,currentState);
     },()=>{
@@ -484,7 +717,10 @@
     wrapFunction("go",args=>{
       const view=String(args?.[0]||"home");
       currentState.view=view;
-      if(view!=="lesson")currentState.lessonId="";
+      if(view!=="lesson"){
+        currentState.lessonId="";
+        currentState.lessonUi=null;
+      }
       currentState.scrollY=0;
       currentState.ts=Date.now();
       saveJson(STATE_KEY,currentState);
@@ -493,6 +729,7 @@
     wrapFunction("renderCourse",()=>{
       currentState.view="course";
       currentState.lessonId="";
+      currentState.lessonUi=null;
       currentState.scrollY=0;
       currentState.ts=Date.now();
       saveJson(STATE_KEY,currentState);
@@ -501,6 +738,7 @@
     wrapFunction("renderHome",()=>{
       currentState.view="home";
       currentState.lessonId="";
+      currentState.lessonUi=null;
       currentState.scrollY=0;
       currentState.ts=Date.now();
       saveJson(STATE_KEY,currentState);
@@ -521,6 +759,12 @@
       currentState.scrollY=Math.max(0,Math.round(window.scrollY||0));
     }else{
       currentState.scrollY=0;
+    }
+
+    if(currentState.view==="lesson"){
+      currentState.lessonUi=captureLessonUi();
+    }else{
+      currentState.lessonUi=null;
     }
 
     currentState.ts=Date.now();
@@ -572,13 +816,33 @@
     if(restored){
       restoredAfterCrash=true;
       const y=Number(currentState.scrollY||0);
-      setTimeout(()=>window.scrollTo({top:y,behavior:"auto"}),320);
-      setTimeout(()=>toast("↩️ Kitsune восстановила место после перезапуска страницы."),550);
+
+      if(view==="lesson"){
+        const ui=currentState.lessonUi;
+        setTimeout(()=>{
+          restoreLessonUi(ui,y)
+            .finally(()=>{
+              toast(
+                ui?.tutor?.show
+                  ?"↩️ Продолжаем с того же примера и шага."
+                  :"↩️ Продолжаем с того же места в уроке."
+              );
+            });
+        },260);
+      }else{
+        setTimeout(()=>window.scrollTo({top:y,behavior:"auto"}),320);
+        setTimeout(()=>toast("↩️ Продолжаем с того же места."),550);
+      }
     }
   }
 
   function markAlive(){
     if(document.hidden)return;
+
+    if(currentState.view==="lesson"){
+      saveRuntimeState();
+    }
+
     saveJson(ALIVE_KEY,{
       ts:Date.now(),
       view:currentState.view,
@@ -703,7 +967,10 @@
       deviceMemory:memoryGB(),
       cores:cores(),
       restoredAfterCrash,
-      previousCrash
+      previousCrash,
+      continuityRecovery:true,
+      savedExercise:currentState.lessonUi?.activeExercise||"",
+      savedTutor:!!currentState.lessonUi?.tutor?.show
     };
   }
 
@@ -712,6 +979,24 @@
 
   document.addEventListener("click",onCaptureClick,true);
   document.addEventListener("pointerdown",()=>{lastInteraction=Date.now()},{passive:true});
+
+  /* Continuity checkpoints: keep the exact exercise/Tutor state current without
+     polling the whole DOM continuously. */
+  document.addEventListener("input",event=>{
+    if(event.target.closest?.(".exercise[data-ex], .v173-inline-tutor")){
+      lastInteraction=Date.now();
+      saveRuntimeState();
+    }
+  },true);
+
+  document.addEventListener("click",event=>{
+    if(event.target.closest?.(
+      ".exercise[data-ex], .v173-inline-tutor, .level-switch"
+    )){
+      setTimeout(saveRuntimeState,90);
+      setTimeout(saveRuntimeState,380);
+    }
+  });
 
   let scrollTimer=null;
   window.addEventListener("scroll",()=>{
