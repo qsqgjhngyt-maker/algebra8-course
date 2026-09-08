@@ -1,5 +1,5 @@
 /* =====================================================================
-   Kitsune Performance Manager v2.3.0-beta.3.9.2 · SMOOTH RUNTIME
+   Kitsune Performance Manager v2.3.0-beta.3.9.5 · SMOOTH RUNTIME
 
    Philosophy:
    - prevent WebKit/low-memory crashes instead of restoring after them;
@@ -12,7 +12,7 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.9.2";
+  const VERSION="2.3.0-beta.3.9.5";
   const AUTO_KEY="a8_perf_auto_v2392";
   const PROFILE_KEY="a8_perf_profile_v2392";
 
@@ -230,7 +230,7 @@
 
   function patchEffects(){
     const fn=window.effectiveEffects;
-    if(typeof fn!=="function"||fn.__kitsunePerf2392)return;
+    if(typeof fn!=="function"||fn.__kitsunePerf2395)return;
 
     const base=fn.bind(window);
     const wrapped=function(){
@@ -243,7 +243,7 @@
       if(effectiveProfile==="careful"&&normal==="auto")return "soft";
       return normal;
     };
-    wrapped.__kitsunePerf2392=true;
+    wrapped.__kitsunePerf2395=true;
     wrapped.__base=base;
     try{window.effectiveEffects=wrapped}catch{}
   }
@@ -365,6 +365,12 @@
         }
       }catch{}
 
+      try{
+        if(window.KitsuneBrain?.release){
+          jobs.push(Promise.resolve(window.KitsuneBrain.release()));
+        }
+      }catch{}
+
       try{window.speechSynthesis?.cancel?.()}catch{}
 
       if(!jobs.length)return false;
@@ -410,7 +416,7 @@
 
   function wrapFunction(name,onBefore,onAfter){
     const fn=window[name];
-    if(typeof fn!=="function"||fn.__kitsunePerf2392)return false;
+    if(typeof fn!=="function"||fn.__kitsunePerf2395)return false;
 
     const wrapped=function(...args){
       try{onBefore?.(args)}catch{}
@@ -419,7 +425,7 @@
       return result;
     };
 
-    wrapped.__kitsunePerf2392=true;
+    wrapped.__kitsunePerf2395=true;
     wrapped.__base=fn;
 
     try{
@@ -607,10 +613,19 @@
 
   function onRuntimeGroupLoaded(event){
     const group=String(event?.detail?.group||"");
-    if(group==="assistant"&&learningMode&&!dialogOpen()){
-      /* Optional assistant scripts may have just created a wake/voice runtime.
-         Return it to dormant state while the learner is solving exercises. */
-      setTimeout(()=>releaseHeavyVoice("assistant-loaded").catch(()=>{}),140);
+    const background=!!event?.detail?.background;
+
+    if(group==="assistant"){
+      /* The dialog node may not exist during the bounded bootstrap poll when
+         assistant modules are lazy-loaded minutes later. Attach lifecycle
+         tracking immediately after the explicit load as well. */
+      installDialogObserver();
+    }
+
+    if(group==="assistant"&&background&&learningMode&&!dialogOpen()){
+      /* Only background prewarm may be released here. Explicit user voice
+         actions must never race a delayed release. */
+      setTimeout(()=>releaseHeavyVoice("assistant-background-loaded").catch(()=>{}),180);
     }
   }
 
@@ -632,7 +647,9 @@
       cores:cores(),
       recovery:false,
       scrollCheckpointing:false,
-      perActionVoiceRelease:false
+      perActionVoiceRelease:false,
+      backgroundAiAllowed:effectiveProfile==="full",
+      autoRecovery:false
     };
   }
 
