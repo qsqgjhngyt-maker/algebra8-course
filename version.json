@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.9.7",
+  "version": "2.3.0-beta.3.9.8",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "MOBILE_LAZY_VOICE_ENTRY_FIX",
+  "release": "CHILD_NAV_EDUCATIONAL_SECTIONS_VISIBLE",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -73,6 +73,13 @@
     "mobile-inline-tutor-talk-button-without-background-ai",
     "explicit-assistant-load-from-talk-button",
     "exercise-context-preserved-for-lazy-voice-dialogue",
-    "navigation-fix-2396-preserved"
+    "navigation-fix-2396-preserved",
+    "child-nav-trainer-visible",
+    "child-nav-chapter-finals-visible",
+    "child-nav-mastery-visible",
+    "child-nav-mistakes-visible",
+    "child-nav-progress-visible",
+    "offline-ai-remains-hidden-in-child-mode",
+    "stable-runtime-397-preserved"
   ]
 }
