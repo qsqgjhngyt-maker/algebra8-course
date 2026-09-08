@@ -1,18 +1,18 @@
 /* =====================================================================
-   Kitsune Service Worker 2.3.0-beta.3.9.5 · STABLE CURRENT RELEASE
+   Kitsune Service Worker 2.3.0-beta.3.9.7 · STABLE CURRENT RELEASE
 
    - exact-release shell: no old/new HTML-JS mixing;
    - core scripts cached sequentially, never as a phone-killing burst;
    - heavy optional AI/voice modules are cached only when actually requested;
    - navigation is cache-first and refreshed in the background.
    ===================================================================== */
-const CACHE="algebra8-v2.3.0-beta.3.9.5";
-const RUNTIME_CACHE="algebra8-runtime-v2395";
+const CACHE="algebra8-v2.3.0-beta.3.9.7";
+const RUNTIME_CACHE="algebra8-runtime-v2397";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
-const RELEASE="2.3.0-beta.3.9.5";
+const RELEASE="2.3.0-beta.3.9.7";
 
 const CORE_ASSETS=[
-  "./index.html?v=2.3.0-beta.3.9.5",
+  "./index.html?v=2.3.0-beta.3.9.7",
   "./styles.css?v=2.3.0-alpha",
   "./security-bootstrap-v1111.js?v=2.3.0-alpha",
   "./app.js?v=2.2.3",
@@ -33,7 +33,9 @@ const CORE_ASSETS=[
   "./math-engine-v130.js?v=2.2.3",
   "./learning-intelligence-v150.js?v=2.2.3",
   "./student-experience-v220.js?v=2.3.0-alpha",
+  "./navigation-stability-v2396.js?v=2.3.0-beta.3.9.6",
   "./runtime-loader-v2395.js?v=2.3.0-beta.3.9.5",
+  "./mobile-voice-entry-v2397.js?v=2.3.0-beta.3.9.7",
   "./app-kernel-v200.js?v=2.2.3",
   "./auto-setup-v210.js?v=2.2.3",
   "./reveal-manager-v221.js?v=2.2.3",
@@ -45,7 +47,7 @@ const CORE_ASSETS=[
   "./assets/favicon-64.png",
   "./assets/kitsune/kitsune-sprite-v1101.png",
   "./assets/kitsune/idle.png",
-  "./version.json?v=2.3.0-beta.3.9.5"
+  "./version.json?v=2.3.0-beta.3.9.7"
 ];
 
 const CHILD_CSP=[

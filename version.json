@@ -1,13 +1,13 @@
 {
   "name": "Kitsune Algebra 8",
-  "version": "2.3.0-beta.3.9.5",
+  "version": "2.3.0-beta.3.9.7",
   "channel": "beta",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
   "analytics": false,
   "math_engine": "local-web-worker",
   "generator_topics": 51,
-  "release": "STABILITY_CONSOLIDATED_NO_BACKGROUND_AI_ON_CONSTRAINED",
+  "release": "MOBILE_LAZY_VOICE_ENTRY_FIX",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -64,6 +64,15 @@
     "explicit-only-heavy-runtime-on-constrained-devices",
     "exact-release-service-worker-cache",
     "sequential-core-shell-cache",
-    "no-crash-scroll-recovery"
+    "no-crash-scroll-recovery",
+    "home-navigation-capture-fix",
+    "adult-back-to-learning-fix",
+    "home-renderer-fallback-chain",
+    "mobile-sidebar-close-on-home",
+    "mobile-free-talk-button-without-background-ai",
+    "mobile-inline-tutor-talk-button-without-background-ai",
+    "explicit-assistant-load-from-talk-button",
+    "exercise-context-preserved-for-lazy-voice-dialogue",
+    "navigation-fix-2396-preserved"
   ]
 }
