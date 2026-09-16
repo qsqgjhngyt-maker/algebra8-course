@@ -1,15 +1,90 @@
-# Безопасность и приватность
+#!/usr/bin/env python3
+# Kitsune Silero Local Bridge — loopback only, no cloud storage.
+import io
+import os
+import wave
+import numpy as np
+import torch
+from flask import Flask, request, jsonify, Response
 
-Основной учебный контент, ответы и прогресс обрабатываются локально в браузере. Облачный разговор — отдельная возможность с согласием взрослого и разрешённым устройством. Не отправляйте имя, адрес, школу, контакты, пароли, медицинские сведения, ключи API и другие чувствительные данные.
+HOST="127.0.0.1"
+PORT=17865
+ALLOWED_ORIGINS={
+    "https://qsqgjhngyt-maker.github.io",
+    "http://localhost",
+    "http://127.0.0.1",
+}
 
-Qwen получает минимально необходимый текст сообщения и при необходимости ограниченный контекст. Автоматические фильтры не гарантируют обнаружение каждого личного или нежелательного сообщения. Ответы AI могут быть неточными; важные решения и учебные выводы требуют проверки взрослым/учителем. Приложение не заменяет экстренную, медицинскую или психологическую помощь.
+app=Flask(__name__)
+model=None
 
-Постоянный ключ Alibaba Cloud хранится в Cloudflare Secrets, не в клиенте. Сертификат устройства, согласие на облако и локальный прогресс — разные сущности. Система доступа не является полноценной школьной системой аккаунтов и ведомостей. Для разных учеников на одном компьютере используйте разные браузерные профили.
+def add_cors(response):
+    origin=request.headers.get("Origin","")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"]=origin
+        response.headers["Vary"]="Origin"
+    response.headers["Cache-Control"]="no-store"
+    response.headers["X-Content-Type-Options"]="nosniff"
+    return response
 
-Микрофон/камера требуют явного действия и разрешения браузера. В штатной голосовой схеме распознавание локальное; модели загружаются по запросу, не автоматически при открытии курса. Выбор облачного текста не означает передачу сырого аудио. Проверка реального аудио на каждом устройстве остаётся отдельной задачей.
+@app.after_request
+def after(response):
+    return add_cors(response)
 
-Работающий broker сообщает отсутствие журналирования разговоров в приложении, но инфраструктурные провайдеры имеют собственные правила обработки и технических журналов. Не трактуйте это как обещание отсутствия любой внешней обработки.
+@app.route("/health",methods=["GET","OPTIONS"])
+def health():
+    if request.method=="OPTIONS":
+        return Response(status=204)
+    return jsonify(ok=True,engine="silero-v5_5_ru",speakers=["xenia","kseniya"])
 
-Очистка данных браузера может удалить результаты и регистрацию устройства. Обновление оболочки не должно требовать очистки localStorage, IndexedDB или нейросетевых моделей. Смена значка — не основание удалять данные сайта.
+def get_model():
+    global model
+    if model is None:
+        print("Первый запуск: загружаю Silero TTS v5.5 локально...")
+        model,_=torch.hub.load(
+            repo_or_dir="snakers4/silero-models",
+            model="silero_tts",
+            language="ru",
+            speaker="v5_5_ru",
+            trust_repo=True,
+        )
+        model.to(torch.device("cpu"))
+    return model
 
-[Qwen и диагностика](docs/QWEN_API.md) · [руководство взрослого](docs/PARENT_TEACHER_GUIDE.md).
+@app.route("/tts",methods=["POST","OPTIONS"])
+def tts():
+    if request.method=="OPTIONS":
+        return Response(status=204)
+
+    data=request.get_json(silent=True) or {}
+    text=str(data.get("text","")).strip()
+    speaker=str(data.get("speaker","xenia")).strip().lower()
+
+    if speaker not in {"xenia","kseniya"}:
+        return jsonify(error="invalid_speaker"),400
+    if not text or len(text)>900:
+        return jsonify(error="invalid_text"),400
+
+    audio=get_model().apply_tts(
+        text=text,
+        speaker=speaker,
+        sample_rate=48000,
+        put_accent=True,
+        put_yo=True,
+    )
+    arr=np.asarray(audio,dtype=np.float32)
+    arr=np.clip(arr,-1.0,1.0)
+    pcm=(arr*32767.0).astype(np.int16)
+
+    buf=io.BytesIO()
+    with wave.open(buf,"wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(48000)
+        wav.writeframes(pcm.tobytes())
+    return Response(buf.getvalue(),mimetype="audio/wav",headers={"Cache-Control":"no-store"})
+
+if __name__=="__main__":
+    print(f"Kitsune Silero Local Bridge: http://{HOST}:{PORT}")
+    print("Данные не отправляются на сервер приложения; процесс слушает только 127.0.0.1.")
+    app.run(host=HOST,port=PORT,debug=False,threaded=False)

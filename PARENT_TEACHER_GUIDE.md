@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitsune-hybrid-broker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": true,
+  "vars": {
+    "CHAT_ENABLED": "true",
+    "ALLOWED_ORIGIN": "https://qsqgjhngyt-maker.github.io",
+    "GOOGLE_CLIENT_ID": "917733706537-8761p6aqah238r1g2anvlhupstu9s98t.apps.googleusercontent.com",
+    "QWEN_TEMP_TOKEN_URL": "https://ws-xoczzsb7am4cyl8c.ap-southeast-1.maas.aliyuncs.com/api/v1/tokens?expire_in_seconds=60",
+    "QWEN_API_BASE": "https://ws-xoczzsb7am4cyl8c.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1/",
+    "QWEN_MODEL": "qwen3.7-plus",
+    "QWEN_REGION": "ap-southeast-1",
+    "CHALLENGE_TTL_SECONDS": "120"
+  },
+  "secrets": {
+    "required": [
+      "DASHSCOPE_API_KEY",
+      "GRANT_SIGNING_SECRET",
+      "PARENT_GOOGLE_SUB"
+    ]
+  },
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "2301",
+      "simple": { "limit": 12, "period": 60 }
+    },
+    {
+      "name": "TOKEN_RATE_LIMITER",
+      "namespace_id": "2302",
+      "simple": { "limit": 20, "period": 60 }
+    },
+    {
+      "name": "REPLAY_RATE_LIMITER",
+      "namespace_id": "2303",
+      "simple": { "limit": 1, "period": 60 }
+    }
+  ]
+}
