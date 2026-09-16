@@ -235,8 +235,23 @@
 
   function bindAdult(){
     document.querySelector("#sxBackStudent")?.addEventListener("click",()=>window.KitsuneAppKernel?.route?.("home"));
-    document.querySelectorAll("[data-sx-tab]").forEach(b=>b.addEventListener("click",()=>{
-      adultTab=b.dataset.sxTab;renderAdult();
+    document.querySelectorAll("[data-sx-tab]").forEach(b=>b.addEventListener("click",async()=>{
+      adultTab=b.dataset.sxTab;
+      if(adultTab==="cloud"&&!window.KitsuneHybridInfrastructure){
+        const host=document.querySelector("#sxAdultBody");
+        if(host)host.innerHTML=`<section class="sx-adult-card"><h3>Cloud Brain</h3><p>⏳ Загружаю облачную инфраструктуру…</p></section>`;
+        try{
+          await window.KitsuneRuntimeLoader?.ensure?.("cloud",{
+            urgent:true,
+            reason:"adult-cloud-tab",
+            background:false
+          });
+        }catch(error){
+          console.error("[Kitsune Cloud Brain]",error);
+          try{window.KitsuneRuntimeStability?.toast?.("Не удалось загрузить Cloud Brain")}catch{}
+        }
+      }
+      renderAdult();
     }));
     document.querySelector("#sxStudentMode")?.addEventListener("change",e=>setStudentMode(!!e.target.checked));
     document.querySelector("#sxPrivacy")?.addEventListener("click",()=>document.querySelector("#privacyBtn")?.click());
