@@ -1,223 +1,330 @@
-/* =====================================================================
-   Kitsune Runtime Loader v2.3.0-beta.3.9.5 · STABLE LAZY ROUTING
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self';
+             base-uri 'self';
+             object-src 'none';
+             form-action 'none';
+             manifest-src 'self';
+             img-src 'self' data: blob:;
+             media-src 'self' data: blob:;
+             font-src 'self' data:;
+             style-src 'self' 'unsafe-inline' https://accounts.google.com;
+             script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://accounts.google.com;
+             worker-src 'self' blob: https://cdn.jsdelivr.net;
+             child-src 'self' blob: https://cdn.jsdelivr.net;
+             frame-src https://accounts.google.com;
+             connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com http://127.0.0.1:17865;" />
+  <meta name="kitsune-app-version" content="3.1.0-rc.5" />
+  <script src="./security-bootstrap-v1111.js?v=3.1.0-rc.5"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#49b447" />
+  <meta name="description" content="Kitsune Math — математика 7–11 классов, ОГЭ и ЕГЭ." />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./assets/kitsune-math-favicon-64-v310.png" type="image/png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/kitsune-math-apple-touch-180-v310.png" />
+  <link rel="preload" as="image" href="./assets/kitsune/kitsune-sprite-v1101.png" />
+  <link rel="stylesheet" href="./styles.css?v=3.1.0-rc.5" />
+  <link rel="stylesheet" href="./platform-v300.css?v=3.1.0-rc.5" />
+  <link rel="stylesheet" href="./startup-intro.css?v=3.1.0-rc.5" />
+  <link rel="preload" as="image" type="image/webp" href="./assets/startup-intro/motion-v2/kitsune-motion-sprite.webp?v=3.1.0-rc.5" />
+  <link rel="preload" as="image" type="image/webp" href="./assets/startup-intro/motion-v2/kitsune-idle-live.webp?v=3.1.0-rc.5" />
+  <title>Kitsune — Математика 7–11 · ОГЭ · ЕГЭ</title>
 
-   Critical rule: this file is loaded BEFORE app-kernel-v200.js, so its
-   capture handler can prepare a lazy module before the final router consumes
-   the click. This removes the old “first click does nothing, second works”.
-   ===================================================================== */
-(() => {
-  "use strict";
+  <style id="kitsuneRuntime2395Style">
+    .kitsune-runtime-loading{opacity:.72;cursor:progress!important}
+  </style>
 
-  const VERSION="2.3.0-beta.3.9.5";
-  const loaded=new Set();
-  const pending=new Map();
-
-  const groups={
-    mathlab:[
-      "./math-lab-v130.js?v=3.1.0-rc.2",
-      "./camera-import-v210.js?v=3.1.0-rc.2"
-    ],
-    search:["./course-search-v200.js?v=3.1.0-rc.2"],
-    offline:["./offline-center-v200.js?v=3.1.0-rc.2"],
-    progress:[
-      "./mastery-score-v220.js?v=3.1.0-rc.2",
-      "./reliability-center-v220.js?v=3.1.0-rc.2"
-    ],
-    privacy:["./privacy-v1111.js?v=3.1.0-rc.2"],
-    cloud:[
-      "./cloud-config-v230.js?v=3.1.0-rc.2",
-      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
-      "./access-admin-v235.js?v=3.1.0-rc.2"
-    ],
-    assistant:[
-      /* Dependency order from the confirmed 3.8.7 stack. */
-      "./neural-voice-v17.js?v=3.1.0-rc.2",
-      "./kitsune-brain-v18.js?v=3.1.0-rc.2",
-      "./kitsune-voice-v19.js?v=3.1.0-rc.2",
-      "./kitsune-live-v110.js?v=3.1.0-rc.2",
-      "./privacy-v1111.js?v=3.1.0-rc.2",
-      "./cloud-config-v230.js?v=3.1.0-rc.2",
-      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
-      "./access-admin-v235.js?v=3.1.0-rc.2",
-      "./intelligence-router-v230.js?v=3.1.0-rc.2",
-      "./cloud-chat-ux-v231.js?v=3.1.0-rc.2",
-      "./local-voice-lab-v231.js?v=3.1.0-rc.2",
-      "./voice-conversation-v237.js?v=3.1.0-rc.2",
-      "./kitsune-presence-v238.js?v=3.1.0-rc.2",
-      "./voice-stability-v2387.js?v=3.1.0-rc.2",
-      "./chat-dialog-firewall-v231.js?v=3.1.0-rc.2"
-    ]
-  };
-
-  function markExisting(){
-    document.querySelectorAll("script[src]").forEach(script=>{
-      try{loaded.add(new URL(script.src,location.href).href)}catch{}
-    });
-  }
-
-  function profile(){
-    try{return window.KitsunePerformance?.info?.()?.profile||"full"}
-    catch{return /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent||"")?"careful":"full"}
-  }
-
-  function isFull(){return profile()==="full"}
-
-  function yieldToBrowser(ms=35){
-    return new Promise(resolve=>{
-      if("requestIdleCallback" in window){
-        requestIdleCallback(()=>setTimeout(resolve,ms),{timeout:700});
-      }else setTimeout(resolve,ms);
-    });
-  }
-
-  function loadScript(src){
-    const href=new URL(src,location.href).href;
-    if(loaded.has(href))return Promise.resolve(true);
-    if(pending.has(href))return pending.get(href);
-
-    const promise=new Promise((resolve,reject)=>{
-      const script=document.createElement("script");
-      script.src=src;
-      script.async=false;
-      script.dataset.kitsuneRuntime="2395";
-      script.onload=()=>{
-        loaded.add(href);
-        pending.delete(href);
-        resolve(true);
-      };
-      script.onerror=()=>{
-        pending.delete(href);
-        reject(new Error("Не удалось загрузить модуль: "+src));
-      };
-      document.body.appendChild(script);
-    });
-    pending.set(href,promise);
-    return promise;
-  }
-
-  async function ensureGroup(name,{urgent=false,reason="manual",background=false}={}){
-    if(name==='assistant'&&background)return false;
-    const list=groups[name];
-    if(!list)throw new Error("Unknown runtime group: "+name);
-    if(groupReady(name))return true;
-    if(pending.has("group:"+name))return pending.get("group:"+name);
-
-    const promise=(async()=>{
-      for(const src of list){
-        await loadScript(src);
-        await yieldToBrowser(urgent?8:(isFull()?30:85));
-      }
-      try{
-        window.dispatchEvent(new CustomEvent("kitsune-runtime-group-loaded",{
-          detail:{group:name,version:VERSION,reason,background:!!background}
-        }));
-      }catch{}
-      return true;
-    })();
-
-    pending.set("group:"+name,promise);
-    try{return await promise}
-    finally{pending.delete("group:"+name)}
-  }
-
-  function groupReady(name){
-    const list=groups[name]||[];
-    return list.length>0&&list.every(src=>loaded.has(new URL(src,location.href).href));
-  }
-
-  function routeGroup(view){
-    if(view==="mathlab")return "mathlab";
-    if(view==="search")return "search";
-    if(view==="offline")return "offline";
-    if(["mastery","progress","mistakes","adult"].includes(view))return "progress";
-    return "";
-  }
-
-  function closeMobileSidebar(){
-    try{
-      document.querySelector("#sidebar")?.classList.remove("open");
-      document.body.classList.remove("sidebar-mobile-open");
-      document.querySelector("#sidebarScrim")?.setAttribute("aria-hidden","true");
-    }catch{}
-  }
-
-  async function prepareAndRoute(target,view,group){
-    target?.setAttribute("aria-busy","true");
-    target?.classList.add("kitsune-runtime-loading");
-    try{
-      await ensureGroup(group,{urgent:true,reason:"navigation:"+view,background:false});
-      closeMobileSidebar();
-      const platform=window.KitsunePlatform;
-      if(platform?.selected?.()&&!platform.isLegacyMode?.()&&['progress','mastery','mistakes','search'].includes(view))return platform.renderUtility(view);
-      const kernel=window.KitsuneAppKernel;
-      if(kernel?.route)return kernel.route(view);
-      if(typeof window.go==="function")return window.go(view);
-      throw new Error("Навигация ещё не готова");
-    }catch(error){
-      console.error("[Kitsune runtime]",error);
-      try{window.KitsuneRuntimeStability?.toast?.(error?.message||String(error))}catch{}
-    }finally{
-      target?.removeAttribute("aria-busy");
-      target?.classList.remove("kitsune-runtime-loading");
+  <style id="kitsuneStudentNav2398">
+    /*
+     * Эти разделы являются учебными, а не взрослыми/техническими.
+     * Student Experience по старой логике добавляет им student-hidden;
+     * точечный override возвращает только нужные пять пунктов.
+     */
+    body.kitsune-student-mode .main-nav .nav-btn.student-hidden[data-view="trainer"],
+    body.kitsune-student-mode .main-nav .nav-btn.student-hidden[data-view="chapterfinal"],
+    body.kitsune-student-mode .main-nav .nav-btn.student-hidden[data-view="mastery"],
+    body.kitsune-student-mode .main-nav .nav-btn.student-hidden[data-view="mistakes"],
+    body.kitsune-student-mode .main-nav .nav-btn.student-hidden[data-view="progress"]{
+      display:block!important;
     }
-  }
+  </style>
+</head>
+<body>
+  <div id="kitsuneStartupIntro" class="kitsune-startup-intro" role="dialog" aria-label="Запуск Kitsune Math" aria-modal="true">
+    <div class="kitsune-startup-intro__aurora" aria-hidden="true"></div>
+    <div class="kitsune-startup-intro__vignette" aria-hidden="true"></div>
+    <div class="kitsune-startup-intro__scene" aria-hidden="true">
+      <div class="kitsune-startup-intro__motion" data-motion data-preload aria-hidden="true"></div>
+      <img class="kitsune-startup-intro__character" data-frame="idle" data-preload alt="" src="./assets/startup-intro/motion-v2/kitsune-idle-live.webp?v=3.1.0-rc.5">
+      <img class="kitsune-startup-intro__character" data-frame="blink" data-preload alt="" src="./assets/startup-intro/motion-v2/kitsune-blink-live.webp?v=3.1.0-rc.5">
+      <img class="kitsune-startup-intro__character" data-frame="magic" data-preload alt="" src="./assets/startup-intro/motion-v2/kitsune-magic-live.webp?v=3.1.0-rc.5">
+      <img class="kitsune-startup-intro__trail" data-preload alt="" src="./assets/startup-intro/kitsune-tail-trail.webp?v=3.1.0-rc.5">
+      <div class="kitsune-startup-intro__brand">
+        <span class="kitsune-startup-intro__brand-title">Kitsune</span>
+        <span class="kitsune-startup-intro__brand-sub">математика</span>
+        <span class="kitsune-startup-intro__brand-shine" aria-hidden="true"></span>
+      </div>
+    </div>
+    <button class="kitsune-startup-intro__skip" type="button" aria-label="Пропустить заставку">Пропустить</button>
+    <div class="kitsune-startup-intro__hint" aria-hidden="true">Коснись экрана, чтобы пропустить</div>
+  </div>
+  <script src="./startup-intro.js?v=3.1.0-rc.5"></script>
+  <canvas id="particlesCanvas" class="particles-canvas" aria-hidden="true"></canvas>
+  <div class="bg-orb orb-1" aria-hidden="true"></div>
+  <div class="bg-orb orb-2" aria-hidden="true"></div>
+  <div class="bg-orb orb-3" aria-hidden="true"></div>
 
-  /* This listener must be registered before App Kernel's capture listener. */
-  document.addEventListener("click",event=>{
-    if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
-    const target=event.target.closest?.("[data-view],[data-view-jump]");
-    if(!target)return;
-    if(target.closest?.(".v173-inline-tutor,.v16-tutor-btn,.v173-alfi-shortcut"))return;
+  <div class="app-shell">
+    <aside class="sidebar glass-panel" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">KM</div>
+        <div class="brand-copy">
+          <strong>Kitsune Math</strong>
+          <small>Учись · Понимай · Решай</small>
+        </div>
+        <button id="hideSidebarBtn" class="sidebar-collapse-btn" aria-label="Скрыть боковую панель" title="Скрыть панель">‹</button>
+      </div>
 
-    const view=target.dataset.view||target.dataset.viewJump||"";
-    const group=routeGroup(view);
-    if(!group||groupReady(group))return;
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="home">🏠 Главная</button>
+        <button id="curriculumSourcesBtn" class="nav-btn curriculum-sources-nav" data-view="sources">📚 Источники и нормативная база</button>
+        <button class="nav-btn" data-view="course">🗺️ Карта курса</button>
+        <button class="nav-btn" data-view="trainer">🧩 Тренажёр</button>
+        <button class="nav-btn mathlab-nav" data-view="mathlab">🧪 Math Lab · ДЗ</button>
+        <button class="nav-btn route-nav" data-view="route">🧭 Мой маршрут</button>
+        <button class="nav-btn" data-view="search">🔎 Поиск по курсу</button>
+      <button class="nav-btn" data-view="reference">📖 Справочник теории</button>
+        <button class="nav-btn" data-view="offline">📴 Офлайн и AI</button>
+        <button class="nav-btn" data-view="chapterfinal">🏁 Итоги глав</button>
+        <button class="nav-btn" data-view="mastery">🎓 Закрепление</button>
+        <button class="nav-btn" data-view="mistakes">🧠 Мои ошибки</button>
+        <button class="nav-btn" data-view="progress">📈 Прогресс</button>
+      </nav>
 
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-    prepareAndRoute(target,view,group);
-  },true);
+      <div class="sidebar-footer">
+        <button id="assistantModeBtn" class="ghost">🦊 Kitsune: активный</button>
+        <button id="designBtn" class="ghost">🎮 Дизайн: игровой</button>
+        <button id="themeBtn" class="ghost">🌙 Тёмная тема</button>
+        <button id="effectsBtn" class="ghost">✨ Эффекты: авто</button>
+        <button id="startupIntroBtn" class="ghost" type="button" aria-pressed="true">🎬 Запуск: авто</button>
+        <button id="privacyBtn" class="ghost">🔒 Приватность</button>
+        <button id="updateBtn" class="ghost" type="button">🔄 LOCAL 3.1.0-rc.5</button>
+        <button id="installBtn" class="ghost hidden">⬇️ Установить приложение</button>
+      </div>
+    </aside>
+    <div class="sidebar-scrim" id="sidebarScrim" aria-hidden="true"></div>
 
-  document.addEventListener("pointerdown",event=>{
-    const target=event.target.closest?.("[data-view],[data-view-jump]");
-    if(!target)return;
-    const group=routeGroup(target.dataset.view||target.dataset.viewJump||"");
-    if(group&&!groupReady(group)){
-      ensureGroup(group,{urgent:true,reason:"pointer-prewarm",background:false}).catch(()=>{});
-    }
-  },{capture:true,passive:true});
+    <main class="main">
+      <header class="topbar glass-topbar">
+        <button id="menuBtn" class="icon-btn" aria-label="Меню">☰</button>
+        <div>
+          <div class="eyebrow">Интерактивный курс</div>
+          <h1 id="pageTitle">Алгебра 8</h1>
+        </div>
+        <div class="top-actions">
+          <span id="streakBadge" class="badge">🔥 0 дней</span>
+          <button id="resetBtn" class="icon-btn" title="Сбросить прогресс">↺</button>
+        </div>
+      </header>
 
-  function schedule(fn,delay){
-    setTimeout(()=>{
-      if(document.hidden){schedule(fn,1600);return}
-      if("requestIdleCallback" in window)requestIdleCallback(()=>fn(),{timeout:2000});
-      else fn();
-    },delay);
-  }
+      <section id="content" class="content"></section>
+    </main>
+  </div>
 
-  markExisting();
+  <template id="homeTpl">
+    <section class="hero reveal">
+      <div class="glass-panel hero-left">
+        <div class="hero-kicker">
+          <span class="pill">8 класс · базовый уровень</span>
+          <span class="soft-dot">•</span>
+          <span class="muted">Понятное объяснение каждого шага</span>
+        </div>
 
-  window.addEventListener("load",()=>{
-    /* On constrained devices: absolutely no background assistant/model stack.
-       Everything remains available and loads on the first explicit action. */
-    if(!isFull())return;
+        <h2>Не зубрить формулы.<br><span class="gradient-text">Понимать, почему они работают.</span></h2>
+        <p>Короткие объяснения, визуальные подсказки, красивые микроэффекты и пошаговые решения. Если что-то непонятно — курс объяснит ещё проще и даст попробовать снова.</p>
 
-    /* Strong devices retain the convenient zero-config experience. */
-    schedule(()=>ensureGroup("mathlab",{reason:"full-device-prewarm",background:true}).catch(()=>{}),1450);
-    schedule(async()=>{
-      for(const name of ["progress","search","offline"]){
-        await ensureGroup(name,{reason:"full-device-idle",background:true}).catch(()=>{});
-        await yieldToBrowser(100);
-      }
-    },5200);
-  },{once:true});
+        <div class="hero-benefits">
+          <span>🌱 от простого</span>
+          <span>🧩 через практику</span>
+          <span>🎯 до уверенного решения</span>
+          <span>📱 удобно и на телефоне</span>
+          <span>🔒 приватность по умолчанию</span>
+          <span>🧪 Math Lab · ДЗ · Generator 2.0</span>
+        </div>
 
-  window.KitsuneRuntimeLoader={
-    version:VERSION,
-    ensure:ensureGroup,
-    ready:groupReady,
-    groups:()=>Object.keys(groups),
-    profile
-  };
-})();
+        <div class="hero-actions">
+          <button class="primary glow-btn" data-action="continue">Продолжить обучение →</button>
+          <button class="secondary" data-view-jump="course">Посмотреть программу</button>
+          <button class="secondary" data-view-jump="mathlab">🧪 Открыть Math Lab</button>
+          <button class="secondary" data-view-jump="route">🧭 Мой маршрут</button>
+          <button class="secondary" data-view-jump="search">🔎 Найти тему</button>
+        </div>
+      </div>
+
+      <div class="hero-card glass-panel reveal">
+        <div class="big-progress">
+          <div class="ring" id="heroRing"><span id="heroPercent">0%</span></div>
+          <div>
+            <strong>Общий прогресс</strong>
+            <p id="heroStats">0 из 51 темы</p>
+          </div>
+        </div>
+        <hr />
+        <div class="mini-grid">
+          <div><span>✅</span><b id="doneCount">0</b><small>пройдено</small></div>
+          <div><span>🎯</span><b id="accuracyValue">—</b><small>точность</small></div>
+          <div><span>🧠</span><b id="mistakesValue">0</b><small>ошибок</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section reveal">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Сегодня</span>
+          <h3>С чего продолжить</h3>
+        </div>
+      </div>
+      <div id="continueCard"></div>
+    </section>
+
+    <section class="section reveal">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Полный курс</span>
+          <h3>Все 6 глав</h3>
+        </div>
+        <span class="status-chip">платформа · LOCAL 3.1.0-rc.5</span>
+      </div>
+      <div id="homeTopics" class="cards-grid"></div>
+    </section>
+  </template>
+
+  <script src="./school-notation-v3045.js?v=3.1.0-rc.5"></script>
+  <script src="./app.js?v=3.1.0-rc.5"></script>
+  <script src="./pwa-update.js?v=3.1.0-rc.5"></script>
+  <script src="./chapter1-v02.js?v=3.1.0-rc.5"></script>
+  <script src="./course-v1.js?v=3.1.0-rc.5"></script>
+  <script src="./course-theory-v120.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-catalog-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-overlay-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-sources-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./migration-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-algebra-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-frp-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./grade8-progress-bridge-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-8-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-9-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-8-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./coach-v12.js?v=3.1.0-rc.5"></script>
+  <script src="./pedagogy-v12.js?v=3.1.0-rc.5"></script>
+  <script src="./mastery-data-v13.js?v=3.1.0-rc.5"></script>
+  <script src="./mastery-v13.js?v=3.1.0-rc.5"></script>
+  <script src="./design-v14.js?v=3.1.0-rc.5"></script>
+  <script src="./performance-manager-v150.js?v=3.1.0-rc.5"></script>
+  <script src="./runtime-stability-v2395.js?v=3.1.0-rc.5"></script>
+  <script src="./learning-fx-v142.js?v=3.1.0-rc.5"></script>
+  <script src="./live-assistant-v15.js?v=3.1.0-rc.5"></script>
+  <script src="./tutor-lite-v16.js?v=3.1.0-rc.5"></script>
+  <script src="./tutor-smart-v173.js?v=3.1.0-rc.5"></script><script src="./math-engine-v130.js?v=3.1.0-rc.5"></script>
+<script src="./learning-intelligence-v150.js?v=3.1.0-rc.5"></script>
+<script src="./student-experience-v220.js?v=3.1.0-rc.5"></script>
+  <script src="./navigation-stability-v2396.js?v=3.1.0-rc.5"></script>
+  <script src="./runtime-loader-v2395.js?v=3.1.0-rc.5"></script>
+  <script src="./mobile-voice-entry-v2397.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-sources-ui-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./app-kernel-v200.js?v=3.1.0-rc.5"></script>
+  <script src="./auto-setup-v210.js?v=3.1.0-rc.5"></script>
+  <script src="./reveal-manager-v221.js?v=3.1.0-rc.5"></script>
+  <script src="./theory-engine-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./school-typography-ui-v3045.js?v=3.1.0-rc.5"></script>
+
+  <!-- Живой диалог + присутствие персонажа -->
+<!-- Final navigation authority for open Kitsune dialog -->
+<div id="kitsuneReleaseMarker" hidden>3.1.0-rc.5</div>
+</body>
+</html>

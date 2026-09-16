@@ -1,179 +1,255 @@
-{
-  "name": "Kitsune Math 7–11",
-  "version": "3.1.0-rc.2",
-  "channel": "release-candidate",
-  "architecture": "static-github-pages-pwa",
-  "backend": "optional-stateless-credential-broker",
-  "analytics": false,
-  "math_engine": "local-web-worker",
-  "generator_topics": 551,
-  "classic_generator_topics": 51,
-  "generator_mode": "selected-course-authored-exercises",
-  "release": "GITHUB_UNIFIED_COURSE_RC2",
-  "features": [
-    "accessibility",
-    "adult-only-cloud-diagnostics",
-    "cloudflare-credential-broker-source",
-    "device-proof-of-possession",
-    "google-parent-auth-infrastructure",
-    "temporary-qwen-credential",
-    "adult-center",
-    "camera-homework-import",
-    "classic-inline-tutor",
-    "context-scoped-dialog-history",
-    "dynamic-reveal-manager",
-    "ios-no-input-autozoom",
-    "ios-visual-viewport-dialog",
-    "local-ocr",
-    "mastery-score-51",
-    "student-mode",
-    "tutor-inline-navigation-guard",
-    "owner-admin-panel",
-    "conversation-context-v2372",
-    "collapsible-animated-kitsune",
-    "in-app-wake-phrase",
-    "unified-voice-dialog-v2387",
-    "adaptive-performance-profiles",
-    "automatic-device-capability-profile",
-    "runtime-pressure-governor",
-    "event-loop-pressure-monitor",
-    "heap-pressure-monitor-where-supported",
-    "temporary-emergency-render-profile",
-    "automatic-visual-quality-recovery",
-    "minimal-service-worker-core-precache",
-    "progressive-runtime-cache",
-    "neural-model-cache-preservation",
-    "crash-auto-recovery-disabled",
-    "scroll-checkpointing-disabled",
-    "one-time-learning-voice-release",
-    "no-per-exercise-runtime-unload",
-    "progressive-optional-module-loading",
-    "course-first-paint-before-assistant-stack",
-    "ios-glass-look-without-card-backdrop-textures",
-    "lesson-content-visibility-disabled-to-avoid-scroll-jumps",
-    "cache-first-installed-navigation",
-    "no-cross-release-cache-mixing",
-    "adaptive-background-ai-policy",
-    "no-background-ai-on-balanced-or-careful-devices",
-    "ios-auto-narration-safe-default",
-    "manual-voice-preserved-on-constrained-devices",
-    "smart-tutor-dom-loop-guard",
-    "first-click-lazy-navigation",
-    "adult-center-first-click-fix",
-    "student-ask-first-click-fix",
-    "camera-first-click-fix",
-    "math-lab-empty-input-validation",
-    "explicit-only-heavy-runtime-on-constrained-devices",
-    "exact-release-service-worker-cache",
-    "sequential-core-shell-cache",
-    "no-crash-scroll-recovery",
-    "home-navigation-capture-fix",
-    "adult-back-to-learning-fix",
-    "home-renderer-fallback-chain",
-    "mobile-sidebar-close-on-home",
-    "mobile-free-talk-button-without-background-ai",
-    "mobile-inline-tutor-talk-button-without-background-ai",
-    "explicit-assistant-load-from-talk-button",
-    "exercise-context-preserved-for-lazy-voice-dialogue",
-    "navigation-fix-2396-preserved",
-    "child-nav-trainer-visible",
-    "child-nav-chapter-finals-visible",
-    "child-nav-mastery-visible",
-    "child-nav-mistakes-visible",
-    "child-nav-progress-visible",
-    "offline-ai-remains-hidden-in-child-mode",
-    "stable-runtime-397-preserved",
-    "multi-grade-platform-7-11",
-    "oge-track",
-    "ege-basic-track",
-    "ege-profile-track",
-    "course-selector",
-    "separate-course-metadata",
-    "rich-theory-standard-v3",
-    "kitsune-read-theory-manual",
-    "grade8-stable-engine-preserved",
-    "local-lan-test-server",
-    "content-map-before-mass-authoring",
-    "official-curriculum-source-manifest",
-    "curriculum-source-transparency-page",
-    "fipi-oge-2027-project-status",
-    "fipi-ege-2027-project-status",
-    "edsoo-frp-7-11-source-mapping",
-    "production-migration-readiness-read-only",
-    "curriculum-sources-static-sidebar-entry",
-    "curriculum-sources-router-priority-fix",
-    "curriculum-sources-non-grade8-route-fix",
-    "curriculum-sources-visible-label",
-    "curriculum-live-update-button",
-    "curriculum-daily-auto-check",
-    "curriculum-lan-server-cors-safe-checker",
-    "curriculum-source-change-fingerprint",
-    "curriculum-course-verified-date-separation",
-    "curriculum-static-host-safe-fallback",
-    "sources-back-button",
-    "sources-platform-home-button",
-    "grade8-cross-track-navigation-fix",
-    "grade8-safe-home-via-navigation-stability",
-    "source-timeout-friendly-status",
-    "contextual-home-by-selected-track",
-    "grade8-contextual-home-safe-route",
-    "platform-home-separated-from-course-home",
-    "dynamic-home-label",
-    "navigation-stability-delegates-home-to-v3",
-    "legacy-grade8-home-no-longer-forced-for-all-tracks",
-    "contextual-home-capture-order-fix",
-    "full-lesson-standard-v3",
-    "grade7-linear-equation-exemplar",
-    "simple-deep-theory-modes",
-    "worked-examples",
-    "typical-mistakes",
-    "mini-understanding-check",
-    "interactive-practice",
-    "theory-reference",
-    "new-courses-use-grade8-lesson-layout",
-    "grade8-style-level-switch",
-    "grade8-style-practice-flow",
-    "grade8-style-lesson-sidebar",
-    "grade8-style-tutor-context",
-    "separate-progress-by-track",
-    "new-track-home-summary-like-grade8",
-    "new-track-chapter-progress-dashboard",
-    "new-track-real-progress-summary",
-    "grade8-full-theory-all-51-lessons",
-    "grade8-expanded-theory-six-blocks",
-    "grade8-theory-preserves-existing-interactive-ux",
-    "calm-full-theory-reading-mode",
-    "grade8-expanded-theory-8-blocks",
-    "all-new-track-lessons-have-full-theory-section",
-    "non-authored-topics-show-honest-theory-structure",
-    "full-theory-readable-on-mobile",
-    "grade8-separate-calm-theory-all-51-lessons",
-    "grade8-calm-theory-kitsune-narration-all-lessons",
-    "new-tracks-calm-theory-kitsune-narration",
-    "exact-rational-expressions-theory-pattern-generalized",
-    "deep-dive-attached-to-want-understand-deeper",
-    "calm-theory-remains-separate",
-    "deep-dive-renamed-and-distinguished",
-    "grade8-and-v3-tracks-share-deep-mode-pattern",
-    "school-notation-display-layer",
-    "no-visible-math-html-tags-in-theory",
-    "school-division-colon",
-    "school-multiplication-middle-dot",
-    "school-superscript-powers",
-    "tts-strips-internal-math-markup",
-    "content-notation-regression-audit",
-    "global-textbook-math-typography",
-    "stacked-fractions-in-visible-lessons",
-    "binary-operator-spacing",
-    "true-mathematical-minus",
-    "russian-decimal-comma",
-    "grade-and-year-range-en-dash",
-    "no-mutation-observer-formatting",
-    "all-course-renderers-postformatted",
-    "inline-fraction-math-axis-alignment",
-    "fraction-text-single-visual-line",
-    "formula-line-height-adjustment"
-  ],
-  "curriculum_topics": 551,
-  "icon_version": "math-v310"
+html.kitsune-intro-active,html.kitsune-intro-active body{overflow:hidden!important;overscroll-behavior:none}
+/* Kitsune Math cinematic startup intro · 3.1.0-rc.5 · living motion pass
+   iPhone/WebKit-safe: animated layers rely primarily on transform + opacity. */
+:root{--ks-intro-ease:cubic-bezier(.22,.9,.3,1);--ks-intro-glow:#ffad32;--ks-intro-violet:#5f4cff}
+.kitsune-startup-intro{
+  position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;
+  overflow:hidden;isolation:isolate;contain:layout paint style;
+  background:
+    radial-gradient(circle at 50% 46%,rgba(255,177,47,.14),transparent 31%),
+    radial-gradient(circle at 50% 92%,rgba(118,84,255,.08),transparent 42%),
+    linear-gradient(180deg,#fbfdff 0%,#eef4ff 100%);
+  color:#17233f;opacity:1;transition:opacity .32s ease;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+.kitsune-startup-intro[data-theme="dark"]{
+  background:
+    radial-gradient(circle at 50% 46%,rgba(255,160,25,.16),transparent 34%),
+    radial-gradient(circle at 50% 88%,rgba(78,79,255,.20),transparent 46%),
+    linear-gradient(180deg,#02050f 0%,#071126 62%,#050817 100%);
+  color:#fff;
+}
+.kitsune-startup-intro.is-leaving{opacity:0;pointer-events:none}
+.kitsune-startup-intro[hidden]{display:none!important}
+.kitsune-startup-intro__aurora{position:absolute;inset:-20%;pointer-events:none;opacity:.58;transform:translateZ(0);animation:kitsuneAuroraBreath 5.6s ease-in-out infinite}
+.kitsune-startup-intro__aurora::before,.kitsune-startup-intro__aurora::after{content:"";position:absolute;border-radius:50%;filter:blur(34px);opacity:.30}
+.kitsune-startup-intro__aurora::before{width:34vmax;height:34vmax;left:18%;top:24%;background:rgba(255,156,22,.24)}
+.kitsune-startup-intro__aurora::after{width:28vmax;height:28vmax;right:16%;bottom:18%;background:rgba(75,89,255,.21)}
+@keyframes kitsuneAuroraBreath{0%,100%{opacity:.46;transform:scale(.99)}50%{opacity:.64;transform:scale(1.012)}}
+
+/* Screen-edge loading aura: static gradients + opacity/scale pulse, no animated blur. */
+.kitsune-startup-intro__vignette{
+  position:absolute;inset:-2%;pointer-events:none;z-index:0;opacity:.66;transform:scale(1.012) translateZ(0);
+  background:
+    linear-gradient(to bottom,rgba(39,28,88,.26) 0%,rgba(55,37,104,.11) 9%,transparent 23%,transparent 77%,rgba(55,37,104,.12) 91%,rgba(31,22,75,.28) 100%),
+    linear-gradient(to right,rgba(40,28,91,.22) 0%,rgba(84,56,128,.08) 10%,transparent 23%,transparent 77%,rgba(77,54,132,.09) 90%,rgba(38,26,91,.24) 100%),
+    radial-gradient(ellipse at center,transparent 47%,rgba(255,166,48,.025) 60%,rgba(80,58,166,.10) 79%,rgba(30,21,73,.22) 100%);
+  box-shadow:inset 0 0 86px rgba(42,30,96,.24),inset 0 0 174px rgba(68,45,125,.14),inset 0 0 240px rgba(255,166,43,.055);
+  animation:kitsuneEdgePulse 3.6s ease-in-out infinite;will-change:opacity,transform;
+}
+.kitsune-startup-intro__vignette::before{
+  content:"";position:absolute;inset:0;border:1px solid rgba(118,91,207,.12);border-radius:14px;
+  box-shadow:inset 0 0 32px rgba(76,55,164,.13),0 0 26px rgba(255,167,44,.035);
+  opacity:.55;animation:kitsuneFramePulse 3.6s ease-in-out infinite;pointer-events:none
+}
+.kitsune-startup-intro__vignette::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(255,169,42,.13),transparent 19%),
+    radial-gradient(circle at 100% 0%,rgba(92,75,205,.15),transparent 20%),
+    radial-gradient(circle at 100% 100%,rgba(255,156,33,.10),transparent 19%),
+    radial-gradient(circle at 0% 100%,rgba(80,64,190,.13),transparent 21%);
+  opacity:.52;animation:kitsuneCornerPulse 4.8s ease-in-out infinite;pointer-events:none
+}
+[data-theme="dark"] .kitsune-startup-intro__vignette{
+  background:
+    linear-gradient(to bottom,rgba(0,0,10,.78) 0%,rgba(31,24,87,.34) 11%,transparent 26%,transparent 74%,rgba(29,22,80,.34) 89%,rgba(0,0,8,.80) 100%),
+    linear-gradient(to right,rgba(0,0,9,.72) 0%,rgba(48,36,112,.29) 11%,transparent 25%,transparent 75%,rgba(48,36,112,.30) 89%,rgba(0,0,9,.74) 100%),
+    radial-gradient(ellipse at center,transparent 42%,rgba(255,164,44,.03) 58%,rgba(75,60,171,.20) 78%,rgba(0,0,8,.72) 100%);
+  box-shadow:inset 0 0 96px rgba(62,47,156,.34),inset 0 0 188px rgba(23,18,72,.26),inset 0 0 250px rgba(255,166,42,.055);
+}
+.kitsune-startup-intro.is-magic .kitsune-startup-intro__vignette,
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__vignette{opacity:.80}
+.kitsune-startup-intro.is-hold .kitsune-startup-intro__vignette{animation-duration:4.4s}
+@keyframes kitsuneEdgePulse{0%,100%{opacity:.54;transform:scale(1.016)}50%{opacity:.84;transform:scale(.998)}}
+@keyframes kitsuneFramePulse{0%,100%{opacity:.36;box-shadow:inset 0 0 28px rgba(76,55,164,.10),0 0 20px rgba(255,167,44,.025)}50%{opacity:.82;box-shadow:inset 0 0 46px rgba(76,55,164,.18),0 0 34px rgba(255,167,44,.065)}}
+@keyframes kitsuneCornerPulse{0%,100%{opacity:.36}50%{opacity:.68}}
+
+.kitsune-startup-intro__scene{position:relative;z-index:1;width:min(86vw,560px);height:min(78vh,650px);min-height:390px;display:grid;place-items:center;transform:translateZ(0)}
+.kitsune-startup-intro__scene::after{content:"";position:absolute;left:50%;top:43%;width:min(72vw,430px);aspect-ratio:1;transform:translate(-50%,-50%) scale(.82);border-radius:50%;background:radial-gradient(circle,rgba(255,208,117,.30),rgba(255,163,35,.10) 38%,transparent 70%);opacity:0;pointer-events:none;z-index:4}
+.kitsune-startup-intro.is-frame-shift .kitsune-startup-intro__character{opacity:0!important;transition:opacity .055s linear,transform .20s ease}
+.kitsune-startup-intro.is-frame-shift .kitsune-startup-intro__scene::after{animation:kitsuneStageFlash .16s ease-out both}
+@keyframes kitsuneStageFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.72)}45%{opacity:.62}100%{opacity:0;transform:translate(-50%,-50%) scale(1.04)}}
+.kitsune-startup-intro.is-hold .kitsune-startup-intro__scene{animation:kitsuneCameraDrift 5.2s ease-in-out infinite alternate}
+@keyframes kitsuneCameraDrift{from{transform:translateZ(0) scale(1)}to{transform:translateZ(0) scale(1.012)}}
+.kitsune-startup-intro__character{
+  position:absolute;left:50%;top:43%;width:min(74vw,460px);height:auto;max-height:65vh;
+  object-fit:contain;opacity:0;transform:translate3d(-50%,-50%,0) scale(.94);
+  transform-origin:50% 70%;transition:opacity .08s linear,transform .66s var(--ks-intro-ease);
+  will-change:transform,opacity;pointer-events:none;user-select:none;-webkit-user-drag:none;
+  filter:drop-shadow(0 24px 36px rgba(46,31,5,.16));
+}
+[data-theme="dark"] .kitsune-startup-intro__character{filter:drop-shadow(0 28px 42px rgba(0,0,0,.44))}
+.kitsune-startup-intro__character[data-frame="enter"]{transform:translate3d(-50%,-66%,0) scale(.74)}
+.kitsune-startup-intro__character[data-frame="land"]{transform:translate3d(-50%,-45%,0) scale(1.035)}
+.kitsune-startup-intro__character[data-frame="idle"],
+.kitsune-startup-intro__character[data-frame="blink"],
+.kitsune-startup-intro__character[data-frame="magic"]{transform:translate3d(-50%,-48%,0) scale(1)}
+.kitsune-startup-intro.is-enter [data-frame="enter"],
+.kitsune-startup-intro.is-land [data-frame="land"],
+.kitsune-startup-intro.is-idle [data-frame="idle"],
+.kitsune-startup-intro.is-blink [data-frame="blink"],
+.kitsune-startup-intro.is-magic [data-frame="magic"]{opacity:1}
+.kitsune-startup-intro.is-enter [data-frame="enter"]{transform:translate3d(-50%,-50%,0) scale(.97)}
+.kitsune-startup-intro.is-land [data-frame="land"]{transform:translate3d(-50%,-48%,0) scale(1)}
+.kitsune-startup-intro.is-hold.is-idle [data-frame="idle"]{animation:kitsuneHeroBreath 3.8s ease-in-out infinite}
+@keyframes kitsuneHeroBreath{0%,100%{transform:translate3d(-50%,-48%,0) scale(1)}50%{transform:translate3d(-50%,-48.5%,0) scale(1.012)}}
+
+.kitsune-startup-intro__trail{
+  position:absolute;left:50%;top:58%;width:min(90vw,600px);height:auto;opacity:0;
+  transform:translate3d(-50%,-50%,0) scale(.68) rotate(-5deg);transform-origin:center;
+  transition:opacity .34s ease,transform .74s var(--ks-intro-ease);will-change:transform,opacity;
+  pointer-events:none;user-select:none;-webkit-user-drag:none;z-index:-1
+}
+.kitsune-startup-intro.is-magic .kitsune-startup-intro__trail,
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__trail{opacity:.94;transform:translate3d(-50%,-50%,0) scale(1) rotate(0deg)}
+.kitsune-startup-intro.is-hold .kitsune-startup-intro__trail{animation:kitsuneTrailBreath 3.3s ease-in-out infinite}
+@keyframes kitsuneTrailBreath{0%,100%{opacity:.76;transform:translate3d(-50%,-50%,0) scale(.995)}50%{opacity:1;transform:translate3d(-50%,-50%,0) scale(1.018)}}
+
+.kitsune-startup-intro__brand{
+  position:absolute;left:50%;bottom:4%;transform:translate3d(-50%,24px,0) scale(.965);
+  text-align:center;opacity:0;transition:opacity .62s ease,transform .72s var(--ks-intro-ease);
+  white-space:nowrap;pointer-events:none;z-index:3
+}
+.kitsune-startup-intro__brand::before{
+  content:"";position:absolute;left:50%;top:50%;width:150%;height:180%;transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center,rgba(255,178,55,.18),rgba(100,78,255,.07) 44%,transparent 72%);
+  opacity:0;transition:opacity .8s ease;z-index:-1;pointer-events:none
+}
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__brand,
+.kitsune-startup-intro.is-short .kitsune-startup-intro__brand,
+.kitsune-startup-intro.is-reduced .kitsune-startup-intro__brand{opacity:1;transform:translate3d(-50%,0,0) scale(1)}
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__brand::before{opacity:1}
+.kitsune-startup-intro__brand-title{
+  display:block;font:850 clamp(38px,10.5vw,70px)/.96 system-ui,-apple-system,"Segoe UI",sans-serif;
+  letter-spacing:-.045em;color:#fff;
+  background:linear-gradient(110deg,#fff 12%,#fff5d7 36%,#ffc45f 52%,#fff 66%,#dfe8ff 92%);
+  background-size:230% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 4px 18px rgba(38,17,0,.16),0 0 26px rgba(255,165,32,.20);
+}
+.kitsune-startup-intro:not([data-theme="dark"]) .kitsune-startup-intro__brand-title{
+  background:linear-gradient(110deg,#162a58 12%,#314b83 34%,#e6921f 50%,#243a70 68%,#172a5c 92%);
+  background-size:230% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 4px 18px rgba(76,69,50,.10),0 0 22px rgba(255,175,45,.18)
+}
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__brand-title{animation:kitsuneTitleReveal 1.25s ease-out both,kitsuneTitleGlow 3.6s 1.2s ease-in-out infinite}
+.kitsune-startup-intro.is-hold .kitsune-startup-intro__brand-title{filter:drop-shadow(0 0 9px rgba(255,177,47,.20))}
+@keyframes kitsuneTitleReveal{from{letter-spacing:.015em;filter:brightness(.85)}to{letter-spacing:-.045em;filter:brightness(1)}}
+@keyframes kitsuneTitleGlow{0%,100%{background-position:0% 50%;opacity:.94}50%{background-position:100% 50%;opacity:1}}
+.kitsune-startup-intro__brand-sub{
+  display:inline-block;margin-top:11px;padding:7px 18px 8px;border:1px solid rgba(255,184,63,.62);border-radius:999px;
+  font:750 clamp(17px,4.4vw,25px)/1 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.055em;
+  color:#ffbf43;background:linear-gradient(180deg,rgba(255,184,70,.12),rgba(255,146,24,.055));
+  box-shadow:0 0 24px rgba(255,168,30,.14),inset 0 0 18px rgba(255,205,115,.05)
+}
+.kitsune-startup-intro:not([data-theme="dark"]) .kitsune-startup-intro__brand-sub{color:#a9680e;background:rgba(255,184,70,.11);border-color:rgba(214,133,26,.38)}
+.kitsune-startup-intro.is-hold .kitsune-startup-intro__brand-sub{animation:kitsuneSubBreath 3.8s ease-in-out infinite}
+@keyframes kitsuneSubBreath{0%,100%{transform:scale(1);opacity:.90}50%{transform:scale(1.025);opacity:1}}
+.kitsune-startup-intro__brand-shine{position:absolute;inset:-14px -34px;overflow:visible;border-radius:999px;pointer-events:none;opacity:0}
+.kitsune-startup-intro.is-brand .kitsune-startup-intro__brand-shine{opacity:1}
+.kitsune-startup-intro__brand-shine::before{
+  content:"";position:absolute;left:50%;top:66%;width:74%;height:2px;transform:translateX(-50%) scaleX(0);transform-origin:center;
+  background:linear-gradient(90deg,transparent,rgba(255,171,42,.42),rgba(255,226,160,.96),rgba(111,94,255,.42),transparent);
+  box-shadow:0 0 12px rgba(255,171,42,.44),0 0 24px rgba(108,85,255,.20);
+  animation:kitsuneBrandLine 1.05s .18s var(--ks-intro-ease) forwards,kitsuneBrandLineBreath 3.8s 1.3s ease-in-out infinite
+}
+.kitsune-startup-intro__brand-shine::after{
+  content:"";position:absolute;top:-45%;bottom:-45%;left:-38%;width:18%;transform:skewX(-16deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.84),transparent);
+  animation:kitsuneIntroShine 1.18s .22s ease-out both
+}
+@keyframes kitsuneBrandLine{to{transform:translateX(-50%) scaleX(1)}}
+@keyframes kitsuneBrandLineBreath{0%,100%{opacity:.58;filter:brightness(.95)}50%{opacity:1;filter:brightness(1.28)}}
+@keyframes kitsuneIntroShine{to{left:120%}}
+
+.kitsune-startup-intro__skip{
+  position:absolute;z-index:4;right:max(14px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));
+  appearance:none;border:1px solid rgba(120,130,160,.23);border-radius:999px;background:rgba(255,255,255,.62);
+  color:#526079;padding:8px 12px;font:600 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
+}
+[data-theme="dark"] .kitsune-startup-intro__skip{background:rgba(9,19,43,.62);color:#dbe5ff;border-color:rgba(255,255,255,.16)}
+.kitsune-startup-intro__hint{
+  position:absolute;z-index:4;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);
+  font:500 11px/1 system-ui,-apple-system,"Segoe UI",sans-serif;opacity:.40;white-space:nowrap
+}
+.kitsune-startup-intro.is-short .kitsune-startup-intro__skip,
+.kitsune-startup-intro.is-reduced .kitsune-startup-intro__skip,
+.kitsune-startup-intro.is-short .kitsune-startup-intro__hint,
+.kitsune-startup-intro.is-reduced .kitsune-startup-intro__hint{display:none}
+
+@media (max-width:520px){
+  .kitsune-startup-intro__scene{width:100vw;height:100svh;min-height:0}
+  .kitsune-startup-intro__character{width:min(82vw,410px);top:42%}
+  .kitsune-startup-intro__trail{width:104vw;top:59%}
+  .kitsune-startup-intro__brand{bottom:max(8%,calc(env(safe-area-inset-bottom) + 22px))}
+  .kitsune-startup-intro__vignette{inset:-5%}
+}
+@media (max-height:620px){
+  .kitsune-startup-intro__character{width:min(60vw,330px);max-height:58vh;top:39%}
+  .kitsune-startup-intro__brand{bottom:max(3%,calc(env(safe-area-inset-bottom) + 8px))}
+}
+@media (prefers-reduced-motion:reduce){
+  .kitsune-startup-intro *, .kitsune-startup-intro *::before,.kitsune-startup-intro *::after{animation:none!important;transition-duration:.12s!important}
+  .kitsune-startup-intro__aurora{display:none}
+  .kitsune-startup-intro__vignette{opacity:.48;transform:none}
+}
+
+/* === Kitsune Math 3.1.0-rc.5 · Living motion pass ==========================
+   The entrance is now one continuous sprite sequence on a single layer.
+   No cross-fade between unrelated pose PNGs, so there is no doubled mascot.
+   Overall trajectory remains GPU-friendly (transform + background-position). */
+.kitsune-startup-intro__motion{
+  --motion-frame:0;
+  position:absolute;left:50%;top:43%;width:min(78vw,470px);aspect-ratio:3/4;
+  opacity:0;pointer-events:none;user-select:none;
+  background-image:url("./assets/startup-intro/motion-v2/kitsune-motion-sprite.webp?v=3.1.0-rc.5");
+  background-repeat:no-repeat;background-size:600% 100%;
+  background-position:calc(var(--motion-frame) * 20%) 50%;
+  transform:translate3d(-50%,-58%,0) scale(.80) rotate(-2deg);
+  transform-origin:50% 72%;will-change:transform,opacity,background-position;
+  filter:drop-shadow(0 24px 36px rgba(46,31,5,.16));
+}
+[data-theme="dark"] .kitsune-startup-intro__motion{filter:drop-shadow(0 28px 42px rgba(0,0,0,.44))}
+.kitsune-startup-intro.is-motion .kitsune-startup-intro__motion{
+  opacity:1;
+  animation:kitsuneLivingArrival 2.05s cubic-bezier(.20,.74,.28,1) both;
+}
+@keyframes kitsuneLivingArrival{
+  0%{transform:translate3d(-50%,-62%,0) scale(.78) rotate(-3deg)}
+  26%{transform:translate3d(-50%,-55%,0) scale(.90) rotate(-1.2deg)}
+  48%{transform:translate3d(-50%,-47%,0) scale(1.035) rotate(.7deg)}
+  64%{transform:translate3d(-50%,-46.4%,0) scale(.982) rotate(-.25deg)}
+  80%{transform:translate3d(-50%,-47.5%,0) scale(1.012) rotate(.12deg)}
+  100%{transform:translate3d(-50%,-48%,0) scale(1) rotate(0deg)}
+}
+/* Keep the final live assets on exactly the same anchor as the last motion frame. */
+.kitsune-startup-intro__character[data-frame="idle"],
+.kitsune-startup-intro__character[data-frame="blink"],
+.kitsune-startup-intro__character[data-frame="magic"]{
+  width:min(78vw,470px);top:43%;transform:translate3d(-50%,-48%,0) scale(1);
+  transition:opacity .045s linear,transform .35s var(--ks-intro-ease);
+}
+.kitsune-startup-intro.is-idle [data-frame="idle"],
+.kitsune-startup-intro.is-blink [data-frame="blink"],
+.kitsune-startup-intro.is-magic [data-frame="magic"]{opacity:1}
+.kitsune-startup-intro.is-motion .kitsune-startup-intro__character{opacity:0!important}
+.kitsune-startup-intro.is-hold.is-idle [data-frame="idle"],
+.kitsune-startup-intro.is-hold.is-magic [data-frame="magic"]{animation:kitsuneLivingBreath 3.9s ease-in-out infinite}
+@keyframes kitsuneLivingBreath{
+  0%,100%{transform:translate3d(-50%,-48%,0) scale(1) rotate(0deg)}
+  48%{transform:translate3d(-50%,-48.45%,0) scale(1.010) rotate(.12deg)}
+  55%{transform:translate3d(-50%,-48.5%,0) scale(1.011) rotate(.08deg)}
+}
+/* Tiny tail-energy pulse on the magic pose; motion is deliberately subtle. */
+.kitsune-startup-intro.is-hold.is-magic [data-frame="magic"]{filter:drop-shadow(0 24px 36px rgba(46,31,5,.16)) drop-shadow(0 0 16px rgba(255,175,45,.18))}
+[data-theme="dark"].kitsune-startup-intro.is-hold.is-magic [data-frame="magic"]{filter:drop-shadow(0 28px 42px rgba(0,0,0,.44)) drop-shadow(0 0 18px rgba(255,175,45,.24))}
+@media (max-width:520px){
+  .kitsune-startup-intro__motion,.kitsune-startup-intro__character[data-frame="idle"],.kitsune-startup-intro__character[data-frame="blink"],.kitsune-startup-intro__character[data-frame="magic"]{width:min(86vw,420px);top:42%}
+}
+@media (max-height:620px){
+  .kitsune-startup-intro__motion,.kitsune-startup-intro__character[data-frame="idle"],.kitsune-startup-intro__character[data-frame="blink"],.kitsune-startup-intro__character[data-frame="magic"]{width:min(62vw,340px);top:39%}
+}
+@media (prefers-reduced-motion:reduce){
+  .kitsune-startup-intro__motion{display:none!important}
 }
