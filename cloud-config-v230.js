@@ -1,17 +1,16 @@
-node_modules/
-__pycache__/
-*.pyc
-*.pyo
-.env
-.env.*
-.dev.vars
-.dev.vars.*
-.wrangler/
-*.zip
-test-results/
-playwright-report/
-tests/release/*-results.json
-tests/release/*-settled.png
-tests/release/desktop-home.png
-tests/release/mobile-lesson.png
-tests/release/upgrade-screenshot.png
+/* =====================================================================
+   Kitsune v2.3.0-alpha · public Hybrid Intelligence configuration
+
+   This file is safe to publish. Never put API keys, Google ID tokens,
+   device private keys or Cloudflare signing secrets here.
+   ===================================================================== */
+(() => {
+  "use strict";
+
+  window.KITSUNE_HYBRID_CONFIG=Object.freeze({
+    enabled:true,
+    brokerOrigin:"https://kitsune-hybrid-broker.akronikl.workers.dev",
+    googleClientId:"917733706537-8761p6aqah238r1g2anvlhupstu9s98t.apps.googleusercontent.com",
+    privacyMode:"worker-proxy-fixed-test"
+  });
+})();

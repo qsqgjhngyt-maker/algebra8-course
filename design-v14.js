@@ -1,237 +1,102 @@
+
 /* =====================================================================
-   Kitsune v2.3.0-beta.3.6.2 · Final Chat Dialog Navigation Firewall
-
-   Final authority loaded AFTER App Kernel and all legacy route wrappers.
-   While the Kitsune dialog is open, an asynchronous reply is never allowed
-   to replace the current lesson/view with Home.
-
-   Important: lessons have NO active nav button (setActive("")), so guarding
-   only the current nav view is insufficient. This firewall also captures
-   the current lesson id and wraps renderHome itself.
+   v1.4.0 · ПЕРЕКЛЮЧАЕМЫЙ ДИЗАЙН
+   playful — основной игровой учебный стиль
+   classic — исходный утверждённый интерфейс
    ===================================================================== */
-(() => {
-  "use strict";
+const v14DesignKey="a8_design_mode";
+const v14DesignBtn=document.querySelector("#designBtn");
 
-  const VERSION="2.3.0-beta.3.6.2";
-
-  let installed=false;
-  let locked=false;
-  let restoring=false;
-  let snapshot=null;
-  let mutationTimer=null;
-
-  const originals={
-    go:null,
-    kernelRoute:null,
-    renderHome:null
-  };
-
-  function dialogRoot(){
-    return document.querySelector("#v19Dialog");
+function v14GetDesign(){
+  const x=document.documentElement.dataset.design;
+  return x==="classic"?"classic":"playful";
+}
+function v14ThemeColor(){
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(!meta)return;
+  const dark=document.body.classList.contains("dark");
+  if(v14GetDesign()==="playful")meta.content=dark?"#202326":"#49b447";
+  else meta.content=dark?"#09111f":"#2563eb";
+}
+function v14ApplyDesign(mode,save=true){
+  mode=mode==="classic"?"classic":"playful";
+  document.documentElement.dataset.design=mode;
+  if(save){
+    try{localStorage.setItem(v14DesignKey,mode)}catch(e){}
   }
-
-  function dialogOpen(){
-    const root=dialogRoot();
-    return !!(
-      root?.classList.contains("show") ||
-      document.body.classList.contains("v19-dialog-open")
-    );
-  }
-
-  function activeView(){
-    return document.querySelector(".main-nav .nav-btn.active")?.dataset?.view||"";
-  }
-
-  function currentLessonId(){
-    try{
-      if(typeof state!=="undefined"&&state?.lastLesson){
-        const title=document.querySelector("#pageTitle")?.textContent||"";
-        const hasLessonUi=!!document.querySelector(
-          "#content .lesson-wrap,#content .lesson,#content .exercise[data-ex],#content [data-lesson]"
-        );
-        if(hasLessonUi||(!activeView()&&title&&title!=="Алгебра 8")){
-          return String(state.lastLesson||"");
-        }
-      }
-    }catch{}
-    return "";
-  }
-
-  function capture(){
-    const view=activeView();
-    snapshot={
-      view,
-      lessonId:currentLessonId(),
-      title:document.querySelector("#pageTitle")?.textContent||"",
-      capturedAt:Date.now()
-    };
-    locked=true;
-    window.__KITSUNE_DIALOG_LOCK__={
-      active:true,
-      version:VERSION,
-      ...snapshot
-    };
-  }
-
-  function release(){
-    locked=false;
-    snapshot=null;
-    window.__KITSUNE_DIALOG_LOCK__={
-      active:false,
-      version:VERSION
-    };
-  }
-
-  function shouldBlockHome(){
-    return locked&&dialogOpen()&&!restoring;
-  }
-
-  function blockHome(source){
-    if(!shouldBlockHome())return false;
-    console.warn(`[Kitsune ${VERSION}] blocked unintended Home navigation`,{
-      source,
-      snapshot
-    });
-    return true;
-  }
-
-  function installWrappers(){
-    if(typeof window.go==="function"&&!window.go.__kitsuneDialogFirewall362){
-      originals.go=window.go;
-      const wrapped=function(view,...args){
-        if(String(view||"")==="home"&&blockHome("window.go"))return;
-        return originals.go.call(this,view,...args);
-      };
-      wrapped.__kitsuneDialogFirewall362=true;
-      window.go=wrapped;
-    }
-
-    if(window.KitsuneAppKernel?.route &&
-       !window.KitsuneAppKernel.route.__kitsuneDialogFirewall362){
-      originals.kernelRoute=window.KitsuneAppKernel.route.bind(window.KitsuneAppKernel);
-      const wrapped=function(view,...args){
-        if(String(view||"")==="home"&&blockHome("KitsuneAppKernel.route"))return;
-        return originals.kernelRoute(view,...args);
-      };
-      wrapped.__kitsuneDialogFirewall362=true;
-      window.KitsuneAppKernel.route=wrapped;
-    }
-
-    if(typeof window.renderHome==="function" &&
-       !window.renderHome.__kitsuneDialogFirewall362){
-      originals.renderHome=window.renderHome;
-      const wrapped=function(...args){
-        if(blockHome("renderHome"))return;
-        return originals.renderHome.apply(this,args);
-      };
-      wrapped.__kitsuneDialogFirewall362=true;
-      window.renderHome=wrapped;
+  if(v14DesignBtn){
+    if(mode==="playful"){
+      v14DesignBtn.innerHTML=`<span class="v141-game-icon" aria-hidden="true">🎮</span><span> Дизайн: игровой</span>
+        <i class="v141-particle"></i><i class="v141-particle"></i><i class="v141-particle"></i>
+        <i class="v141-particle"></i><i class="v141-particle"></i><i class="v141-particle"></i>`;
+      v14DesignBtn.title="Переключить на первоначальный классический дизайн";
+      v14DesignBtn.setAttribute("aria-label","Сейчас игровой дизайн. Переключить на классический.");
+    }else{
+      v14DesignBtn.innerHTML=`<span aria-hidden="true">✨</span><span> Дизайн: классический</span>`;
+      v14DesignBtn.title="Переключить на игровой дизайн";
+      v14DesignBtn.setAttribute("aria-label","Сейчас классический дизайн. Переключить на игровой.");
     }
   }
-
-  function restoreSnapshot(){
-    if(!locked||!snapshot||restoring||!dialogOpen())return;
-
-    const nowView=activeView();
-    const pageTitle=document.querySelector("#pageTitle")?.textContent||"";
-    const looksHome=
-      nowView==="home" ||
-      (
-        pageTitle==="Алгебра 8" &&
-        !!document.querySelector("#heroRing,#continueCard,#homeTopics")
-      );
-
-    if(!looksHome)return;
-
-    restoring=true;
-    try{
-      if(snapshot.lessonId&&typeof window.openLesson==="function"){
-        window.openLesson(snapshot.lessonId);
-      }else if(snapshot.view&&snapshot.view!=="home"){
-        const route=
-          originals.kernelRoute ||
-          originals.go ||
-          window.KitsuneAppKernel?.route ||
-          window.go;
-        route?.(snapshot.view);
-      }
-      console.warn(`[Kitsune ${VERSION}] restored dialog context`,snapshot);
-    }catch(error){
-      console.error(`[Kitsune ${VERSION}] context restore failed`,error);
-    }finally{
-      setTimeout(()=>{restoring=false},0);
+  const effects=document.querySelector("#effectsBtn");
+  if(effects){
+    if(mode==="playful"){
+      effects.disabled=true;
+      effects.textContent="✨ Эффекты: в классическом";
+      effects.title="Фоновые эффекты доступны в классическом дизайне";
+    }else{
+      effects.disabled=false;
+      effects.title="Настроить интенсивность фоновых эффектов";
+      if(typeof applyEffectsMode==="function")applyEffectsMode();
     }
   }
+  v14ThemeColor();
 
-  function scheduleIntegrityCheck(){
-    if(!locked||mutationTimer)return;
-    mutationTimer=setTimeout(()=>{
-      mutationTimer=null;
-      restoreSnapshot();
-    },0);
-  }
+  /* Canvas остаётся на месте, но в игровом режиме скрыт CSS.
+     При возврате в классику эффекты продолжают работать с прежними настройками. */
+  window.dispatchEvent(new Event("resize"));
+}
 
-  function onDialogState(){
-    installWrappers();
-
-    if(dialogOpen()){
-      if(!locked)capture();
-    }else if(locked){
-      release();
+if(v14DesignBtn){
+  v14DesignBtn.addEventListener("click",()=>{
+    const next=v14GetDesign()==="playful"?"classic":"playful";
+    if(v14GetDesign()==="playful"){
+      v14DesignBtn.classList.remove("v141-burst");
+      void v14DesignBtn.offsetWidth;
+      v14DesignBtn.classList.add("v141-burst");
     }
-  }
+    v14ApplyDesign(next,true);
 
-  document.addEventListener("click",event=>{
-    if(!dialogOpen())return;
-
-    const root=dialogRoot();
-    if(root?.contains(event.target))return;
-
-    const nav=event.target.closest?.('[data-view],[data-view-jump]');
-    if(nav){
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
+    if(next==="playful"){
+      requestAnimationFrame(()=>{
+        v14DesignBtn.classList.remove("v141-celebrate","v141-burst");
+        void v14DesignBtn.offsetWidth;
+        v14DesignBtn.classList.add("v141-celebrate","v141-burst");
+        setTimeout(()=>v14DesignBtn.classList.remove("v141-celebrate","v141-burst"),800);
+      });
+    }else{
+      setTimeout(()=>v14DesignBtn.classList.remove("v141-burst"),800);
     }
-  },true);
-
-  window.addEventListener("popstate",event=>{
-    if(!dialogOpen())return;
-    const view=new URLSearchParams(location.search).get("view");
-    if(view==="home"){
-      event.stopImmediatePropagation?.();
-      scheduleIntegrityCheck();
-    }
-  },true);
-
-  const observer=new MutationObserver(()=>{
-    onDialogState();
-    scheduleIntegrityCheck();
   });
+}
 
-  function init(){
-    installWrappers();
-    observer.observe(document.body,{
-      subtree:true,
-      childList:true,
-      attributes:true,
-      attributeFilter:["class"]
-    });
-    onDialogState();
-    installed=true;
-  }
+/* Следим за светлой/тёмной темой для правильного цвета системной панели браузера. */
+const v14BodyObserver=new MutationObserver(()=>v14ThemeColor());
+v14BodyObserver.observe(document.body,{attributes:true,attributeFilter:["class"]});
 
-  window.KitsuneDialogFirewall={
-    version:VERSION,
-    installed:()=>installed,
-    locked:()=>locked,
-    snapshot:()=>snapshot?{...snapshot}:null,
-    check:restoreSnapshot
-  };
+/* На случай недоступного localStorage оставляем игровой стиль как основной. */
+let v14Initial="playful";
+try{v14Initial=localStorage.getItem(v14DesignKey)||"playful"}catch(e){}
+v14ApplyDesign(v14Initial,false);
 
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",init,{once:true});
-  }else{
-    init();
-  }
-})();
+/* В версии v1.4 игровой дизайн основной, но классический доступен всегда. */
+const v14BaseHome=renderHome;
+renderHome=function(){
+  v14BaseHome();
+  const release=window.KITSUNE_APP_VERSION||"2.3.0-alpha";
+  document.querySelectorAll(".status-chip").forEach(x=>{
+    if(x.textContent.includes("v1.3"))x.textContent=x.textContent.replace("v1.3",`v${release}`); else if(/все главы готовы · v1\.4(?:\.2)?/.test(x.textContent))x.textContent=`все главы готовы · v${release}`;
+  });
+};
+window.renderHome=renderHome;
+
+renderHome();
