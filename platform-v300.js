@@ -1,0 +1,922 @@
+(() => {
+  "use strict";
+  const VERSION="3.1.0-rc.2";
+  let legacyMode=false;
+  const KEY="kitsune_math_track_v300";
+  const catalog=window.KitsuneCurriculum;
+  const theory=window.KitsuneTheoryContent||{};
+  if(!catalog)return;
+
+  const esc=s=>String(s??"").replace(/[&<>\"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+  const schoolText=s=>window.KitsuneSchoolNotation?.text?.(s)
+    ?? String(s??"").replace(/<[^>]+>/g," ").replace(/\u00F7/g,":").replace(/\u00D7/g,"·").replace(/\s+/g," ").trim();
+  const getTrack=id=>catalog.tracks.find(x=>x.id===id)||catalog.tracks.find(x=>x.id==="grade8");
+  const selected=()=>{try{return localStorage.getItem(KEY)||""}catch{return ""}};
+  const save=id=>{try{localStorage.setItem(KEY,id)}catch{}};
+  const content=()=>document.querySelector("#content");
+  const title=()=>document.querySelector("#pageTitle");
+
+  function setNavNone(){document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));}
+  function closeSidebar(){document.querySelector("#sidebar")?.classList.remove("open");document.body.classList.remove("sidebar-mobile-open");document.querySelector("#sidebarScrim")?.setAttribute("aria-hidden","true");}
+  function selectedLabel(){return getTrack(selected()||"grade8")?.label||"8 класс"}
+
+  function homeButton(){
+    return document.querySelector('.main-nav .nav-btn[data-view="home"]');
+  }
+
+  function syncHomeLabel(){
+    const home=homeButton();
+    if(!home)return;
+    const id=selected();
+    if(!id){
+      home.innerHTML="🏠 <span>Главная</span>";
+      home.title="Главная платформы";
+      return;
+    }
+    const tr=getTrack(id);
+    home.innerHTML=`🏠 <span>Главная · ${esc(tr?.label||"курс")}</span>`;
+    home.title=`Главная выбранного курса: ${tr?.label||"курс"}`;
+  }
+
+  function goSelectedHome(source="platform-home"){
+    const id=selected();
+    if(!id){
+      showChooser();
+      return true;
+    }
+    renderTrackHome(id);
+    return true;
+  }
+
+
+  function installNav(){
+    const nav=document.querySelector(".main-nav"); if(!nav||document.querySelector("#platformCourseBtn"))return;
+    const btn=document.createElement("button");btn.id="platformCourseBtn";btn.className="nav-btn platform-course-btn";btn.type="button";btn.innerHTML=`📚 <span>Библиотека курсов</span>`;btn.addEventListener("click",showChooser);
+    const home=nav.querySelector('[data-view="home"]');
+    if(home?.nextSibling)nav.insertBefore(btn,home.nextSibling);else nav.prepend(btn);
+    syncHomeLabel();
+  }
+
+  function trackCard(x){
+    const all=x.sections.flatMap(s=>s.chapters.flatMap(c=>c.topics));
+    const total=all.length, ready=all.filter(t=>!!theory[`${x.id}:${t.id}`]).length;
+    const advanced=all.filter(t=>t.level==="advanced").length;
+    const p=v3Progress(x.id),done=p.completed.filter(id=>all.some(t=>t.id===id)).length;
+    const pct=total?Math.round(done/total*100):0;
+    const active=selected()===x.id?" current":"";
+    const status=x.exam?"ФИПИ-2027 · проект":"ФРП · сверено 15.09.2026";
+    const mapLabel=`${total} тем в курсе`;
+    return `<button class="platform-track${active}" data-platform-track="${esc(x.id)}">
+      <span class="platform-number">${esc(x.accent)}</span><b>${esc(x.label)}</b><small>${esc(x.subtitle)}</small>
+      <div class="platform-status"><span>${mapLabel}</span><span>${status}</span></div>
+      <div class="platform-status"><span>📚 Готовых уроков: ${ready}</span>${advanced?`<span>🧠 углубл.: ${advanced}</span>`:""}<span>прогресс: ${pct}%</span></div>
+    </button>`;
+  }
+
+  function showChooser(){
+    legacyMode=false;stopTheory();
+    closeSidebar();setNavNone();
+    const home=homeButton();
+    if(home){home.innerHTML="🏠 <span>Главная платформы</span>";home.title="Главная платформы — выбор курса";}
+    if(title())title().textContent="Библиотека курсов Kitsune Math";
+    content().innerHTML=`<section class="platform-hero reveal"><span class="eyebrow">Kitsune Math · ${VERSION}</span><h2>Библиотека курсов Kitsune Math</h2><p>Выбери свой курс или экзаменационную траекторию. Математика для 7–11 классов, подготовка к ОГЭ и ЕГЭ. Читай объяснения, решай задачи и возвращайся к темам, которые хочется понять лучше.</p><div class="platform-alpha-note">Локальная версия для проверки перед выпуском. В каждом курсе — теория, примеры, практика и собственный прогресс.</div><button type="button" class="platform-source-trust platform-source-link" id="platformSourceTrust"><span>✓ Программа сверяется с официальными источниками</span><small>Федеральные рабочие программы · ФИПИ ОГЭ/ЕГЭ · показать источники →</small></button><div class="platform-track-grid">${catalog.tracks.map(trackCard).join("")}</div></section>`;
+    content().querySelectorAll("[data-platform-track]").forEach(b=>b.addEventListener("click",()=>selectTrack(b.dataset.platformTrack)));
+    window.applyReveal?.();
+  }
+
+  function openGrade8(source="platform-grade8"){
+    legacyMode=true;stopTheory();
+    save("grade8");
+    syncHomeLabel();
+    installBadge();
+    closeSidebar();
+
+    /* Use the proven navigation-stability path instead of calling renderHome()
+       directly. This is important when switching FROM another v3 track:
+       the old renderHome chain may have been wrapped by App Kernel / Student
+       Experience and could fail to repaint the legacy 8th-grade home. */
+    try{
+      if(window.KitsuneNavigationStability?.home){
+        const opened=window.KitsuneNavigationStability.home(source);
+        if(opened!==false)return true;
+      }
+    }catch(error){
+      console.warn("[Kitsune platform] grade8 safe-home failed",error);
+    }
+
+    try{
+      window.renderHome?.();
+      return true;
+    }catch(error){
+      console.error("[Kitsune platform] grade8 renderHome fallback failed",error);
+      return false;
+    }
+  }
+
+  function selectTrack(id){
+    save(id);
+    syncHomeLabel();
+    const tr=getTrack(id);
+    renderTrackHome(id);
+  }
+
+  function installBadge(){
+    let badge=document.querySelector("#platformTopBadge");
+    if(!badge){badge=document.createElement("button");badge.id="platformTopBadge";badge.className="platform-badge";badge.type="button";badge.addEventListener("click",showChooser);document.querySelector(".top-actions")?.prepend(badge)}
+    badge.textContent=`🎒 ${selectedLabel()}`;
+  }
+
+  function topicButton(track,section,chapter,topic){
+    const key=`${track.id}:${topic.id}`,ready=!!theory[key];
+    return `<button class="platform-topic" data-track="${esc(track.id)}" data-section="${esc(section.id)}" data-chapter="${esc(chapter.id)}" data-topic="${esc(topic.id)}"><span>${esc(topic.title)}</span><em>${ready?"📚 готовый урок":"карта"}</em></button>`;
+  }
+
+  function v3FlatChapters(tr){
+    const out=[];
+    for(const sec of tr.sections)for(const ch of sec.chapters)out.push({sec,ch});
+    return out;
+  }
+
+  function v3FlatTopics(tr){
+    const out=[];
+    for(const sec of tr.sections)for(const ch of sec.chapters)for(const tp of ch.topics)out.push({sec,ch,tp});
+    return out;
+  }
+
+  function v3ChapterDone(trackId,ch){
+    const p=v3Progress(trackId);
+    return ch.topics.filter(t=>p.completed.includes(t.id)).length;
+  }
+
+  function v3ChapterCard(trackId,item,index){
+    const {sec,ch}=item,p=v3Progress(trackId),done=v3ChapterDone(trackId,ch);
+    const pct=ch.topics.length?Math.round(done/ch.topics.length*100):0;
+    const firstUnfinished=ch.topics.find(t=>!p.completed.includes(t.id))||ch.topics[0];
+    const icon=sec.icon||["","➗","√","x²","≷","ƒ","10ⁿ"][index+1]||"📘";
+    return `<article class="chapter-summary-card reveal">
+      <div class="chapter-icon">${esc(icon)}</div>
+      <span class="eyebrow">${esc(sec.title)} · раздел ${index+1}</span>
+      <h4>${esc(ch.title)}</h4>
+      <p class="muted">${done} из ${ch.topics.length} тем пройдено</p>
+      <div class="progress-bar"><span style="width:${pct}%"></span></div>
+      <div class="card-footer">
+        <button class="secondary" data-v3-home-topic="${esc(firstUnfinished.id)}" data-v3-home-sec="${esc(sec.id)}" data-v3-home-ch="${esc(ch.id)}">${done?"Повторить":"Начать"}</button>
+        <button class="ghost" data-v3-home-map="1">Карта →</button>
+      </div>
+    </article>`;
+  }
+
+  function renderTrackHome(id){
+    legacyMode=false;stopTheory();
+    const tr=getTrack(id);save(tr.id);syncHomeLabel();installBadge();closeSidebar();setNavNone();
+    homeButton()?.classList.add("active");
+    if(title())title().textContent=`${tr.label} · главная курса`;
+
+    const p=v3Progress(tr.id);
+    const topics=v3FlatTopics(tr);
+    const chapters=v3FlatChapters(tr);
+    const total=topics.length;
+    const done=p.completed.filter(x=>topics.some(t=>t.tp.id===x)).length;
+    const pct=total?Math.round(done/total*100):0;
+    const acc=p.attempts?Math.round(p.correct/p.attempts*100):null;
+    const last=topics.find(x=>!p.completed.includes(x.tp.id))||topics[0];
+    const lastTheory=last?theory[`${tr.id}:${last.tp.id}`]:null;
+    const subtitle=lastTheory?.lead||last?.tp?.title||tr.subtitle;
+
+    content().innerHTML=`<section class="hero reveal">
+      <div>
+        <span class="pill">${esc(tr.label)} · ${tr.exam?"экзаменационный трек":"полный интерактивный курс"}</span>
+        <h2>${tr.exam?"Готовимся системно: теория → практика → разбор ошибок.":"Математика становится понятной, когда видно каждый шаг."}</h2>
+        <p>${esc(tr.subtitle)} Выбери главу, продолжи урок или повтори задачи.</p>
+        <div class="hero-actions">
+          ${last?`<button class="primary glow-btn" id="v3HomeContinue">Продолжить обучение →</button>`:""}
+          <button class="secondary" id="v3HomeCourse">Карта курса</button>
+          <button class="secondary" id="v3HomeProgress">Мой прогресс</button>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="big-progress"><div class="ring" style="--p:${pct}"><span>${pct}%</span></div>
+          <div><strong>Общий прогресс</strong><p>${done} из ${total} тем</p></div></div>
+        <hr>
+        <div class="mini-grid">
+          <div><span>✅</span><b>${done}</b><small>пройдено</small></div>
+          <div><span>🎯</span><b>${acc===null?"—":acc+"%"}</b><small>точность</small></div>
+          <div><span>🧠</span><b>${p.mistakes.length}</b><small>ошибок в повторении</small></div>
+        </div>
+      </div>
+    </section>
+
+    ${last?`<section class="section reveal">
+      <div class="section-head"><div><span class="eyebrow">Продолжить</span><h3>${esc(last.tp.title)}</h3></div>
+        <span class="status-chip">${done} из ${total} тем · ${pct}%</span></div>
+      <div class="home-continue"><p>${esc(subtitle)}</p><div class="card-footer">
+        <span class="effects-chip">✨ выбранный курс: ${esc(tr.label)}</span>
+        <button class="primary" id="v3HomeContinue2">Открыть →</button>
+      </div></div>
+    </section>`:""}
+
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Сводка по обучению</span>
+      <h3>${chapters.length} разделов · ${total} тем</h3></div></div>
+      <div class="chapter-summary-grid">${chapters.map((x,i)=>v3ChapterCard(tr.id,x,i)).join("")}</div>
+    </section>
+
+    <section class="course-final-banner reveal">
+      <div><span class="eyebrow">Сводка и повторение</span><h3>Мой прогресс по ${esc(tr.label)}</h3>
+      <p class="muted">Посмотри освоение тем, точность, ошибки и выбери, что повторить дальше.</p></div>
+      <button class="primary glow-btn" id="v3HomeProgress2">📈 Открыть сводку</button>
+    </section>`;
+
+    const openLast=()=>last&&renderTopic(tr.id,last.sec.id,last.ch.id,last.tp.id);
+    document.querySelector("#v3HomeContinue")?.addEventListener("click",openLast);
+    document.querySelector("#v3HomeContinue2")?.addEventListener("click",openLast);
+    document.querySelector("#v3HomeCourse")?.addEventListener("click",()=>renderTrack(tr.id));
+    document.querySelector("#v3HomeProgress")?.addEventListener("click",()=>renderUtility("progress"));
+    document.querySelector("#v3HomeProgress2")?.addEventListener("click",()=>renderUtility("progress"));
+
+    content().querySelectorAll("[data-v3-home-topic]").forEach(btn=>btn.addEventListener("click",()=>{
+      renderTopic(tr.id,btn.dataset.v3HomeSec,btn.dataset.v3HomeCh,btn.dataset.v3HomeTopic);
+    }));
+    content().querySelectorAll("[data-v3-home-map]").forEach((btn,i)=>btn.addEventListener("click",()=>renderChapter(tr.id,chapters[i].sec.id,chapters[i].ch.id)));
+
+    window.scrollTo(0,0);window.applyReveal?.();
+  }
+
+  function renderTrack(id){
+    legacyMode=false;stopTheory();
+    const tr=getTrack(id);save(tr.id);syncHomeLabel();installBadge();closeSidebar();setNavNone();
+    homeButton()?.classList.add("active");
+    if(title())title().textContent=tr.label;
+    content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformChooseBack">← Все курсы</button>${tr.id==="grade8"?'<button class="primary" id="platformOpenLegacy8">Классический курс алгебры 8</button>':''}</div><section class="platform-hero reveal"><span class="eyebrow">${esc(tr.exam?"Экзаменационный трек":"Школьный курс")}</span><h2>${esc(tr.label)}</h2><p>${esc(tr.subtitle)}</p><div class="platform-status"><span>${tr.sections.length} направления</span><span>Теория и практика</span></div></section>${tr.sections.map(s=>`<section class="platform-section"><div class="section-head"><div><span class="eyebrow">${esc(s.icon)} направление</span><h3>${esc(s.title)}</h3></div></div><div class="platform-chapters">${s.chapters.map(c=>`<article class="platform-chapter"><span class="eyebrow">${c.topics.length} тем</span><h4>${esc(c.title)}</h4><div class="platform-topic-list">${c.topics.map(tp=>topicButton(tr,s,c,tp)).join("")}</div></article>`).join("")}</div></section>`).join("")}`;
+    document.querySelector("#platformChooseBack")?.addEventListener("click",showChooser);
+    document.querySelector("#platformOpenLegacy8")?.addEventListener("click",()=>openGrade8("platform-open-legacy8"));
+    content().querySelectorAll(".platform-topic").forEach(b=>b.addEventListener("click",()=>renderTopic(b.dataset.track,b.dataset.section,b.dataset.chapter,b.dataset.topic)));
+    window.applyReveal?.();
+  }
+
+  function renderChapter(trackId,sectionId,chapterId){
+    const tr=getTrack(trackId),sec=tr.sections.find(s=>s.id===sectionId),ch=sec?.chapters.find(c=>c.id===chapterId);
+    if(!ch)return;
+    stopTheory();closeSidebar();
+    content().innerHTML=`<div class="platform-backline"><button class="secondary" id="chapterBack">← Карта курса</button></div><section class="platform-hero"><span class="eyebrow">${esc(tr.label)} · ${esc(sec.title)}</span><h2>${esc(ch.title)}</h2><p>${v3ChapterDone(trackId,ch)} из ${ch.topics.length} тем пройдено</p><div class="platform-topic-list">${ch.topics.map(tp=>topicButton(tr,sec,ch,tp)).join("")}</div></section>`;
+    title().textContent=ch.title;
+    document.querySelector('#chapterBack').onclick=()=>renderTrack(trackId);
+    content().querySelectorAll('.platform-topic').forEach(b=>b.onclick=()=>renderTopic(trackId,sectionId,chapterId,b.dataset.topic));
+    window.scrollTo(0,0);window.applyReveal?.();
+  }
+
+  function locate(trackId,sectionId,chapterId,topicId){const tr=getTrack(trackId),s=tr.sections.find(x=>x.id===sectionId),c=s?.chapters.find(x=>x.id===chapterId),tp=c?.topics.find(x=>x.id===topicId);return {tr,s,c,tp}}
+
+  function v3ProgressKey(trackId){return `kitsune:v3:progress:${trackId}`}
+  function v3Progress(trackId){
+    try{
+      const raw=JSON.parse(localStorage.getItem(v3ProgressKey(trackId))||"{}");
+      return {solved:raw.solved||{},completed:Array.isArray(raw.completed)?raw.completed:[],mistakes:Array.isArray(raw.mistakes)?raw.mistakes:[],attempts:Number(raw.attempts||0),correct:Number(raw.correct||0)};
+    }catch{return {solved:{},completed:[],mistakes:[],attempts:0,correct:0}}
+  }
+  function v3SaveProgress(trackId,p){
+    try{localStorage.setItem(v3ProgressKey(trackId),JSON.stringify(p))}catch{}
+  }
+  function v3NormAnswer(v){return String(v??"").toLowerCase().trim().replace(/\s+/g,"").replace(/−/g,"-").replace(/,/g,".")}
+  function v3Match(value,accepted){
+    const v=v3NormAnswer(value),arr=Array.isArray(accepted)?accepted:[accepted];
+    if(!v)return false;
+    return arr.some(a=>{
+      const n=v3NormAnswer(a);
+      if(v===n)return true;
+      const vn=Number(v),an=Number(n);
+      return Number.isFinite(vn)&&Number.isFinite(an)&&Math.abs(vn-an)<1e-9;
+    });
+  }
+  function v3BridgeId(trackId,topicId){return `v3-${trackId}-${topicId}`}
+  function v3SolvedCount(trackId,bridgeId,d){
+    const p=v3Progress(trackId);
+    let n=0;
+    (d.exercises||[]).forEach((_,i)=>{if(p.solved[`${bridgeId}-${i}`])n++});
+    if(!d.exam?.variantSize&&d.challenge&&p.solved[`${bridgeId}-challenge`])n++;
+    return n;
+  }
+  function v3PracticeTotal(d){return (d.exercises?.length||0)+(d.exam?.variantSize?0:(d.challenge?1:0))}
+  function v3Roman(n){return ["","I","II","III","IV","V","VI","VII","VIII","IX","X"][n]||String(n)}
+  function v3RegisterTutorLesson(bridgeId,d){
+    try{
+      if(typeof lessonData!=="undefined"&&lessonData){
+        lessonData[bridgeId]=d;
+      }
+    }catch{}
+  }
+  function v3QuickHtml(bridgeId,q){
+    if(!q)return "";
+    return `<div class="exercise reveal v3-course-exercise"><h4>⚡ Проверка понимания</h4><p>${q.q}</p>
+      <div class="micro-check">${q.options.map((o,i)=>`<button type="button" data-v3-quick="${i}">${o}</button>`).join("")}
+      <span class="micro-result" id="v3q-${bridgeId}"></span></div></div>`;
+  }
+  function v3ExerciseHtml(trackId,bridgeId,i,e){
+    const p=v3Progress(trackId),done=!!p.solved[`${bridgeId}-${i}`];
+    if(e?.manual){
+      return `<div class="exercise reveal v3-course-exercise v3-manual-exercise" data-ex="${bridgeId}-${i}">
+        <h4>${done?"✅ ":""}Задание ${i+1} · развёрнутый ответ</h4><p>${e.q}</p>
+        <textarea id="ans-${bridgeId}-${i}" class="v3-manual-answer" rows="7" placeholder="Запиши полное решение: ход рассуждений, вычисления и ответ"></textarea>
+        <div class="answer-row">
+          <button class="secondary" type="button" data-v3-hint="${i}">💡 Подсказка</button>
+          <button class="check-btn" type="button" data-v3-manual-review="${i}">Сверить с критерием</button>
+          <button class="secondary v3-manual-done" type="button" data-v3-manual-done="${i}" hidden>✓ Отметить после самопроверки</button>
+        </div>
+        <div class="hint" id="hint-${bridgeId}-${i}">${e.hint||""}</div>
+        <div class="feedback" id="fb-${bridgeId}-${i}">${done?"✅ Решение уже отмечено после самопроверки.":""}</div>
+      </div>`;
+    }
+    return `<div class="exercise reveal v3-course-exercise" data-ex="${bridgeId}-${i}">
+      <h4>${done?"✅ ":""}Задание ${i+1}</h4><p>${e.q}</p>
+      <div class="answer-row"><input id="ans-${bridgeId}-${i}" placeholder="Твой ответ" autocomplete="off">
+      <button class="check-btn" type="button" data-v3-check="${i}">Проверить</button>
+      <button class="secondary" type="button" data-v3-hint="${i}">💡 Подсказка</button></div>
+      <div class="hint" id="hint-${bridgeId}-${i}">${e.hint||""}</div>
+      <div class="feedback" id="fb-${bridgeId}-${i}">${done?"✅ Уже решено. Можно повторить для закрепления.":""}</div>
+    </div>`;
+  }
+  function v3ChallengeHtml(trackId,bridgeId,e){
+    if(!e)return "";
+    const p=v3Progress(trackId),done=!!p.solved[`${bridgeId}-challenge`];
+    return `<div class="exercise challenge-card reveal v3-course-exercise" data-ex="${bridgeId}-challenge">
+      <h4>${done?"✅ ":""}🚀 Задание со звёздочкой</h4><p>${e.q}</p>
+      <div class="answer-row"><input id="ans-${bridgeId}-challenge" placeholder="Попробуй без спешки" autocomplete="off">
+      <button class="check-btn" type="button" id="v3ChallengeCheck">Проверить</button>
+      <button class="secondary" type="button" id="v3ChallengeHint">💡 Подсказка</button></div>
+      <div class="hint" id="hint-${bridgeId}-challenge">${e.hint||""}</div>
+      <div class="feedback" id="fb-${bridgeId}-challenge">${done?"🌟 Уже решено!":""}</div>
+    </div>`;
+  }
+  function v3DeepDiveHtml(trackId,s,c,tp,d){
+    const school=schoolText(d?.levels?.school||d?.levels?.simple||d?.lead||"");
+    const deep=schoolText(d?.levels?.deep||school);
+    const formula=schoolText(d?.formula||d?.remember||"Ключевую схему сформулируй своими словами.");
+    const why=schoolText(d?.why||"Правило опирается на свойства математических объектов этой темы.");
+    const mistake=schoolText(d?.mistake||"Главная ловушка — применить знакомый приём автоматически, не проверив условия.");
+    const ex=(Array.isArray(d?.examples)?d.examples.slice(0,2):[]).map(e=>({
+      ...e,
+      task:schoolText(e?.task||""),
+      steps:(Array.isArray(e?.steps)?e.steps:[]).map(schoolText)
+    }));
+    const goals=(Array.isArray(d?.goals)?d.goals.slice(0,3):[]).map(schoolText);
+
+    return `<section class="v3-deep-dive reveal" aria-hidden="true">
+      <div class="v3-deep-dive-head">
+        <div><span class="eyebrow">🧠 Углублённый разбор</span>
+        <h3>Разбираемся глубже: почему это работает</h3>
+        <p class="muted">Не повторяем теорию, а разбираем логику, связи и стратегию решения.</p></div>
+        <span class="status-chip">${esc(c?.title||"тема")}</span>
+      </div>
+      <div class="v3-deep-grid">
+        <article class="v3-deep-card">
+          <span class="eyebrow">1 · Идея</span><h4>Что стоит за правилом</h4>
+          <p>${esc(deep)}</p>
+          <p>${esc(why)}</p>
+        </article>
+        <article class="v3-deep-card">
+          <span class="eyebrow">2 · Связь</span><h4>На что опирается тема</h4>
+          <p>${esc(school)}</p>
+          <p>Попробуй назвать, какие уже знакомые свойства, определения или преобразования используются здесь. Чем яснее эта связь, тем меньше правило приходится запоминать механически.</p>
+        </article>
+        <article class="v3-deep-card">
+          <span class="eyebrow">3 · Стратегия</span><h4>Как выбрать следующий шаг</h4>
+          <div class="v3-deep-formula"><b>Ориентир</b><div>${esc(formula)}</div></div>
+          <ol>
+            <li>Определи математический объект и ограничения.</li>
+            <li>Назови свойство, которое разрешает преобразование.</li>
+            <li>Сделай один понятный шаг.</li>
+            <li>Проверь, сохранился ли смысл исходной задачи.</li>
+          </ol>
+        </article>
+        <article class="v3-deep-card">
+          <span class="eyebrow">4 · Ловушки</span><h4>Где чаще ошибаются</h4>
+          <div class="callout danger"><b>⚠️ Типичная ошибка</b><br>${esc(mistake)}</div>
+          <p>Если ответ получился неожиданным, ищи не «всю ошибку сразу», а последний шаг, который можешь обосновать словами.</p>
+        </article>
+        <article class="v3-deep-card v3-deep-wide">
+          <span class="eyebrow">5 · Разбор примера</span><h4>Смотрим не только на ответ, а на ход мысли</h4>
+          ${ex.length?ex.map((e,i)=>`<div class="v3-deep-example"><b>Пример ${i+1}. ${esc(e.task||"Разберём применение")}</b><ol>${(e.steps||[]).map(st=>`<li>${esc(st)}</li>`).join("")}</ol></div>`).join(""):`<p>Для этой темы примеры ещё наполняются. Пока используй принцип: сначала предскажи следующий шаг сам, потом сравни с готовым решением.</p>`}
+        </article>
+        <article class="v3-deep-card">
+          <span class="eyebrow">6 · Самопроверка</span><h4>Понял ли я тему глубоко?</h4>
+          <ul>${goals.length?goals.map(x=>`<li>${esc(x)}</li>`).join(""):`<li>могу объяснить правило своими словами</li><li>понимаю, почему оно работает</li><li>умею найти и проверить ошибку</li>`}</ul>
+        </article>
+      </div>
+    </section>`;
+  }
+
+  function v3FindTopicById(trackId,topicId){
+    const tr=getTrack(trackId);
+    if(!tr)return null;
+    for(const sec of tr.sections||[])for(const ch of sec.chapters||[])for(const tp of ch.topics||[]){
+      if(tp.id===topicId)return {tr,sec,ch,tp};
+    }
+    return null;
+  }
+
+  function v3ExamLayerHtml(trackId,d){
+    const tr=getTrack(trackId);
+    if(!tr?.exam||!d?.exam)return "";
+    const e=d.exam||{};
+    const algorithm=Array.isArray(e.algorithm)?e.algorithm:[];
+    const traps=Array.isArray(e.traps)?e.traps:[];
+    const links=Array.isArray(e.schoolLinks)?e.schoolLinks:[];
+    return `<section class="v3-exam-layer reveal">
+      <div class="v3-exam-layer-head"><div><span class="eyebrow">🎯 Экзаменационный слой</span><h3>${esc(e.taskType||"Что проверяет это задание")}</h3>${e.variantSize?`<p class="muted v3-exam-variant-meta">${esc(`${e.variantSize} заданий · часть 1: ${e.part1??19} · часть 2: ${e.part2??6}${e.duration?` · ${e.duration} минут`:""}`)}</p>`:""}</div><span class="status-chip">${esc(e.answerFormat||"ответ по условию")}</span></div>
+      <div class="v3-exam-grid">
+        <article class="v3-exam-card"><span class="eyebrow">Что проверяют</span><p>${esc(e.checks||d.lead||"")}</p>${e.points?`<p class="muted">Ориентир: ${esc(e.points)}</p>`:""}</article>
+        <article class="v3-exam-card"><span class="eyebrow">Алгоритм</span><ol>${algorithm.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></article>
+        <article class="v3-exam-card"><span class="eyebrow">Типичные ловушки</span><ul>${traps.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></article>
+        <article class="v3-exam-card v3-exam-school"><span class="eyebrow">📚 Повторить школьную теорию</span><div class="v3-exam-links">${links.map((x,i)=>`<button class="secondary" type="button" data-v3-school-link="${i}">${esc(x.label||x.topicId||"Открыть тему")}</button>`).join("")||'<span class="muted">Для этой стратегии достаточно текущего разбора.</span>'}</div></article>
+      </div>
+    </section>`;
+  }
+
+  function v3Grade8StyleLessonHtml(trackId,s,c,tp,d){
+    const bridgeId=v3BridgeId(trackId,tp.id),tr=getTrack(trackId);
+    const idx=c.topics.findIndex(x=>x.id===tp.id);
+    const simple=d.levels?.simple||"",school=d.levels?.school||simple,deep=d.levels?.deep||school;
+    const solved=v3SolvedCount(trackId,bridgeId,d),total=v3PracticeTotal(d),pct=total?Math.round(solved/total*100):0;
+    const goals=(d.goals||[]).slice(0,3);
+    const examples=(d.examples||[]).slice(0,2);
+
+    return `<div class="lesson-layout">
+      <article class="lesson-panel reveal">
+        <span class="pill">${esc(tr.label)} · ${esc(c.title)} · урок ${idx+1} из ${c.topics.length}</span>
+        <h2>${esc(d.title||tp.title)}</h2>
+        <p class="lead">${esc(d.lead||"")}</p>
+        ${v3ExamLayerHtml(trackId,d)}
+
+        <div class="chapter-progress-strip">${c.topics.map((t,i)=>`<span class="${v3Progress(trackId).completed.includes(t.id)?"done":i===idx?"current":""}" title="${esc(t.title)}"></span>`).join("")}</div>
+
+        <div class="lesson-objectives">${goals.map((g,i)=>`<div class="objective"><b>${["🎯 Поймём","🧩 Научимся","✅ Закрепим"][i]||"•"}</b><small>${esc(g)}</small></div>`).join("")}</div>
+
+        <div class="theory-actions v3-lesson-voice">
+          <button class="primary" id="platformSpeakTheory">🦊 Kitsune расскажет тему</button>
+          <button class="secondary" id="platformStopTheory">⏹ Остановить</button>
+        </div>
+
+        ${v3CalmTheoryHtml(trackId,s,c,tp,d,true)}
+
+        <h3 id="simple">🌱 Объяснение уровнями</h3>
+        <div class="level-switch">
+          <button class="active" type="button" data-v3-level="simple">Совсем просто</button>
+          <button type="button" data-v3-level="school">Как в школе</button>
+          <button type="button" data-v3-level="deep">Хочу понять глубже</button>
+        </div>
+        <div class="explain-pane active" data-pane="simple"><p>${simple}</p></div>
+        <div class="explain-pane" data-pane="school"><p>${school}</p></div>
+        <div class="explain-pane" data-pane="deep"><p>${deep}</p></div>
+        ${v3DeepDiveHtml(trackId,s,c,tp,d)}
+
+        <div class="formula-card"><strong>Ключевая схема</strong><div class="formula-main">${d.formula||""}</div></div>
+        <div class="callout good"><b>🧠 Запомни</b><br>${d.remember||""}</div>
+        <div class="callout"><b>🔍 Почему так?</b><br>${d.why||""}</div>
+        <div class="callout danger"><b>⚠️ Частая ошибка</b><br>${d.mistake||""}</div>
+
+        ${v3QuickHtml(bridgeId,d.quick)}
+
+        <h3 id="example">📘 Два примера по шагам</h3>
+        <div class="examples-stack">${examples.map((ex,i)=>`<div class="example-card"><span class="example-label">пример ${i+1}</span><h4>${ex.task}</h4><div class="steps">${(ex.steps||[]).map(step=>`<div class="step">${step}</div>`).join("")}</div></div>`).join("")}</div>
+
+        <h3 id="practice">✍️ Самостоятельная практика</h3>
+        ${(d.exercises||[]).map((e,i)=>v3ExerciseHtml(trackId,bridgeId,i,e)).join("")}
+        ${d.exam?.variantSize?'':v3ChallengeHtml(trackId,bridgeId,d.challenge)}
+
+        <div class="lesson-summary"><b>✅ Итог урока</b><ul>${(d.summary||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="callout warn"><b>💡 Если пока трудно</b><br>Вернись к уровню «Совсем просто», повтори первый пример и реши первые два задания. Ошибка здесь — часть обучения, а не повод спешить.</div>
+        <button class="primary glow-btn" type="button" id="v3FinishLesson">✅ Я понял(а) эту тему</button>
+      </article>
+
+      <aside class="lesson-nav reveal">
+        <div class="lesson-mini"><b>Прогресс урока</b><small id="v3MasteryText">${solved} из ${total} практик решено</small></div>
+        <div class="mastery-box"><div class="mastery-line"><span>Освоение</span><b id="v3MasteryPercent">${pct}%</b></div><div class="progress-bar"><span id="v3MasteryBar" style="width:${pct}%"></span></div></div>
+        <b style="display:block;margin-top:16px">Навигация</b>
+        <button class="ghost" type="button" data-v3-scroll="simple">🌱 Объяснение</button>
+        <button class="ghost" type="button" data-v3-scroll="example">📘 Примеры</button>
+        <button class="ghost" type="button" data-v3-scroll="practice">✍️ Практика</button>
+        <hr>
+        <button class="secondary" type="button" id="platformTopicBack">← Карта курса</button>
+        <button class="ghost" type="button" id="v3PrintLesson">🖨️ Печать урока</button>
+      </aside>
+    </div>`;
+  }
+  function v3UpdateMastery(trackId,bridgeId,d){
+    const solved=v3SolvedCount(trackId,bridgeId,d),total=v3PracticeTotal(d),pct=total?Math.round(solved/total*100):0;
+    const a=document.querySelector("#v3MasteryText"),b=document.querySelector("#v3MasteryPercent"),c=document.querySelector("#v3MasteryBar");
+    if(a)a.textContent=`${solved} из ${total} практик решено`;
+    if(b)b.textContent=pct+"%";
+    if(c)c.style.width=pct+"%";
+  }
+  function v3RecordResult(trackId,bridgeId,d,key,ok,question,answer){
+    const p=v3Progress(trackId);p.attempts++;
+    if(ok){p.correct++;p.solved[key]=true}
+    else{
+      p.mistakes.push({lesson:bridgeId,question,answer:String(answer||""),ts:Date.now()});
+      p.mistakes=p.mistakes.slice(-120);
+    }
+    v3SaveProgress(trackId,p);
+    // The legacy learning engine writes a8_* data. Modern courses use p above.
+    v3UpdateMastery(trackId,bridgeId,d);
+  }
+  function v3BindGrade8StyleLesson(trackId,s,c,tp,d){
+    const bridgeId=v3BridgeId(trackId,tp.id);
+    v3RegisterTutorLesson(bridgeId,d);
+
+    document.querySelectorAll("[data-v3-school-link]").forEach(btn=>btn.addEventListener("click",()=>{
+      const link=d.exam?.schoolLinks?.[Number(btn.dataset.v3SchoolLink)];
+      if(!link)return;
+      const target=v3FindTopicById(link.trackId,link.topicId);
+      if(!target)return;
+      save(target.tr.id);syncHomeLabel();installBadge();
+      renderTopic(target.tr.id,target.sec.id,target.ch.id,target.tp.id);
+    }));
+
+    document.querySelectorAll("[data-v3-level]").forEach(btn=>btn.addEventListener("click",()=>{
+      document.querySelectorAll("[data-v3-level]").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".explain-pane").forEach(p=>p.classList.toggle("active",p.dataset.pane===btn.dataset.v3Level));
+      const showDeep=btn.dataset.v3Level==="deep";
+      document.querySelectorAll(".v3-deep-dive").forEach(box=>{
+        box.classList.toggle("active",showDeep);
+        box.setAttribute("aria-hidden",showDeep?"false":"true");
+      });
+    }));
+
+    document.querySelectorAll("[data-v3-scroll]").forEach(btn=>btn.addEventListener("click",()=>document.querySelector(`#${btn.dataset.v3Scroll}`)?.scrollIntoView({behavior:"smooth",block:"start"})));
+
+    document.querySelectorAll("[data-v3-quick]").forEach(btn=>btn.addEventListener("click",()=>{
+      const choice=Number(btn.dataset.v3Quick),q=d.quick,out=document.querySelector(`#v3q-${bridgeId}`);
+      btn.parentElement.querySelectorAll("button").forEach(b=>b.style.borderColor="");
+      if(choice===Number(q.correct)){out.textContent="✅ "+q.good;out.style.color="var(--good)";btn.style.borderColor="var(--good)"}
+      else{out.textContent="🙂 "+q.bad;out.style.color="var(--warn)";btn.style.borderColor="var(--warn)"}
+    }));
+
+    document.querySelectorAll("[data-v3-hint]").forEach(btn=>btn.addEventListener("click",()=>document.querySelector(`#hint-${bridgeId}-${btn.dataset.v3Hint}`)?.classList.toggle("show")));
+
+    document.querySelectorAll("[data-v3-manual-review]").forEach(btn=>btn.addEventListener("click",()=>{
+      const i=Number(btn.dataset.v3ManualReview),e=d.exercises[i],fb=document.querySelector(`#fb-${bridgeId}-${i}`);
+      if(!e||!fb)return;
+      fb.className="feedback ok";
+      fb.innerHTML=`<strong>Критерий самопроверки:</strong> ${esc(e.rubric||"Решение должно быть полным и обоснованным.")}<br><br><strong>Один из разборов:</strong> ${esc(e.solution||"Сверь ход решения с теорией и проверь итоговый ответ.")}`;
+      const doneBtn=document.querySelector(`[data-v3-manual-done="${i}"]`);if(doneBtn)doneBtn.hidden=false;
+    }));
+    document.querySelectorAll("[data-v3-manual-done]").forEach(btn=>btn.addEventListener("click",()=>{
+      const i=Number(btn.dataset.v3ManualDone),e=d.exercises[i],input=document.querySelector(`#ans-${bridgeId}-${i}`),fb=document.querySelector(`#fb-${bridgeId}-${i}`);
+      if(!e||!fb)return;
+      if(!String(input?.value||"").trim()){fb.className="feedback bad";fb.textContent="Сначала запиши своё решение, затем сверяй и отмечай выполнение.";return;}
+      v3RecordResult(trackId,bridgeId,d,`${bridgeId}-${i}`,true,e.q,input.value);
+      fb.className="feedback ok";fb.textContent="✅ Отмечено после самопроверки. Вернись к критерию, если остались сомнения.";
+    }));
+
+    document.querySelectorAll("[data-v3-check]").forEach(btn=>btn.addEventListener("click",()=>{
+      const i=Number(btn.dataset.v3Check),e=d.exercises[i],input=document.querySelector(`#ans-${bridgeId}-${i}`),fb=document.querySelector(`#fb-${bridgeId}-${i}`);
+      if(!input||!fb||!e)return;
+      if(!input.value.trim()){fb.className="feedback bad";fb.textContent="Сначала введи ответ.";return;}
+      const ok=v3Match(input.value,e.a);
+      if(ok){
+        fb.className="feedback ok";fb.textContent="✅ Верно! Отлично.";
+        const box=document.querySelector(`[data-ex="${bridgeId}-${i}"]`);if(box){box.classList.remove("success-flash");void box.offsetWidth;box.classList.add("success-flash");setTimeout(()=>box.classList.remove("success-flash"),900)}
+      }else{
+        fb.className="feedback bad";fb.textContent="Пока не так. Попробуй ещё раз или открой подсказку.";
+      }
+      v3RecordResult(trackId,bridgeId,d,`${bridgeId}-${i}`,ok,e.q,input.value);
+    }));
+
+    document.querySelector("#v3ChallengeHint")?.addEventListener("click",()=>document.querySelector(`#hint-${bridgeId}-challenge`)?.classList.toggle("show"));
+    document.querySelector("#v3ChallengeCheck")?.addEventListener("click",()=>{
+      const e=d.challenge,input=document.querySelector(`#ans-${bridgeId}-challenge`),fb=document.querySelector(`#fb-${bridgeId}-challenge`);
+      if(!e||!input||!fb)return;
+      if(!input.value.trim()){fb.className="feedback bad";fb.textContent="Сначала введи ответ.";return;}
+      const ok=v3Match(input.value,e.a);
+      fb.className=`feedback ${ok?"ok":"bad"}`;
+      fb.textContent=ok?"🌟 Верно! Сложное задание покорено.":"Пока не получилось. Подсказка даст направление.";
+      v3RecordResult(trackId,bridgeId,d,`${bridgeId}-challenge`,ok,e.q,input.value);
+    });
+
+    document.querySelector("#platformSpeakTheory")?.addEventListener("click",()=>speakTheory(d));
+    document.querySelector("#platformStopTheory")?.addEventListener("click",stopTheory);
+    document.querySelector("#v3PrintLesson")?.addEventListener("click",()=>window.print());
+    document.querySelector("#v3FinishLesson")?.addEventListener("click",()=>{
+      const p=v3Progress(trackId);
+      if(!p.completed.includes(tp.id))p.completed.push(tp.id);
+      v3SaveProgress(trackId,p);
+      const idx=c.topics.findIndex(x=>x.id===tp.id);
+      const next=c.topics[idx+1];
+      if(next)renderTopic(trackId,s.id,c.id,next.id);else renderTrack(trackId);
+    });
+
+    /* Tutor-lite/tutor-smart use .exercise[data-ex] + lessonData.
+       Register first, then give their MutationObserver a frame to attach. */
+    setTimeout(()=>window.KitsuneMobileVoiceEntry?.scan?.(),40);
+  }
+
+  function v3CalmTheoryHtml(trackId,s,c,tp,d,isAuthored=true){
+    const levelSimple=schoolText(d?.levels?.simple||d?.lead||"");
+    const levelSchool=schoolText(d?.levels?.school||levelSimple);
+    const levelDeep=schoolText(d?.levels?.deep||levelSchool);
+    const formula=schoolText(d?.formula||d?.remember||"");
+    const why=schoolText(d?.why||levelDeep||"");
+    const mistake=schoolText(d?.mistake||"");
+    const goals=(Array.isArray(d?.goals)?d.goals:[]).map(schoolText);
+    const examples=(Array.isArray(d?.examples)?d.examples:[]).map(ex=>({
+      ...ex,
+      task:schoolText(ex?.task||""),
+      steps:(Array.isArray(ex?.steps)?ex.steps:[]).map(schoolText)
+    }));
+    const summary=(Array.isArray(d?.summary)?d.summary:[]).map(schoolText);
+    const intro=isAuthored
+      ? `Эта версия текста предназначена именно для спокойного чтения. Здесь не нужно сразу отвечать или считать — сначала разберись в смысле темы и только потом переходи к практике.`
+      : `Тема уже есть в карте курса. Полный авторский текст ещё наполняется, поэтому ниже показана структура будущей теории без притворства, что материал уже окончательно готов.`;
+
+    const calmId=`v3Calm-${trackId}-${tp.id}`.replace(/[^a-zA-Z0-9_-]/g,"-");
+    return `<details class="v3-calm-theory reveal" open id="${calmId}">
+      <summary><span>📚 Полная теория — прочитать спокойно</span><small>${isAuthored?"расширенный текст":"структура в наполнении"}</small></summary>
+      <div class="theory-actions v3-calm-theory-actions">
+        <button type="button" class="primary" data-v3-calm-speak="${calmId}">🦊 Kitsune расскажет тему</button>
+        <button type="button" class="secondary" data-v3-calm-stop="${calmId}">⏹ Остановить</button>
+      </div>
+      <div class="v3-calm-theory-body">
+        <p class="v3-calm-intro">${intro}</p>
+
+        <section>
+          <span class="eyebrow">1 · Смысл темы</span>
+          <h4>${esc(tp.title)}</h4>
+          <p>${esc(levelSimple||`Тема «${tp.title}» входит в раздел «${c.title}». Сначала важно понять, какие математические объекты здесь рассматриваются и что именно требуется научиться делать.`)}</p>
+          <p>${esc(levelSchool||`Следующий шаг — связать понятие с уже знакомыми действиями и увидеть, какие свойства используются при преобразованиях.`)}</p>
+        </section>
+
+        <section>
+          <span class="eyebrow">2 · Почему это работает</span>
+          <p>${esc(why||`В математике правило важно не само по себе, а потому что оно опирается на свойства чисел, выражений, уравнений, функций или геометрических объектов. В этой теме нужно уметь назвать это свойство словами.`)}</p>
+          ${formula?`<div class="v3-calm-formula"><b>Ключевая схема</b><div>${esc(formula)}</div></div>`:""}
+        </section>
+
+        <section>
+          <span class="eyebrow">3 · Как рассуждать</span>
+          <ol>
+            <li>Определи, к какому типу относится задача и какие данные даны.</li>
+            <li>Назови правило или свойство, которое подходит именно к этой записи.</li>
+            <li>Выполняй по одному преобразованию и не теряй смысл исходного условия.</li>
+            <li>Проверь ответ обратным действием, подстановкой, оценкой или чтением графика — в зависимости от темы.</li>
+          </ol>
+          ${goals.length?`<div class="callout good"><b>После урока ты должен(на) уметь</b><br>${goals.map(x=>`• ${esc(x)}`).join("<br>")}</div>`:""}
+        </section>
+
+        <section>
+          <span class="eyebrow">4 · Примеры</span>
+          ${examples.length?examples.slice(0,3).map((ex,i)=>`<div class="v3-calm-example"><b>Пример ${i+1}. ${esc(ex.task||"Разберём применение правила")}</b>${Array.isArray(ex.steps)&&ex.steps.length?`<ol>${ex.steps.map(st=>`<li>${esc(st)}</li>`).join("")}</ol>`:""}</div>`).join(""):`<p>Подробные примеры будут добавлены при наполнении этой темы. Пока ориентируйся на структуру: условие → правило → шаги → проверка.</p>`}
+        </section>
+
+        <section>
+          <span class="eyebrow">5 · Типичная ошибка</span>
+          <div class="callout danger"><b>⚠️ На что обратить внимание</b><br>${esc(mistake||"Не выполняй знакомое действие автоматически. Сначала проверь, что оно действительно разрешено в этой задаче и не нарушает ограничения темы.")}</div>
+          <p>После решения полезно отдельно проверить самый опасный переход — место со знаком, знаменателем, корнем, степенью, скобками, коэффициентом или границей промежутка.</p>
+        </section>
+
+        <section>
+          <span class="eyebrow">6 · Прочитай и перескажи</span>
+          <p>Закрой формулу рукой или прокрути страницу так, чтобы её не было видно, и попробуй объяснить тему своими словами за одну минуту. Если получается назвать правило, привести короткий пример и предупредить об ошибке — значит теория уже начала закрепляться.</p>
+        </section>
+
+        <section>
+          <span class="eyebrow">7 · Итог</span>
+          ${summary.length?`<ul>${summary.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:`<p>Главный итог темы: понимать не только «что делать», но и «почему это разрешено» и «как проверить полученный результат».</p>`}
+          <p><b>Не торопись переходить к следующей теме.</b> Сначала добейся ощущения, что можешь объяснить этот урок кому-то ещё простыми словами.</p>
+        </section>
+      </div>
+    </details>`;
+  }
+
+  function legacyTheoryAsGrade8Style(a,tp){
+    if(!a)return null;
+    if(a.standard==="grade8-style-v1")return a;
+    const sections=a.sections||[];
+    const first=sections[0]?.body||a.lead||"";
+    const middle=sections.slice(0,Math.min(3,sections.length)).map(x=>x.body).join(" ");
+    const deep=sections.slice(1,Math.min(5,sections.length)).map(x=>x.body).join(" ")||middle||first;
+    const examples=sections.filter(x=>/пример/i.test(x.title||"")).slice(0,2).map((x,i)=>({task:x.title.replace(/^\d+\.\s*/,""),steps:[x.body]}));
+    return {
+      standard:"grade8-style-preview",
+      title:a.title||tp.title,
+      lead:a.lead||"",
+      levels:{simple:first,school:middle||first,deep:deep||middle||first},
+      formula:(a.summary||[])[0]||"Ключевая идея темы сформулирована в тексте урока.",
+      remember:(a.summary||[]).join(" · ")||"Вернись к ключевой идее темы перед практикой.",
+      why:sections[1]?.body||deep||first,
+      mistake:sections.find(x=>/ошиб/i.test(x.title||""))?.body||"Проверяй каждый шаг и не меняй несколько элементов выражения одновременно.",
+      goals:(a.summary||[]).slice(0,3),
+      quick:null,
+      examples:examples.length?examples:[{task:"Разберём ключевую идею",steps:[sections[0]?.body||a.lead||"Материал готовится."]}],
+      exercises:[],
+      challenge:null,
+      summary:a.summary||[],
+      voice:a.voice||""
+    };
+  }
+
+  function v3SpeakText(text){
+    const value=(window.KitsuneSchoolNotation?.speech?.(text) ?? schoolText(text)).trim();
+    if(!value)return;
+    try{
+      if(typeof window.v151Speak==="function"){
+        window.v151Speak(value,{state:"explain",force:true});
+        return;
+      }
+    }catch{}
+    try{
+      if("speechSynthesis" in window){
+        speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(value);
+        u.lang="ru-RU";
+        speechSynthesis.speak(u);
+      }
+    }catch{}
+  }
+
+  function v3BindCalmTheorySpeech(root=document){
+    root.querySelectorAll("[data-v3-calm-speak]").forEach(btn=>{
+      if(btn.dataset.bound==="1")return;
+      btn.dataset.bound="1";
+      btn.addEventListener("click",()=>{
+        const id=btn.dataset.v3CalmSpeak;
+        const box=document.getElementById(id);
+        if(!box)return;
+        const body=box.querySelector(".v3-calm-theory-body");
+        v3SpeakText(body?.innerText||body?.textContent||"");
+      });
+    });
+    root.querySelectorAll("[data-v3-calm-stop]").forEach(btn=>{
+      if(btn.dataset.bound==="1")return;
+      btn.dataset.bound="1";
+      btn.addEventListener("click",()=>{
+        try{speechSynthesis.cancel()}catch{}
+        try{window.v151StopSpeaking?.()}catch{}
+      });
+    });
+  }
+
+  function renderTopic(trackId,sectionId,chapterId,topicId){
+    const {tr,s,c,tp}=locate(trackId,sectionId,chapterId,topicId);if(!tp)return;
+    legacyMode=false;stopTheory();closeSidebar();save(trackId);syncHomeLabel();installBadge();
+    const source=theory[`${trackId}:${topicId}`];
+    if(title())title().textContent=tp.title;
+
+    if(!source){
+      const level=tp.level==="advanced"?"углублённая линия":"основная линия";
+      content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformTopicBack">← ${esc(tr.label)}</button><button class="ghost" id="platformAllCourses">🎒 Сменить курс</button></div>
+      <section class="platform-hero reveal"><span class="eyebrow">${esc(s?.title||"")} · ${esc(c?.title||"")}</span>
+        <h2>${esc(tp.title)}</h2><p>Тема уже включена в проверенную curriculum map (${level}), но полноценный авторский урок ещё не прошёл содержательный QA.</p>
+        <div class="platform-status"><span>🗺 карта: готова</span><span>📚 урок: в редактуре</span><span>🚫 заглушка не выдаётся за теорию</span></div>
+      </section>
+      <div class="platform-alpha-note"><b>Почему здесь пока нет универсального текста?</b><br>В Kitsune Math тема считается готовой только после предметной проверки определения, формул, примеров, типичных ошибок, практики, озвучки и математической типографики. Поэтому вместо шаблонного «урока» показывается честный статус наполнения.</div>`;
+      document.querySelector("#platformTopicBack")?.addEventListener("click",()=>renderTrack(trackId));
+      document.querySelector("#platformAllCourses")?.addEventListener("click",showChooser);
+      window.scrollTo(0,0);window.applyReveal?.();
+      return;
+    }
+
+    const d=legacyTheoryAsGrade8Style(source,tp);
+    content().innerHTML=v3Grade8StyleLessonHtml(trackId,s,c,tp,d);
+    v3BindGrade8StyleLesson(trackId,s,c,tp,d);
+    v3BindCalmTheorySpeech(content());
+    document.querySelector('#platformTopicBack')?.addEventListener('click',()=>renderTrack(trackId));
+    const back=document.createElement('div');back.className='platform-backline';
+    back.innerHTML='<button class="secondary" id="lessonChapterBack">← К главе</button>';
+    content().prepend(back);back.querySelector('button').onclick=()=>renderChapter(trackId,sectionId,chapterId);
+    window.scrollTo(0,0);
+    window.applyReveal?.();
+  }
+
+  function speakTheory(a){
+    if(!a?.voice)return;
+    try{if(typeof window.v151Speak==="function"){window.v151Speak(a.voice,{state:"explain",force:true});return}}catch{}
+    try{if("speechSynthesis" in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(a.voice);u.lang="ru-RU";speechSynthesis.speak(u)}}catch{}
+  }
+
+  function renderUtility(view){
+    const tr=getTrack(selected());if(!tr)return false;
+    stopTheory();
+    if(["trainer","chapterfinal","mastery","mistakes","route"].includes(view))return renderStudy(view,tr);
+    const names={trainer:"Тренажёр",chapterfinal:"Итоги разделов",mastery:"Закрепление",mistakes:"Мои ошибки",progress:"Прогресс",route:"Мой маршрут",search:"Поиск по курсу",reference:"Справочник теории"};
+    const name=names[view]||"Учебный раздел";closeSidebar();setNavNone();
+    document.querySelector(`.nav-btn[data-view="${view}"]`)?.classList.add("active");if(title())title().textContent=name;
+    if(view==="search"){
+      content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformUtilBack">← ${esc(tr.label)}</button></div><section class="platform-hero"><span class="eyebrow">${esc(tr.label)}</span><h2>🔎 Поиск по курсу</h2><p>Поиск работает по карте именно выбранного курса.</p><div class="theory-actions"><input id="platformSearchInput" style="min-width:min(520px,80vw)" placeholder="Например: производная, окружность, проценты"><button class="primary" id="platformSearchBtn">Найти</button></div><div id="platformSearchResults"></div></section>`;
+      const run=()=>{
+        const q=(document.querySelector("#platformSearchInput")?.value||"").trim().toLowerCase(),host=document.querySelector("#platformSearchResults");
+        if(!q){host.innerHTML='<p class="muted">Введи тему или термин.</p>';return}
+        const found=[];for(const sec of tr.sections)for(const ch of sec.chapters)for(const tp of ch.topics)if(tp.title.toLowerCase().includes(q)||ch.title.toLowerCase().includes(q))found.push({sec,ch,tp});
+        host.innerHTML=found.length?`<div class="platform-topic-list">${found.slice(0,30).map(x=>`<button class="platform-topic" data-ps-s="${esc(x.sec.id)}" data-ps-c="${esc(x.ch.id)}" data-ps-t="${esc(x.tp.id)}"><span>${esc(x.tp.title)}</span><em>${esc(x.ch.title)}</em></button>`).join("")}</div>`:'<p class="muted">Ничего не найдено в карте выбранного курса.</p>';
+        host.querySelectorAll("[data-ps-t]").forEach(b=>b.addEventListener("click",()=>renderTopic(tr.id,b.dataset.psS,b.dataset.psC,b.dataset.psT)));
+      };
+      document.querySelector("#platformSearchBtn")?.addEventListener("click",run);document.querySelector("#platformSearchInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+    }else if(view==="reference"){
+      const ready=[];
+      for(const sec of tr.sections)for(const ch of sec.chapters)for(const tp of ch.topics){
+        const article=theory[`${tr.id}:${tp.id}`];
+        if(article)ready.push({sec,ch,tp,article});
+      }
+      content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformUtilBack">← ${esc(tr.label)}</button></div>
+      <section class="platform-hero"><span class="eyebrow">${esc(tr.label)}</span><h2>📖 Справочник теории</h2>
+      <p>Здесь собраны теоретические материалы выбранного курса.</p>
+      <div class="platform-status"><span>${ready.length} готовых статей</span></div></section>
+      <section class="platform-section"><div class="platform-topic-list">${ready.length?ready.map(x=>`<button class="platform-topic" data-ref-s="${esc(x.sec.id)}" data-ref-c="${esc(x.ch.id)}" data-ref-t="${esc(x.tp.id)}"><span>${esc(x.article.title||x.tp.title)}</span><em>${esc(x.ch.title)}</em></button>`).join(""):'<div class="platform-alpha-note">В этом треке эталонные статьи ещё не подготовлены.</div>'}</div></section>`;
+      content().querySelectorAll("[data-ref-t]").forEach(b=>b.addEventListener("click",()=>renderTopic(tr.id,b.dataset.refS,b.dataset.refC,b.dataset.refT)));
+    }else if(view==="progress"){
+      const p=v3Progress(tr.id),chapters=v3FlatChapters(tr),topics=v3FlatTopics(tr);
+      const total=topics.length,done=p.completed.filter(x=>topics.some(t=>t.tp.id===x)).length;
+      const acc=p.attempts?Math.round(p.correct/p.attempts*100):0;
+      content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformUtilBack">← ${esc(tr.label)}</button></div>
+      <div class="stat-grid">
+        <div class="stat reveal"><span class="muted">Тем пройдено</span><b>${done} из ${total}</b></div>
+        <div class="stat reveal"><span class="muted">Попыток</span><b>${p.attempts}</b></div>
+        <div class="stat reveal"><span class="muted">Точность</span><b>${p.attempts?acc+"%":"—"}</b></div>
+        <div class="stat reveal"><span class="muted">Ошибок для повторения</span><b>${p.mistakes.length}</b></div>
+      </div>
+      ${chapters.map((x,i)=>{const n=v3ChapterDone(tr.id,x.ch),pct=x.ch.topics.length?Math.round(n/x.ch.topics.length*100):0;return `<section class="progress-card reveal" style="margin-top:18px"><div class="section-head"><div><span class="eyebrow">${esc(x.sec.title)}</span><h2>${esc(x.ch.title)}</h2></div><span class="status-chip">${n} из ${x.ch.topics.length}</span></div>${x.ch.topics.map(t=>`<div style="margin:13px 0"><div style="display:flex;justify-content:space-between;gap:10px"><span>${p.completed.includes(t.id)?"✅ ":""}${esc(t.title)}</span><b>${p.completed.includes(t.id)?"100%":"0%"}</b></div><div class="progress-bar"><span style="width:${p.completed.includes(t.id)?100:0}%"></span></div></div>`).join("")}</section>`}).join("")}`;
+    }else{
+      content().innerHTML=`<div class="platform-backline"><button class="secondary" id="platformUtilBack">← ${esc(tr.label)}</button></div><section class="platform-hero"><span class="eyebrow">${esc(tr.label)}</span><h2>${esc(name)}</h2><p>Раздел уже привязан к выбранному курсу и использует отдельный прогресс. Его содержательное наполнение будет расширяться вместе с уроками ${esc(tr.label)}.</p></section>`;
+    }
+    document.querySelector("#platformUtilBack")?.addEventListener("click",()=>renderTrackHome(tr.id));window.scrollTo(0,0);return true;
+  }
+
+  /* Register BEFORE App Kernel: selected tracks other than grade 8 must not
+     fall through into the old Algebra 8 router. */
+  document.addEventListener("click",event=>{
+    const btn=event.target.closest?.(".nav-btn[data-view]");if(!btn)return;
+    const view=btn.dataset.view||"";
+
+    /* "Главная" is contextual for every selected track, including legacy
+       grade 8. This runs before App Kernel so grade 8 cannot fall through to
+       stale state when we are inside the v3 platform. */
+    if(view==="home"){
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+      goSelectedHome("sidebar-home");
+      return;
+    }
+
+    const tr=getTrack(selected()||"grade8");
+    if(!tr||(tr.id==="grade8"&&legacyMode))return;
+    if(view==="sources"||view==="mathlab"||view==="offline")return;
+    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+    if(view==="course")renderTrack(tr.id);else renderUtility(view);
+  },true);
+
+  function boot(){
+    installNav();syncHomeLabel();installBadge();
+    const reset=document.querySelector('#resetBtn');
+    if(reset)reset.onclick=()=>{
+      const id=selected();if(!id)return;
+      if(!confirm(`Сбросить прогресс только курса «${getTrack(id).label}»?`))return;
+      localStorage.removeItem(v3ProgressKey(id));
+      if(id==='grade8'){
+        ['a8_completed','a8_solved','a8_attempts','a8_correct','a8_mistakes','a8_lastLesson','a8_streak','kitsune:v3:migration:grade8-legacy-v311'].forEach(k=>localStorage.removeItem(k));
+      }
+      location.reload();
+    };
+    const s=selected();if(!s){setTimeout(showChooser,80)}else{setTimeout(()=>renderTrackHome(s),80)}
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});else boot();
+  function stopTheory(){try{window.v151StopSpeaking?.();window.speechSynthesis?.cancel();}catch{}}
+  function renderStudy(view,tr){
+    closeSidebar();setNavNone();document.querySelector(`[data-view="${view}"]`)?.classList.add('active');
+    const names={trainer:'Тренажёр',chapterfinal:'Итоги глав',mastery:'Закрепление',mistakes:'Мои ошибки',route:'Мой маршрут'};
+    title().textContent=`${tr.label} · ${names[view]}`;
+    const p=v3Progress(tr.id),topics=v3FlatTopics(tr);
+    let rows=topics;
+    if(view==='mistakes')rows=topics.filter(x=>p.mistakes.some(m=>m.lesson===v3BridgeId(tr.id,x.tp.id)));
+    if(view==='mastery')rows=topics.filter(x=>p.completed.includes(x.tp.id)||p.mistakes.some(m=>m.lesson===v3BridgeId(tr.id,x.tp.id)));
+    if(view==='route')rows=topics.filter(x=>!p.completed.includes(x.tp.id)).slice(0,10);
+    content().innerHTML=`<div class="platform-backline"><button class="secondary" id="studyBack">← Главная курса</button></div><section class="platform-hero"><span class="eyebrow">${esc(tr.label)}</span><h2>${names[view]}</h2><p>${view==='mistakes'?'Темы, в которых были ошибки. Открой урок и повтори практику.':view==='route'?'Следующие непройденные темы по порядку курса.':'Выбери тему или главу для практики и повторения.'}</p>${view==='trainer'?'<button class="primary" id="studyPractice">Начать смешанную практику</button>':''}</section><div id="studyRows" class="platform-topic-list"></div>`;
+    document.querySelector('#studyBack').onclick=()=>renderTrackHome(tr.id);
+    document.querySelector('#studyPractice')?.addEventListener('click',()=>renderPractice(tr.id,rows));
+    const host=document.querySelector('#studyRows');
+    if(view==='chapterfinal'){
+      const chapters=v3FlatChapters(tr);
+      host.innerHTML=chapters.map((x,i)=>`<button class="platform-topic" data-study-ch="${i}"><span>${esc(x.ch.title)}</span><em>${v3ChapterDone(tr.id,x.ch)} из ${x.ch.topics.length} тем · проверка главы</em></button>`).join('');
+      host.querySelectorAll('[data-study-ch]').forEach(b=>b.onclick=()=>renderPractice(tr.id,topics.filter(x=>x.ch===chapters[Number(b.dataset.studyCh)].ch)));
+    }else{
+      host.innerHTML=rows.length?rows.map(x=>topicButton(tr,x.sec,x.ch,x.tp)).join(''):'<p class="muted">Пока здесь нет тем. Продолжай обучение — результаты появятся автоматически.</p>';
+      host.querySelectorAll('.platform-topic').forEach(b=>b.onclick=()=>renderTopic(tr.id,b.dataset.section,b.dataset.chapter,b.dataset.topic));
+    }
+    window.scrollTo(0,0);window.applyReveal?.();return true;
+  }
+  function renderPractice(trackId,rows){
+    const pool=rows.flatMap(x=>(theory[`${trackId}:${x.tp.id}`]?.exercises||[]).map((e,i)=>({x,e,i}))).filter(x=>!x.e.manual);
+    const tasks=pool.sort(()=>Math.random()-.5).slice(0,8);
+    content().innerHTML=`<div class="platform-backline"><button class="secondary" id="practiceBack">← Тренажёр</button></div><section class="platform-hero"><h2>Практика · ${esc(getTrack(trackId).label)}</h2><p>${tasks.length} заданий из выбранных тем</p></section>${tasks.map(({x,e,i})=>v3ExerciseHtml(trackId,v3BridgeId(trackId,x.tp.id),i,e)).join('')}`;
+    document.querySelector('#practiceBack').onclick=()=>renderUtility('trainer');
+    content().querySelectorAll('.v3-course-exercise').forEach((box,j)=>{
+      const {x,e,i}=tasks[j],bridge=v3BridgeId(trackId,x.tp.id),d=theory[`${trackId}:${x.tp.id}`];v3RegisterTutorLesson(bridge,d);
+      box.querySelector('[data-v3-hint]').onclick=()=>box.querySelector('.hint')?.classList.toggle('show');
+      box.querySelector('[data-v3-check]').onclick=()=>{
+        const input=box.querySelector('input'),fb=box.querySelector('.feedback');
+        if(!input.value.trim()){fb.textContent='Сначала введи ответ.';fb.className='feedback bad';return;}
+        const ok=v3Match(input.value,e.a);fb.textContent=ok?'✅ Верно!':'Пока не так. Открой подсказку и попробуй ещё раз.';fb.className=`feedback ${ok?'ok':'bad'}`;
+        v3RecordResult(trackId,bridge,d,`${bridge}-${i}`,ok,e.q,input.value);
+      };
+    });window.applyReveal?.();
+  }
+  window.KitsunePlatform={version:VERSION,showChooser,selectTrack,renderTrackHome,renderTrack,renderChapter,renderTopic,renderUtility,selected,openGrade8,goSelectedHome,syncHomeLabel,matchAnswer:v3Match,isLegacyMode:()=>legacyMode};
+})();

@@ -149,12 +149,12 @@ const lessonData = {
  title:"Умножение дробей. Степень дроби",
  lead:"При умножении дробей числители перемножаются между собой, знаменатели — между собой. Но часто можно сделать проще: сократить заранее.",
  levels:{
-   simple:`<span class="math">(a/b)·(c/d) = ac/bd</span>. Для степени: <span class="math">(a/b)^n = a^n/b^n</span>.`,
+   simple:`<span class="math">(a/b) · (c/d) = ac/bd</span>. Для степени: <span class="math">(a/b)ⁿ = aⁿ/bⁿ</span>.`,
    school:`При умножении дробей произведение числителей записывается в числитель, а произведение знаменателей — в знаменатель. Степень дроби распространяется и на числитель, и на знаменатель.`,
    deep:`Предварительное сокращение уменьшает вычислительную нагрузку и снижает риск ошибок. Это особенно важно в длинных выражениях.`
  },
  remember:`Сначала ищи, что можно сократить крест-накрест. Так вычисления будут короче и вероятность ошибки меньше.`,
- why:`Дробь — это деление. Произведение двух делений можно объединить в одно: <span class="math">(a÷b)(c÷d)=ac÷bd</span>.`,
+ why:`Дробь — это деление. Произведение двух делений можно объединить в одно: <span class="math">(a : b) · (c : d) = ac : bd</span>.`,
  mistake:`Частая ошибка — забыть возвести в степень знаменатель.`,
  example:{
    task:`Вычисли <span class="math">(6/7)·(14/15)</span>.`,
@@ -461,6 +461,15 @@ window.switchLevel=(button,level)=>{
   document.querySelectorAll(".level-switch button").forEach(b=>b.classList.remove("active"));
   button.classList.add("active");
   document.querySelectorAll(".explain-pane").forEach(p=>p.classList.toggle("active",p.dataset.pane===level));
+
+  // v3: отдельный углублённый блок относится именно к режиму
+  // «Хочу понять глубже». «Полная теория — прочитать спокойно»
+  // остаётся самостоятельным блоком ниже.
+  document.querySelectorAll(".v12-deep-dive").forEach(box=>{
+    const show=level==="deep";
+    box.classList.toggle("active",show);
+    box.setAttribute("aria-hidden",show?"false":"true");
+  });
 };
 window.microCheck=(btn,ok,msg)=>{
   const out = document.querySelector("#microResult");
@@ -540,7 +549,7 @@ function renderProgress(){
  setActive("progress");pageTitle.textContent="Прогресс";
  const acc=state.attempts?Math.round(state.correct/state.attempts*100):0;
  content.innerHTML=`<div class="stat-grid">
-  <div class="stat reveal"><span class="muted">Тем пройдено</span><b>${state.completed.length}/${TOTAL_TOPICS}</b></div>
+  <div class="stat reveal"><span class="muted">Тем пройдено</span><b>${state.completed.length} из ${TOTAL_TOPICS}</b></div>
   <div class="stat reveal"><span class="muted">Попыток</span><b>${state.attempts}</b></div>
   <div class="stat reveal"><span class="muted">Точность</span><b>${state.attempts?acc+"%":"—"}</b></div>
   <div class="stat reveal"><span class="muted">Ошибок сохранено</span><b>${state.mistakes.length}</b></div>

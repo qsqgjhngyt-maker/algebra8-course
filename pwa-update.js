@@ -187,6 +187,10 @@
     setButton(`🔄 v${VERSION} · проверка…`,"checking");
 
     try{
+      // Offline launches can fail register() while an installed worker still
+      // controls the app. Keep its registration so reconnect/update can work.
+      const existing=await navigator.serviceWorker.getRegistration();
+      if(existing)watchRegistration(existing);
       let reg;
       try{
         reg=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});

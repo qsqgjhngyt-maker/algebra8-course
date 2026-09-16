@@ -100,7 +100,8 @@ lessonHtml=function(id,d){
   <h3 id="simple">🌱 Объяснение уровнями</h3>
   <div class="level-switch"><button class="active" onclick="switchLevel(this,'simple')">Совсем просто</button><button onclick="switchLevel(this,'school')">Как в школе</button><button onclick="switchLevel(this,'deep')">Хочу понять глубже</button></div>
   <div class="explain-pane active" data-pane="simple"><p>${simple}</p></div><div class="explain-pane" data-pane="school"><p>${school}</p></div><div class="explain-pane" data-pane="deep"><p>${deep}</p></div>
-  <div class="formula-card"><strong>Ключевая схема</strong><div class="formula-main">${d.formula}</div></div>
+  ${window.KitsuneFullTheory8?.html?.(id,d)||""}
+  <div class="formula-card"><strong>Ключевая схема</strong><div class="formula-main">${d.formula||d.remember||""}</div></div>
   <div class="callout good"><b>🧠 Запомни</b><br>${d.remember}</div>
   <div class="callout"><b>🔍 Почему так?</b><br>${d.why}</div>
   <div class="callout danger"><b>⚠️ Частая ошибка</b><br>${d.mistake}</div>
@@ -220,7 +221,7 @@ function v1ChapterCard(ch){
 renderCourse=function(){
  setActive("course");pageTitle.textContent="Карта курса";
  content.innerHTML=`<section class="section reveal" style="margin-top:0"><div class="section-head"><div><span class="eyebrow">Полная программа</span><h3>6 глав · ${TOTAL_TOPICS} тем</h3></div><span class="status-chip">v1.1 · релизная версия</span></div>
- <div class="course-grid">${chapters.map(ch=>`<section class="chapter-card reveal"><div class="chapter-head"><div><span class="eyebrow">Глава ${v1Roman(ch.id)}</span><h3>${ch.title}</h3></div><span class="status-chip">${v1ChapterDone(ch)}/${ch.topics.length} пройдено</span></div><div class="chapter-body">${ch.topics.map((t,i)=>`<div class="topic-row"><div class="topic-number">${String(i+1).padStart(2,"0")}</div><div><b>${state.completed.includes(t.id)?"✅ ":""}${t.title}</b><small class="muted" style="display:block;margin-top:3px">${v1SolvedCount(t.id)}/${v1PracticeTotal(t.id)} практик · освоение ${v1Pct(t.id)}%</small></div><button onclick="openLesson('${t.id}')">Открыть</button></div>`).join("")}<div style="padding:18px"><button class="primary glow-btn" onclick="v1RenderChapterFinal(${ch.id},'test')">🏁 Итог главы ${v1Roman(ch.id)}</button></div></div></section>`).join("")}</div></section>`;
+ <div class="course-grid">${chapters.map(ch=>`<section class="chapter-card reveal"><div class="chapter-head"><div><span class="eyebrow">Глава ${v1Roman(ch.id)}</span><h3>${ch.title}</h3></div><span class="status-chip">${v1ChapterDone(ch)} из ${ch.topics.length} пройдено</span></div><div class="chapter-body">${ch.topics.map((t,i)=>`<div class="topic-row"><div class="topic-number">${String(i+1).padStart(2,"0")}</div><div><b>${state.completed.includes(t.id)?"✅ ":""}${t.title}</b><small class="muted" style="display:block;margin-top:3px">${v1SolvedCount(t.id)} из ${v1PracticeTotal(t.id)} практик · освоение ${v1Pct(t.id)}%</small></div><button onclick="openLesson('${t.id}')">Открыть</button></div>`).join("")}<div style="padding:18px"><button class="primary glow-btn" onclick="v1RenderChapterFinal(${ch.id},'test')">🏁 Итог главы ${v1Roman(ch.id)}</button></div></div></section>`).join("")}</div></section>`;
  applyReveal();
 };window.renderCourse=renderCourse;
 
@@ -244,7 +245,7 @@ function v1RenderChapterFinal(chapterOrTab=1,tab="test"){
  const ch=chapters.find(c=>c.id===chId),d=v1FinalData(chId),b=v1Best(chId);
  setActive("chapterfinal");pageTitle.textContent=`Итог главы ${v1Roman(chId)}`;
  content.innerHTML=`<section class="final-hero reveal"><span class="eyebrow">Глава ${v1Roman(chId)} · ${d.title}</span><h2 style="font-size:38px;margin:6px 0">Проверяем понимание</h2><p class="lead">Сначала короткая диагностика, затем самостоятельная мини-контрольная. Ошибки превращаются в ссылки на нужные уроки.</p>
- <div class="final-score-grid"><div class="final-score"><span class="muted">Уроки</span><b>${v1ChapterDone(ch)}/${ch.topics.length}</b></div><div class="final-score"><span class="muted">Диагностика</span><b>${b.test?b.test+"/"+d.test.length:"—"}</b></div><div class="final-score"><span class="muted">Контрольная</span><b>${b.control?b.control+"/"+d.control.length:"—"}</b></div></div>
+ <div class="final-score-grid"><div class="final-score"><span class="muted">Уроки</span><b>${v1ChapterDone(ch)} из ${ch.topics.length}</b></div><div class="final-score"><span class="muted">Диагностика</span><b>${b.test?b.test+" из "+d.test.length:"—"}</b></div><div class="final-score"><span class="muted">Контрольная</span><b>${b.control?b.control+" из "+d.control.length:"—"}</b></div></div>
  <div class="final-tabs"><button class="${tab==="test"?"active":""}" onclick="v1RenderChapterFinal(${chId},'test')">🎯 Диагностика</button><button class="${tab==="control"?"active":""}" onclick="v1RenderChapterFinal(${chId},'control')">📝 Мини-контрольная</button><button class="${tab==="cheat"?"active":""}" onclick="v1RenderChapterFinal(${chId},'cheat')">📌 Шпаргалка</button><button onclick="v1FinalHub()">← Все итоги</button></div>
  <div id="finalBody">${tab==="test"?v1TestHtml(chId,d.test):tab==="control"?v1ControlHtml(chId,d.control):v1CheatHtml(d.cheat)}</div></section>`;
  applyReveal();
@@ -264,7 +265,7 @@ window.v1SubmitControl=chId=>{
 function v1CheatHtml(items){return `<div class="cheat-grid">${items.map(([h,t])=>`<div class="cheat-card"><h4>${h}</h4><div>${t}</div></div>`).join("")}</div><div class="finish-actions"><button class="secondary" onclick="window.print()">🖨️ Распечатать</button><button class="primary" onclick="renderTrainer()">🧩 Потренироваться</button></div>`}
 function v1Result(target,score,total,weak){
  const pct=Math.round(score/total*100),label=pct>=90?"Отличное понимание 🌟":pct>=70?"Хорошая база 👍":pct>=50?"Есть что закрепить 💪":"Лучше спокойно повторить основы 🌱",uniq=[...new Set(weak)];
- document.querySelector("#"+target).innerHTML=`<div class="result-banner"><strong>${score}/${total} · ${pct}%</strong><b>${label}</b>${uniq.length?`<div class="recommendations"><span class="muted">Повторить:</span>${uniq.map(id=>`<button class="secondary" onclick="openLesson('${id}')">${lessonData[id]?.title||id}</button>`).join("")}</div>`:"<p>Слабых тем не найдено — можно двигаться дальше.</p>"}</div>`;
+ document.querySelector("#"+target).innerHTML=`<div class="result-banner"><strong>${score} из ${total} · ${pct}%</strong><b>${label}</b>${uniq.length?`<div class="recommendations"><span class="muted">Повторить:</span>${uniq.map(id=>`<button class="secondary" onclick="openLesson('${id}')">${lessonData[id]?.title||id}</button>`).join("")}</div>`:"<p>Слабых тем не найдено — можно двигаться дальше.</p>"}</div>`;
 }
 function v1CourseFinalView(){
  setActive("chapterfinal");pageTitle.textContent="Итог всего курса";
@@ -283,7 +284,7 @@ function v1TrainerGenerate(){
  if(m==="roots"){const n=[4,9,16,25,36,49,64,81,100,121,144][Math.floor(Math.random()*11)];return {q:`√${n} = ?`,a:String(Math.sqrt(n)),tip:"Найди неотрицательное число, квадрат которого равен подкоренному.",tag:"2-11"}}
  if(m==="quadratic"){const r1=1+Math.floor(Math.random()*5),r2=1+Math.floor(Math.random()*5),sum=r1+r2,prod=r1*r2;return {q:`Корни x²−${sum}x+${prod}=0. Введи через запятую.`,a:[`${r1},${r2}`,`${r2},${r1}`],tip:"Используй теорему Виета: сумма и произведение.",tag:"3-23"}}
  if(m==="ineq"){const a=1+Math.floor(Math.random()*8),b=a+1+Math.floor(Math.random()*6);return {q:`Реши x + ${a} < ${b}. Введи, например, x<3.`,a:`x<${b-a}`,tip:"Вычти a из обеих частей.",tag:"4-39"}}
- const a=2+Math.floor(Math.random()*4),n=1+Math.floor(Math.random()*3);return {q:`${a}^-${n} = ?`,a:v1Frac(1,a**n),tip:"Отрицательная степень = обратная положительная.",tag:"6-47"};
+ const a=2+Math.floor(Math.random()*4),n=1+Math.floor(Math.random()*3),pow=["","⁻¹","⁻²","⁻³"][n];return {q:`${a}${pow} = ?`,a:v1Frac(1,a**n),tip:"Отрицательная степень = обратная положительная.",tag:"6-47"};
 }
 renderTrainer=function(){
  setActive("trainer");pageTitle.textContent="Тренажёр всего курса";v1Trainer={correct:0,total:0,streak:0,current:null};
@@ -292,11 +293,11 @@ renderTrainer=function(){
 window.v1SetTrainer=(m,btn)=>{v1TrainerMode=m;document.querySelectorAll(".trainer-mode").forEach(b=>b.classList.remove("active"));btn.classList.add("active");v1TrainerNext()};
 function v1TrainerNext(){v1Trainer.current=v1TrainerGenerate();document.querySelector("#trainerProblem").innerHTML=`<div class="trainer-problem">${v1Trainer.current.q}</div><div class="answer-row"><input id="trainerAns" placeholder="Ответ"><button class="check-btn" onclick="v1CheckTrainer()">Проверить</button></div><div id="trainerFb" class="feedback"></div><div class="hint show">${v1Trainer.current.tip}</div>`;v1TrainerScore()}
 window.v1CheckTrainer=()=>{const val=document.querySelector("#trainerAns").value,ok=v1Match(val,v1Trainer.current.a),fb=document.querySelector("#trainerFb");v1Trainer.total++;state.attempts++;if(ok){v1Trainer.correct++;v1Trainer.streak++;state.correct++;fb.className="feedback ok";fb.textContent=`✅ Верно! Серия ${v1Trainer.streak}`;ch1TouchActivity();v1Save();setTimeout(v1TrainerNext,600)}else{v1Trainer.streak=0;fb.className="feedback bad";fb.textContent="❌ Пока не так. Используй подсказку.";v1RecordMistake(v1Trainer.current.tag,v1Trainer.current.q,val);v1Save()}v1TrainerScore()};
-function v1TrainerScore(){const e=document.querySelector("#trainerScore");if(e)e.innerHTML=`<b style="font-size:34px">${v1Trainer.correct}</b> правильных из ${v1Trainer.total}<br><span class="muted">серия: ${v1Trainer.streak}/5</span>`}
+function v1TrainerScore(){const e=document.querySelector("#trainerScore");if(e)e.innerHTML=`<b style="font-size:34px">${v1Trainer.correct}</b> правильных из ${v1Trainer.total}<br><span class="muted">серия: ${v1Trainer.streak} из 5</span>`}
 
 renderProgress=function(){
  setActive("progress");pageTitle.textContent="Прогресс";const acc=state.attempts?Math.round(state.correct/state.attempts*100):0;
- content.innerHTML=`<div class="stat-grid"><div class="stat reveal"><span class="muted">Тем пройдено</span><b>${state.completed.length}/${TOTAL_TOPICS}</b></div><div class="stat reveal"><span class="muted">Попыток</span><b>${state.attempts}</b></div><div class="stat reveal"><span class="muted">Точность</span><b>${state.attempts?acc+"%":"—"}</b></div><div class="stat reveal"><span class="muted">Серия</span><b>${state.streak} ${ch1DayWord(state.streak)}</b></div></div>${chapters.map(ch=>`<section class="progress-card reveal" style="margin-top:18px"><div class="section-head"><div><span class="eyebrow">Глава ${v1Roman(ch.id)}</span><h2>${ch.title}</h2></div><button class="secondary" onclick="v1RenderChapterFinal(${ch.id},'test')">Итог</button></div>${ch.topics.map(t=>`<div style="margin:13px 0"><div style="display:flex;justify-content:space-between;gap:10px"><span>${state.completed.includes(t.id)?"✅ ":""}${t.title}</span><b>${v1Pct(t.id)}%</b></div><div class="progress-bar"><span style="width:${v1Pct(t.id)}%"></span></div></div>`).join("")}</section>`).join("")}`;applyReveal();
+ content.innerHTML=`<div class="stat-grid"><div class="stat reveal"><span class="muted">Тем пройдено</span><b>${state.completed.length} из ${TOTAL_TOPICS}</b></div><div class="stat reveal"><span class="muted">Попыток</span><b>${state.attempts}</b></div><div class="stat reveal"><span class="muted">Точность</span><b>${state.attempts?acc+"%":"—"}</b></div><div class="stat reveal"><span class="muted">Серия</span><b>${state.streak} ${ch1DayWord(state.streak)}</b></div></div>${chapters.map(ch=>`<section class="progress-card reveal" style="margin-top:18px"><div class="section-head"><div><span class="eyebrow">Глава ${v1Roman(ch.id)}</span><h2>${ch.title}</h2></div><button class="secondary" onclick="v1RenderChapterFinal(${ch.id},'test')">Итог</button></div>${ch.topics.map(t=>`<div style="margin:13px 0"><div style="display:flex;justify-content:space-between;gap:10px"><span>${state.completed.includes(t.id)?"✅ ":""}${t.title}</span><b>${v1Pct(t.id)}%</b></div><div class="progress-bar"><span style="width:${v1Pct(t.id)}%"></span></div></div>`).join("")}</section>`).join("")}`;applyReveal();
 };
 renderMistakes=function(){
  setActive("mistakes");pageTitle.textContent="Мои ошибки";const items=[...state.mistakes].reverse();
@@ -586,7 +587,7 @@ function v11RenderControlPanel(chId,level="base"){
   return `<div class="v11-difficulty">
     ${Object.entries(v11DifficultyInfo).map(([k,v])=>`<button class="${k===level?"active":""}" onclick="v11SwitchControl(${chId},'${k}')">${v[0]}</button>`).join("")}
   </div>
-  <div class="v11-level-info"><b>${info[0]} уровень.</b> ${info[1]} ${best?`Лучший результат: <b>${best}/${set.length}</b>.`:""}</div>
+  <div class="v11-level-info"><b>${info[0]} уровень.</b> ${info[1]} ${best?`Лучший результат: <b>${best} из ${set.length}</b>.`:""}</div>
   <div class="callout warn"><b>Режим контрольной:</b> решай самостоятельно. Разбор появится после проверки.</div>
   <div class="control-grid">${set.map((q,i)=>`<div class="test-question" id="v11cq-${i}">
     <span class="fc-topic-badge">${lessonData[q.tag]?.title||""}</span>
@@ -628,8 +629,8 @@ v1RenderChapterFinal=function(chapterOrTab=1,tab="test"){
     <span class="eyebrow">Глава ${v1Roman(chId)} · ${d.title}</span>
     <h2 style="font-size:38px;margin:6px 0">Контрольная по уровню</h2>
     <p class="lead">Можно начать с базового уровня, затем перейти к смешанному и «Уверенному».</p>
-    <div class="final-score-grid"><div class="final-score"><span class="muted">Уроки</span><b>${v1ChapterDone(ch)}/${ch.topics.length}</b></div>
-    <div class="final-score"><span class="muted">Диагностика</span><b>${b.test?b.test+"/"+d.test.length:"—"}</b></div>
+    <div class="final-score-grid"><div class="final-score"><span class="muted">Уроки</span><b>${v1ChapterDone(ch)} из ${ch.topics.length}</b></div>
+    <div class="final-score"><span class="muted">Диагностика</span><b>${b.test?b.test+" из "+d.test.length:"—"}</b></div>
     <div class="final-score"><span class="muted">Лучший контроль</span><b>${b.control?b.control+"/6":"—"}</b></div></div>
     <div class="final-tabs"><button onclick="v1RenderChapterFinal(${chId},'test')">🎯 Диагностика</button>
     <button class="active" onclick="v1RenderChapterFinal(${chId},'control')">📝 Контрольная</button>
@@ -687,7 +688,7 @@ function v11ReadinessHtml(){
     <p class="muted">Это не школьная оценка: показатель объединяет решённую практику, прохождение тем и текущую точность ответов.</p>
     <div class="v11-readiness-grid">
       <div class="v11-readiness-stat"><span class="muted">Освоение практики</span><b>${mastery}%</b></div>
-      <div class="v11-readiness-stat"><span class="muted">Пройдено тем</span><b>${completed}/${TOTAL_TOPICS}</b></div>
+      <div class="v11-readiness-stat"><span class="muted">Пройдено тем</span><b>${completed} из ${TOTAL_TOPICS}</b></div>
       <div class="v11-readiness-stat"><span class="muted">Точность ответов</span><b>${state.attempts?acc+"%":"—"}</b></div>
     </div>
     ${weak.length?`<b>Что полезнее повторить сейчас</b><div class="v11-weak-list">${weak.map(x=>`<button class="secondary" onclick="openLesson('${x.id}')">${lessonData[x.id]?.title||x.id} · ${x.p}%</button>`).join("")}</div>`:`<div class="callout good">✅ Явных слабых тем по практике сейчас не видно.</div>`}

@@ -27,7 +27,7 @@
   async function cacheStatus(){
     let keys=[];
     try{keys=await caches.keys()}catch(e){}
-    const release=keys.find(k=>k===`algebra8-v${VERSION}`)||keys.find(k=>k.startsWith("algebra8-v"))||"";
+    const release=keys.find(k=>k===`kitsune-math-${VERSION}`)||keys.find(k=>k===`algebra8-v${VERSION}`)||keys.find(k=>k.startsWith("kitsune-math-")&&!k.startsWith("kitsune-math-runtime-"))||keys.find(k=>k.startsWith("algebra8-v"))||"";
     const ai=keys.find(k=>k.startsWith("algebra8-ai-runtime-"))||"";
     let shell=false;
     try{
@@ -138,12 +138,12 @@
 
       <section class="ko-actions glass-panel">
         <div>
-          <span class="eyebrow">Zero-Config Offline</span>
-          <h3>Автоматическая подготовка устройства</h3>
-          <p>В v2.2.3 Kitsune сама подготавливает Brain, Whisper, голос и OCR в фоне, когда есть сеть и достаточно места. Ребёнку не нужно заходить в настройки. Кнопки ниже оставлены как диагностика и ручной повтор для взрослого.</p>
+          <span class="eyebrow">Локальные AI-возможности</span>
+          <h3>Подготовка по вашему запросу</h3>
+          <p>Учебный курс работает без подготовки нейросетей. Brain, Whisper, голос и OCR подготавливаются только по явному запросу и могут потребовать заметного объёма памяти и загрузки данных. Фоновая автоподготовка отключена.</p>
         </div>
         <div class="ml-actions">
-          <button class="primary glow-btn" id="koPrepareAll">↻ Повторить автоподготовку</button>
+          <button class="primary glow-btn" id="koPrepareAll">↻ Подготовить локальные модели</button>
           <button class="secondary" id="koPersist">💾 Защитить локальное хранилище</button>
           <button class="secondary" id="koReleaseRam">🧹 Освободить RAM</button>
           <button class="secondary" id="koUpdate">🔄 Проверить обновление</button>

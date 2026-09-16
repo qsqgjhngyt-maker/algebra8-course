@@ -13,7 +13,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "2.3.0-beta.3.9.6";
+  const VERSION = "3.0.0-alpha.4.5.1";
   const capturedStudentHome =
     typeof window.renderHome === "function"
       ? window.renderHome.bind(window)
@@ -147,6 +147,21 @@
     const source = target.id === "sxBackStudent"
       ? "adult-back"
       : "sidebar-home";
+
+    /*
+     * Kitsune Math v3 owns contextual Home.
+     * navigation-stability is registered earlier than platform-v300 and used
+     * to force every Home click into the legacy Algebra 8 renderer.
+     * Delegate sidebar Home to the v3 platform when available.
+     * The adult "Вернуться к обучению" keeps the legacy-safe behavior.
+     */
+    if (
+      target.id !== "sxBackStudent" &&
+      window.KitsunePlatform?.goSelectedHome
+    ) {
+      window.KitsunePlatform.goSelectedHome(source);
+      return;
+    }
 
     goHome(source);
   }, true);

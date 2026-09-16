@@ -84,10 +84,10 @@ function renderMastery(){
     <h2>Закрепление и подготовка</h2>
     <p>Здесь темы уже не идут строго по параграфам. Нужно вспоминать базу 7 класса, узнавать метод самостоятельно, решать смешанные задачи и постепенно переходить к полноценной контрольной работе.</p>
     <div class="v13-score-strip">
-      <div class="v13-score-box"><span>Повторение 7 класса</span><b>${r7}/32</b></div>
-      <div class="v13-score-box"><span>Итог 8 класса</span><b>${fr}/24</b></div>
-      <div class="v13-score-box"><span>Повышенный уровень</span><b>${adv}/12</b></div>
-      <div class="v13-score-box"><span>Лучшая контрольная</span><b>${exam||"—"}/18</b></div>
+      <div class="v13-score-box"><span>Повторение 7 класса</span><b>${r7} из 32</b></div>
+      <div class="v13-score-box"><span>Итог 8 класса</span><b>${fr} из 24</b></div>
+      <div class="v13-score-box"><span>Повышенный уровень</span><b>${adv} из 12</b></div>
+      <div class="v13-score-box"><span>Лучшая контрольная</span><b>${exam?exam+" из 18":"—"}</b></div>
     </div>
   </section>
 
@@ -113,7 +113,7 @@ window.renderMastery=renderMastery;
 function v13HubCard(icon,title,text,done,total,action){
   const pct=v13Pct(done,total);
   return `<article class="v13-hub-card reveal"><div class="v13-hub-icon">${icon}</div><h3>${title}</h3><p>${text}</p>
-    <div class="v13-card-progress"><span>${done}/${total}</span><b>${pct}%</b></div>
+    <div class="v13-card-progress"><span>${done} из ${total}</span><b>${pct}%</b></div>
     <div class="progress-bar"><span style="width:${pct}%"></span></div>
     <div style="margin-top:13px"><button class="primary" onclick="${action}">Открыть →</button></div></article>`;
 }
@@ -152,7 +152,7 @@ window.v13SubmitDiagnostic=(type)=>{
   v13Save();
   const recs=[...new Set(weak)].slice(0,8);
   document.querySelector("#v13DiagResult").innerHTML=`<div class="v13-result">
-    <strong>${score}/${arr.length} · ${pct}%</strong>
+    <strong>${score} из ${arr.length} · ${pct}%</strong>
     <p>${pct>=85?"Очень уверенная база 🌟":pct>=65?"Хорошая база, осталось точечно укрепить несколько мест.":pct>=45?"Есть рабочая основа, но повторение заметно поможет.":"Начни спокойно с базовых модулей — именно для этого они здесь."}</p>
     ${isEntry?`<p><b>Что повторить первым:</b></p><div class="v13-recs">${recs.map(id=>`<button class="secondary" onclick="v13OpenReview7('${id}')">${v13ReviewName(id)}</button>`).join("")}</div>`:
     `<p><b>Темы 8 класса для повторения:</b></p><div class="v13-recs">${recs.map(id=>`<button class="secondary" onclick="openLesson('${id}')">${v13LessonName(id)}</button>`).join("")}</div>
@@ -170,7 +170,7 @@ window.v13Review7Hub=()=>{
     <div class="v13-modules">${v13Data.review7.map(m=>{
       const done=m.tasks.filter((_,i)=>v13State.review7[`${m.id}:${i}`]).length,p=v13Pct(done,m.tasks.length);
       return `<article class="v13-module-card reveal"><span class="eyebrow">${m.icon} · база</span><h4>${m.title}</h4><p>${m.lead}</p>
-      <div class="v13-card-progress"><span>${done}/${m.tasks.length} заданий</span><b>${p}%</b></div><div class="progress-bar"><span style="width:${p}%"></span></div>
+      <div class="v13-card-progress"><span>${done} из ${m.tasks.length} заданий</span><b>${p}%</b></div><div class="progress-bar"><span style="width:${p}%"></span></div>
       <div style="margin-top:12px"><button class="primary" onclick="v13OpenReview7('${m.id}')">${done?"Повторить":"Начать"} →</button></div></article>`;
     }).join("")}</div>`;
   v13Decorate();
@@ -179,7 +179,7 @@ window.v13OpenReview7=(id)=>{
   const m=v13Data.review7.find(x=>x.id===id);if(!m)return;
   v13CleanupTimer();setActive("mastery");pageTitle.textContent=m.title;
   const idx=v13Data.review7.findIndex(x=>x.id===id);
-  content.innerHTML=`<section class="v13-hero reveal"><span class="eyebrow">Повторение 7 класса · ${idx+1}/${v13Data.review7.length}</span><h2>${m.title}</h2><p>${m.lead}</p>
+  content.innerHTML=`<section class="v13-hero reveal"><span class="eyebrow">Повторение 7 класса · ${idx+1} из ${v13Data.review7.length}</span><h2>${m.title}</h2><p>${m.lead}</p>
     <div class="v11-release-actions"><button class="secondary" onclick="v13Review7Hub()">← Все модули</button>${idx<v13Data.review7.length-1?`<button class="secondary" onclick="v13OpenReview7('${v13Data.review7[idx+1].id}')">Следующий модуль →</button>`:""}</div></section>
     <div class="v13-theory"><div class="v13-note"><b>🧠 Что вспомнить</b><ul>${m.remember.map(x=>`<li>${x}</li>`).join("")}</ul></div>
       <div class="v13-example"><h4>📘 Пример: ${m.example.q}</h4>${m.example.steps.map((x,i)=>`<div class="v13-example-step"><b>${i+1}.</b> ${x}</div>`).join("")}</div></div>
@@ -208,7 +208,7 @@ window.v13FinalReview=(station=0)=>{
   const all=v13Data.finalReview,start=station*6,tasks=all.slice(start,start+6),done=v13FinalReviewSolved();
   content.innerHTML=`<section class="v13-hero reveal"><span class="eyebrow">🏁 Смешиваем темы</span><h2>Итоговое повторение 8 класса</h2>
     <p>Здесь название темы специально не показывается до проверки. На контрольной никто не подсказывает, что сейчас нужно применить — навык выбора метода тоже нужно тренировать.</p>
-    <div class="v13-card-progress"><span>${done}/${all.length} заданий решено</span><b>${v13Pct(done,all.length)}%</b></div><div class="progress-bar"><span style="width:${v13Pct(done,all.length)}%"></span></div>
+    <div class="v13-card-progress"><span>${done} из ${all.length} заданий решено</span><b>${v13Pct(done,all.length)}%</b></div><div class="progress-bar"><span style="width:${v13Pct(done,all.length)}%"></span></div>
     <button class="secondary" style="margin-top:12px" onclick="renderMastery()">← Назад</button></section>
     <div class="v13-stations">${[0,1,2,3].map(i=>`<button class="${i===station?"active":""}" onclick="v13FinalReview(${i})">Станция ${i+1}</button>`).join("")}</div>
     ${tasks.map((t,j)=>{const i=start+j,key=String(i);return v13TaskHtml("fr",key,t,!!v13State.finalReview[key],`v13CheckFinalReview(${i})`)}).join("")}`;
@@ -226,10 +226,10 @@ window.v13Advanced=()=>{
   const done=v13AdvancedSolved();
   content.innerHTML=`<section class="v13-hero reveal"><span class="eyebrow">🚀 Не просто применить формулу</span><h2>Повышенный уровень</h2>
     <p>Эти задания требуют увидеть идею или соединить два правила. Если не получается, кнопка «Разобрать идею» подскажет направление, но не выдаст ответ сразу.</p>
-    <div class="v13-card-progress"><span>${done}/${v13Data.advanced.length} решено</span><b>${v13Pct(done,v13Data.advanced.length)}%</b></div><div class="progress-bar"><span style="width:${v13Pct(done,v13Data.advanced.length)}%"></span></div>
+    <div class="v13-card-progress"><span>${done} из ${v13Data.advanced.length} решено</span><b>${v13Pct(done,v13Data.advanced.length)}%</b></div><div class="progress-bar"><span style="width:${v13Pct(done,v13Data.advanced.length)}%"></span></div>
     <button class="secondary" style="margin-top:12px" onclick="renderMastery()">← Назад</button></section>
     ${v13Data.advanced.map((t,i)=>`<article class="v13-advanced-card reveal ${v13State.advanced[String(i)]?"solved":""}">
-      <span class="eyebrow">${i+1}/12 · ${v13LessonName(t.tag)}</span><h4>${t.title}</h4><p>${t.q}</p>
+      <span class="eyebrow">${i+1} из 12 · ${v13LessonName(t.tag)}</span><h4>${t.title}</h4><p>${t.q}</p>
       <div class="v13-answer-row"><input id="v13adv-${i}" placeholder="Ответ"><button class="check-btn" onclick="v13CheckAdvanced(${i})">Проверить</button>
       <button class="secondary" onclick="document.querySelector('#v13idea-${i}').classList.toggle('show')">🧠 Разобрать идею</button></div>
       <div class="v13-idea" id="v13idea-${i}"><b>Идея:</b> ${t.idea}</div>
@@ -251,7 +251,7 @@ window.v13ExamHub=()=>{
     <button class="secondary" onclick="renderMastery()">← Назад</button></section>
     <div class="v13-exam-grid">${v13Data.examVariants.map(v=>{const best=v13State.exams[v.id]?.best||0;return `<article class="v13-exam-card reveal">
       <span class="eyebrow">${v.minutes} минут · 18 заданий</span><h3>${v.title}</h3><p>${v.desc}</p>
-      <div class="v13-card-progress"><span>лучший результат</span><b>${best||"—"}/18</b></div>
+      <div class="v13-card-progress"><span>лучший результат</span><b>${best?best+" из 18":"—"}</b></div>
       <button class="primary" onclick="v13StartExam('${v.id}')">Открыть вариант →</button></article>`}).join("")}</div>`;
   v13Decorate();
 };
@@ -289,7 +289,7 @@ window.v13SubmitExam=(id)=>{
   const elapsed=v13TimerStartedAt?Math.round((Date.now()-v13TimerStartedAt)/1000):null;v13CleanupTimer();
   const prev=v13State.exams[id]||{best:0};v13State.exams[id]={best:Math.max(prev.best||0,score),last:score,elapsed,date:Date.now()};v13Save();
   const uniq=[...new Set(weak)].slice(0,8),pct=v13Pct(score,v.tasks.length);
-  document.querySelector("#v13ExamResult").innerHTML=`<div class="v13-result"><strong>${score}/${v.tasks.length} · ${pct}%</strong>
+  document.querySelector("#v13ExamResult").innerHTML=`<div class="v13-result"><strong>${score} из ${v.tasks.length} · ${pct}%</strong>
     <p>${pct>=89?"Отличная самостоятельная работа 🌟":pct>=67?"Хороший результат. Несколько тем стоит закрепить.":pct>=45?"База есть, но перед следующей контрольной лучше повторить отмеченные темы.":"Вернись к итоговому повторению и пройди слабые темы небольшими блоками."}</p>
     ${elapsed?`<p class="muted">Время с момента запуска таймера: ${v13FormatTime(elapsed)}.</p>`:""}
     <b>Рекомендуется повторить:</b><div class="v13-recs">${uniq.map(tag=>`<button class="secondary" onclick="openLesson('${tag}')">${v13LessonName(tag)}</button>`).join("")}</div></div>`;

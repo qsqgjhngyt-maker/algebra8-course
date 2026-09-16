@@ -1,0 +1,15 @@
+{
+  "name": "kitsune-math",
+  "version": "3.1.0-rc.2",
+  "private": true,
+  "scripts": {
+    "test": "node tests/release/qa-static.cjs",
+    "test:browser": "node tests/release/qa-browser.cjs",
+    "test:voice": "node tests/release/qa-voice.cjs",
+    "test:visual": "node tests/release/qa-visual.cjs",
+    "test:upgrade": "node tests/release/qa-upgrade.cjs",
+    "test:broker": "node --test cloudflare-broker/tests/current.test.mjs"
+  },
+  "devDependencies": { "playwright": "1.62.1" },
+  "engines": { "node": ">=22" }
+}

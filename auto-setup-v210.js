@@ -177,6 +177,7 @@
   }
 
   async function run({manual=false}={}){
+    if(!manual)return false; // Download model runtimes only after an explicit action.
     if(running||!enabled())return false;
     if(location.protocol==="file:"||!window.isSecureContext)return false;
     if(!navigator.onLine){

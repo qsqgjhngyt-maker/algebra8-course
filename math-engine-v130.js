@@ -13,7 +13,7 @@
 
   function ensureWorker(){
     if(worker)return worker;
-    worker=new Worker("./math-worker-v130.js?v=2.2.3",{name:"kitsune-math"});
+    worker=new Worker("./math-worker-v130.js?v=3.1.0-rc.2",{name:"kitsune-math"});
     worker.onmessage=e=>{
       const m=e.data||{};
       const p=pending.get(m.id);

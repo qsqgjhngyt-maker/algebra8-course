@@ -7,10 +7,8 @@
   "use strict";
 
   const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
-  const HW_KEY="a8_mathlab_homework_v130";
-  const SKILL_KEY="a8_mathlab_skills_v130";
-  const HISTORY_KEY="a8_mathlab_history_v130";
-  const BOARD_KEY="a8_mathlab_board_v200";
+  let HW_KEY,SKILL_KEY,HISTORY_KEY,BOARD_KEY,activeTrack=null;
+  let classicGenerator=false;
 
   let homework=[];
   let skills={};
@@ -21,6 +19,13 @@
   let boardStrokes=[];
   let graphResizeObserver=null;
 
+  function syncTrack(){
+    const id=window.KitsunePlatform?.selected?.()||'grade8';
+    if(id===activeTrack)return;
+    activeTrack=id;classicGenerator=false;currentGeneratedPack=null;
+    const prefix=id==='grade8'?'a8_mathlab_':`kitsune:v3:mathlab:${id}:`;
+    HW_KEY=prefix+'homework_v130';SKILL_KEY=prefix+'skills_v130';HISTORY_KEY=prefix+'history_v130';BOARD_KEY=prefix+'board_v200';
+    homework=[];skills={};history=[];boardStrokes=[];
   try{
     homework=JSON.parse(localStorage.getItem(HW_KEY)||"[]");
     skills=JSON.parse(localStorage.getItem(SKILL_KEY)||"{}");
@@ -31,6 +36,8 @@
     if(!Array.isArray(history))history=[];
     if(!Array.isArray(boardStrokes))boardStrokes=[];
   }catch(e){}
+  }
+  syncTrack();
 
   function save(){
     try{
@@ -62,6 +69,10 @@
   }
 
   function courseTopics(){
+    if(!classicGenerator){
+      const tr=window.KitsuneCurriculum?.tracks.find(t=>t.id===activeTrack);
+      if(tr)return tr.sections.flatMap(s=>s.chapters.flatMap(ch=>ch.topics.map(t=>({id:t.id,title:t.title,chapter:ch.id,chapterTitle:ch.title}))));
+    }
     try{
       if(typeof chapters!=="undefined"&&Array.isArray(chapters)){
         return chapters.flatMap(ch=>ch.topics.map(t=>({
@@ -251,7 +262,7 @@ x > -6"></textarea>
       <div class="ml-panel">
         <div class="ml-panel-head">
           <div><span class="eyebrow">Homework Studio</span><h3>Моё домашнее задание</h3></div>
-          <span class="status-chip">${homework.filter(x=>x.done).length}/${homework.length} готово</span>
+          <span class="status-chip">${homework.filter(x=>x.done).length} из ${homework.length} готово</span>
         </div>
         <div class="ml-homework-add">
           <textarea id="mlHwNew" class="ml-textarea" rows="4" placeholder="Вставь одно или несколько заданий — каждое с новой строки"></textarea>
@@ -290,6 +301,7 @@ x > -6"></textarea>
     const topics=courseTopics();
     const chapterOptions=(()=>{
       try{
+        if(!classicGenerator){return [...new Map(topics.map(t=>[t.chapter,t.chapterTitle]))].map(([id,label])=>`<option value="${esc(id)}">${esc(label)}</option>`).join('');}
         if(typeof chapters!=="undefined"){
           return chapters.map(ch=>`<option value="${ch.id}">Глава ${ch.id}. ${esc(ch.title)}</option>`).join("");
         }
@@ -302,12 +314,13 @@ x > -6"></textarea>
       <div class="ml-panel ml-gen2">
         <div class="ml-panel-head">
           <div>
-            <span class="eyebrow">Generator 2.0 · 51/51 тем</span>
+            <span class="eyebrow">${classicGenerator?'Классический Generator 51':'Практика выбранного курса'}</span>
             <h3>Умный генератор по всему курсу</h3>
           </div>
-          <span class="status-chip">51 тема · 6 глав</span>
+          <span class="status-chip">${topics.length} тем · ${new Set(topics.map(t=>t.chapter)).size} глав</span>
         </div>
 
+        ${activeTrack==='grade8'?`<button class="secondary" id="mlClassicToggle">${classicGenerator?'Все темы 8 класса':'Классический Generator 51'}</button>`:''}
         <div class="ml-gen-mode-grid">
           <label>Режим
             <select id="mlGenMode">
@@ -317,7 +330,7 @@ x > -6"></textarea>
               <option value="adaptive">🧠 Адаптивный</option>
               <option value="control">📝 Контрольная</option>
               <option value="homework">🏠 Подборка ДЗ</option>
-              <option value="marathon">🏆 Марафон 51</option>
+              <option value="marathon">🏆 Марафон курса</option>
             </select>
           </label>
 
@@ -358,8 +371,7 @@ x > -6"></textarea>
 
         <div id="mlGenerated" class="ml-generated">
           <div class="ml-empty">
-            🎯 Выбери режим. Можно взять любую из 51 темы, собрать контрольную,
-            адаптивный набор или настоящий марафон по всему курсу.
+            🎯 Выбери тему, главу или смешанную практику по курсу.
           </div>
         </div>
       </div>`;
@@ -503,12 +515,12 @@ x > -6"></textarea>
       if(!h.work.trim()){out.innerHTML=`<div class="ml-error">Сначала запиши свой ответ или решение в поле выше.</div>`;return}
       if(gen){
         try{
-          const check=await window.KitsuneMath.checkGenerated(gen,h.work);
+          const check=await checkTask(gen,h.work);
           out.innerHTML=check.ok
             ?`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`
             :`<div class="ml-error">Пока не совпало. Попробуй ещё раз или возьми подсказку.</div>`;
           touchSkill({type:generatedSkillType(gen)},check.ok,gen.topicId);
-          window.KitsuneLearning?.recordGeneratedResult?.(gen,check.ok,h.work);
+          if(gen.source!=='curriculum')window.KitsuneLearning?.recordGeneratedResult?.(gen,check.ok,h.work);
         }catch(e){out.innerHTML=`<div class="ml-error">${esc(e.message)}</div>`}
         return;
       }
@@ -532,6 +544,7 @@ x > -6"></textarea>
   }
 
   function generatorModeText(mode){
+    if(!classicGenerator)return ({topic:'Практика из упражнений выбранной темы.',chapter:'Упражнения выбранной главы.',all:'Практика по всем направлениям курса.',adaptive:'Начни с тем, в которых были ошибки.',control:'Проверка по разным темам курса.',homework:'Набор упражнений, который можно сохранить в ДЗ.',marathon:'По одному заданию каждой темы с кратким ответом.'})[mode]||'';
     const map={
       topic:"Выбери любую из 51 тем. Можно сгенерировать несколько разных заданий именно по ней.",
       chapter:"Смешанная практика внутри выбранной главы.",
@@ -573,7 +586,7 @@ x > -6"></textarea>
     }
 
     if(btn){
-      btn.textContent=mode==="marathon"?"🏆 Создать марафон 51":
+      btn.textContent=mode==="marathon"?"🏆 Создать марафон курса":
         mode==="control"?"📝 Собрать контрольную":
         mode==="homework"?"🏠 Подобрать ДЗ":"✨ Создать набор";
     }
@@ -644,8 +657,7 @@ x > -6"></textarea>
       </div>
       ${mode==="marathon"?`
         <div class="ml-marathon-banner">
-          🏆 <b>Полное покрытие курса:</b> 51 из 51 тем. Карточки ниже используют
-          content-visibility, поэтому длинный марафон не должен тормозить интерфейс.
+          🏆 <b>Марафон:</b> ${coverage} тем с кратким ответом.
         </div>`:""}
       <div class="ml-gen-set">
         ${tasks.map(generatedCard).join("")}
@@ -803,9 +815,9 @@ x > -6"></textarea>
 
           host.innerHTML=`<div class="ml-loading">⚙ Проверяю локально…</div>`;
           try{
-            const check=await window.KitsuneMath.checkGenerated(task,answer);
+            const check=await checkTask(task,answer);
             touchSkill({type:generatedSkillType(task)},check.ok,task.topicId);
-            window.KitsuneLearning?.recordGeneratedResult?.(task,check.ok,answer);
+            if(task.source!=='curriculum')window.KitsuneLearning?.recordGeneratedResult?.(task,check.ok,answer);
             if(check.ok){
               host.innerHTML=`<div class="ml-success">✅ Верно! ${esc(check.answer)}</div>`;
             }else{
@@ -823,7 +835,7 @@ x > -6"></textarea>
     const mode=document.querySelector("#mlGenMode")?.value||"topic";
     const difficulty=Number(document.querySelector("#mlGenDifficulty")?.value||2);
     let count=Number(document.querySelector("#mlGenCount")?.value||8);
-    const chapterId=Number(document.querySelector("#mlGenChapter")?.value||0);
+    const chapterId=document.querySelector("#mlGenChapter")?.value||'0';
     const topicId=document.querySelector("#mlGenTopicId")?.value||courseTopics()[0]?.id;
     const host=document.querySelector("#mlGenerated");
     if(!host)return;
@@ -833,14 +845,31 @@ x > -6"></textarea>
 
     host.innerHTML=`<div class="ml-loading">⚙ Generator 2.0 подбирает задания и проверяет ключи…</div>`;
     try{
-      const pack=await window.KitsuneMath.generateSet({
-        mode,topicId,chapterId:chapterId||null,count,difficulty,
+      const pack=!classicGenerator?authoredPack({mode,topicId,chapterId,count,difficulty}):await window.KitsuneMath.generateSet({
+        mode,topicId,chapterId:Number(chapterId)||null,count,difficulty,
         weakTopicIds:mode==="adaptive"?weakTopicIds():[]
       });
       renderGeneratedPack(pack);
     }catch(e){
       host.innerHTML=`<div class="ml-error">⚠ ${esc(e.message||e)}</div>`;
     }
+  }
+
+  function checkTask(task,answer){
+    if(task.source==='curriculum')return Promise.resolve({ok:window.KitsunePlatform.matchAnswer(answer,task.answers),answer:task.answer});
+    return window.KitsuneMath.checkGenerated(task,answer);
+  }
+  function authoredPack({mode,topicId,chapterId,count,difficulty}){
+    let topics=courseTopics();
+    if(mode==='topic')topics=topics.filter(t=>t.id===topicId);
+    if((mode==='chapter'||mode==='homework')&&chapterId!=='0')topics=topics.filter(t=>String(t.chapter)===chapterId);
+    if(mode==='adaptive'){const weak=weakTopicIds();topics.sort((a,b)=>weak.indexOf(b.id)-weak.indexOf(a.id));}
+    const pools=topics.map(t=>({t,ex:(window.KitsuneTheoryContent?.[`${activeTrack}:${t.id}`]?.exercises||[]).filter(e=>!e.manual)})).filter(x=>x.ex.length);
+    let tasks=[];
+    for(const {t,ex} of pools){const ordered=[...ex].sort(()=>Math.random()-.5);for(const e of (mode==='marathon'?ordered.slice(0,1):ordered))tasks.push({source:'curriculum',trackId:activeTrack,topicId:t.id,topicTitle:t.title,chapterId:t.chapter,difficulty,kind:'text',question:e.q,answer:String(e.a[0]),answers:e.a,hint:e.hint,explanation:e.solution||e.hint});}
+    if(mode!=='marathon'){if(mode!=='adaptive')tasks.sort(()=>Math.random()-.5);tasks=tasks.slice(0,count);}
+    if(!tasks.length)throw new Error('В выбранной теме нет кратких заданий. Развёрнутые решения доступны в уроке.');
+    return {mode,tasks,coverage:[...new Set(tasks.map(t=>t.topicId))],chapters:[...new Set(tasks.map(t=>t.chapterId))]};
   }
 
   async function drawGraph(){
@@ -926,12 +955,14 @@ x > -6"></textarea>
     });
 
     document.querySelector("#mlGenMode")?.addEventListener("change",syncGeneratorModeUi);
+    document.querySelector("#mlClassicToggle")?.addEventListener("click",()=>{classicGenerator=!classicGenerator;renderTab()});
     document.querySelector("#mlGenChapter")?.addEventListener("change",syncGeneratorModeUi);
     document.querySelector("#mlGenerateBtn")?.addEventListener("click",generateTask);
     if(document.querySelector("#mlGenMode"))syncGeneratorModeUi();
   }
 
   function render(){
+    syncTrack();
     const content=document.querySelector("#content");
     if(!content)return;
     document.querySelector("#pageTitle").textContent="Kitsune Math Lab";
@@ -995,7 +1026,7 @@ x > -6"></textarea>
   window.KitsuneMathLab={
     version:VERSION,
     open:render,
-    addHomework(task){addHomeworkTasks(task)},
+    addHomework(task){syncTrack();addHomeworkTasks(task)},
     homework:()=>JSON.parse(JSON.stringify(homework)),
     skills:()=>JSON.parse(JSON.stringify(skills))
   };
@@ -1005,4 +1036,3 @@ x > -6"></textarea>
     document.addEventListener("DOMContentLoaded",bindMathLabRoute,{once:true});
   }
 })();
-

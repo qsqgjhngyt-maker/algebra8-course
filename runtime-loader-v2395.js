@@ -14,38 +14,38 @@
 
   const groups={
     mathlab:[
-      "./math-lab-v130.js?v=2.2.3",
-      "./camera-import-v210.js?v=2.2.3"
+      "./math-lab-v130.js?v=3.1.0-rc.2",
+      "./camera-import-v210.js?v=3.1.0-rc.2"
     ],
-    search:["./course-search-v200.js?v=2.2.3"],
-    offline:["./offline-center-v200.js?v=2.3.0-alpha"],
+    search:["./course-search-v200.js?v=3.1.0-rc.2"],
+    offline:["./offline-center-v200.js?v=3.1.0-rc.2"],
     progress:[
-      "./mastery-score-v220.js?v=2.3.0-alpha",
-      "./reliability-center-v220.js?v=2.3.0-alpha"
+      "./mastery-score-v220.js?v=3.1.0-rc.2",
+      "./reliability-center-v220.js?v=3.1.0-rc.2"
     ],
-    privacy:["./privacy-v1111.js?v=2.3.0-beta"],
+    privacy:["./privacy-v1111.js?v=3.1.0-rc.2"],
     cloud:[
-      "./cloud-config-v230.js?v=2.3.0-alpha.2",
-      "./hybrid-infrastructure-v230.js?v=2.3.0-beta.3.7.2",
-      "./access-admin-v235.js?v=2.3.0-beta.3.6.2"
+      "./cloud-config-v230.js?v=3.1.0-rc.2",
+      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
+      "./access-admin-v235.js?v=3.1.0-rc.2"
     ],
     assistant:[
       /* Dependency order from the confirmed 3.8.7 stack. */
-      "./neural-voice-v17.js?v=2.2.3",
-      "./kitsune-brain-v18.js?v=2.3.0-beta",
-      "./kitsune-voice-v19.js?v=2.3.0-beta",
-      "./kitsune-live-v110.js?v=2.2.3",
-      "./privacy-v1111.js?v=2.3.0-beta",
-      "./cloud-config-v230.js?v=2.3.0-alpha.2",
-      "./hybrid-infrastructure-v230.js?v=2.3.0-beta.3.7.2",
-      "./access-admin-v235.js?v=2.3.0-beta.3.6.2",
-      "./intelligence-router-v230.js?v=2.3.0-beta.3.3",
-      "./cloud-chat-ux-v231.js?v=2.3.0-beta.3.3",
-      "./local-voice-lab-v231.js?v=2.3.0-beta.3.3",
-      "./voice-conversation-v237.js?v=2.3.0-beta.3.7.2",
-      "./kitsune-presence-v238.js?v=2.3.0-beta.3.8.1",
-      "./voice-stability-v2387.js?v=2.3.0-beta.3.8.7",
-      "./chat-dialog-firewall-v231.js?v=2.3.0-beta.3.6.2"
+      "./neural-voice-v17.js?v=3.1.0-rc.2",
+      "./kitsune-brain-v18.js?v=3.1.0-rc.2",
+      "./kitsune-voice-v19.js?v=3.1.0-rc.2",
+      "./kitsune-live-v110.js?v=3.1.0-rc.2",
+      "./privacy-v1111.js?v=3.1.0-rc.2",
+      "./cloud-config-v230.js?v=3.1.0-rc.2",
+      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
+      "./access-admin-v235.js?v=3.1.0-rc.2",
+      "./intelligence-router-v230.js?v=3.1.0-rc.2",
+      "./cloud-chat-ux-v231.js?v=3.1.0-rc.2",
+      "./local-voice-lab-v231.js?v=3.1.0-rc.2",
+      "./voice-conversation-v237.js?v=3.1.0-rc.2",
+      "./kitsune-presence-v238.js?v=3.1.0-rc.2",
+      "./voice-stability-v2387.js?v=3.1.0-rc.2",
+      "./chat-dialog-firewall-v231.js?v=3.1.0-rc.2"
     ]
   };
 
@@ -96,6 +96,7 @@
   }
 
   async function ensureGroup(name,{urgent=false,reason="manual",background=false}={}){
+    if(name==='assistant'&&background)return false;
     const list=groups[name];
     if(!list)throw new Error("Unknown runtime group: "+name);
     if(groupReady(name))return true;
@@ -146,6 +147,8 @@
     try{
       await ensureGroup(group,{urgent:true,reason:"navigation:"+view,background:false});
       closeMobileSidebar();
+      const platform=window.KitsunePlatform;
+      if(platform?.selected?.()&&!platform.isLegacyMode?.()&&['progress','mastery','mistakes','search'].includes(view))return platform.renderUtility(view);
       const kernel=window.KitsuneAppKernel;
       if(kernel?.route)return kernel.route(view);
       if(typeof window.go==="function")return window.go(view);
@@ -201,7 +204,6 @@
     if(!isFull())return;
 
     /* Strong devices retain the convenient zero-config experience. */
-    schedule(()=>ensureGroup("assistant",{reason:"full-device-prewarm",background:true}).catch(()=>{}),850);
     schedule(()=>ensureGroup("mathlab",{reason:"full-device-prewarm",background:true}).catch(()=>{}),1450);
     schedule(async()=>{
       for(const name of ["progress","search","offline"]){

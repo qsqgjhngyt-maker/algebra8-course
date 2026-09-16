@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "appVersion": "3.1.0-alpha.6-WORK",
+  "checkedAt": null,
+  "mode": "pending-runtime-check",
+  "successCount": 0,
+  "totalCount": 5,
+  "changedCount": 0,
+  "allReachable": false,
+  "fromCache": false,
+  "sources": {}
+}

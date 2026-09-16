@@ -597,7 +597,7 @@ function v161CompareVoices(){
       return;
     }
     const voice=candidates[i];
-    if(note)note.textContent=`🎧 Вариант ${i+1}/${candidates.length}: ${voice.name}`;
+    if(note)note.textContent=`🎧 Вариант ${i+1} из ${candidates.length}: ${voice.name}`;
     v151Speak(
       `Вариант ${i+1}. Привет! Я Kitsune. Смотри, сейчас попробуем решить задачу вместе.`,
       {state:i===0?"happy":i===1?"explain":"wave",force:true,voiceOverride:voice,onDone:()=>{

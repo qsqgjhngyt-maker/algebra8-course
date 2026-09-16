@@ -881,6 +881,5 @@
     );
   }
 
-  scheduleWhisperRestoreAfterUpdate();
-  window.addEventListener("kitsune-pwa-updated",scheduleWhisperRestoreAfterUpdate,{once:true});
+  // A PWA update must not preload Whisper into memory.
 })();

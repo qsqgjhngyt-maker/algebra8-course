@@ -459,7 +459,7 @@
         <section class="ki-card">
           <span class="eyebrow">Локальная сводка</span><h3>Как идёт обучение</h3>
           <div class="ki-parent-stats">
-            <div><b>${s.practiced}/51</b><span>тем тренировались</span></div>
+            <div><b>${s.practiced} из 51</b><span>тем тренировались</span></div>
             <div><b>${s.totalAttempts}</b><span>проверенных ответов</span></div>
             <div><b>${s.accuracy===null?"—":s.accuracy+"%"}</b><span>точность</span></div>
             <div><b>${s.sessionCount}</b><span>адаптивных занятий</span></div>
@@ -557,9 +557,9 @@
         let level=Number(b.dataset.level||1);
         try{window.KitsuneMastery?.recordHint?.(task.topicId,level)}catch(e){}
         const fb=document.querySelector(`#kiFeedback_${prefix}_${index}`);
-        fb.innerHTML=`<div class="ki-hint-level"><b>Подсказка ${level}/4</b><p>${esc(hintLadder(task,level))}</p></div>`;
+        fb.innerHTML=`<div class="ki-hint-level"><b>Подсказка ${level} из 4</b><p>${esc(hintLadder(task,level))}</p></div>`;
         level=Math.min(4,level+1);b.dataset.level=String(level);
-        b.textContent=level===4?"🧮 Полный разбор 4/4":`💡 Подсказка ${level}/4`;
+        b.textContent=level===4?"🧮 Полный разбор 4 из 4":`💡 Подсказка ${level} из 4`;
       });
       document.querySelector(`[data-ki-voice="${key}"]`)?.addEventListener("click",()=>{
         const ctx={
@@ -599,7 +599,7 @@
     sessions=sessions.slice(-90);save();
     const pct=currentSession.answered?Math.round(currentSession.correct/currentSession.answered*100):0;
     const host=document.querySelector("#kiSessionResult");
-    if(host)host.innerHTML=`<div class="ki-session-finish"><h3>🦊 Занятие сохранено</h3><p>${currentSession.correct}/${currentSession.answered||0} правильных · ${pct}% · ${currentSession.durationMin} мин.</p><button class="secondary" id="kiRefreshRoute">Обновить маршрут</button></div>`;
+    if(host)host.innerHTML=`<div class="ki-session-finish"><h3>🦊 Занятие сохранено</h3><p>${currentSession.correct} из ${currentSession.answered||0} правильных · ${pct}% · ${currentSession.durationMin} мин.</p><button class="secondary" id="kiRefreshRoute">Обновить маршрут</button></div>`;
     document.querySelector("#kiRefreshRoute")?.addEventListener("click",render);
   }
 

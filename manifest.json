@@ -1,32 +1,32 @@
 {
-  "name": "Kitsune · Алгебра 8",
-  "short_name": "Kitsune Algebra 8",
+  "name": "Kitsune Math — Математика 7–11, ОГЭ и ЕГЭ",
+  "short_name": "Kitsune Math",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f6f8fc",
-  "theme_color": "#2563eb",
+  "theme_color": "#49b447",
   "lang": "ru",
   "icons": [
     {
-      "src": "./assets/icon-192.png",
+      "src": "./assets/kitsune-math-icon-192-v310.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/icon-512.png",
+      "src": "./assets/kitsune-math-icon-512-v310.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./assets/icon-maskable-192.png",
+      "src": "./assets/kitsune-math-icon-maskable-192-v310.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "./assets/icon-maskable-512.png",
+      "src": "./assets/kitsune-math-icon-maskable-512-v310.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -34,7 +34,7 @@
   ],
   "id": "./",
   "scope": "./",
-  "description": "Kitsune Algebra 8 v2.3.0-alpha: optional Hybrid Intelligence infrastructure with the complete local/offline course preserved.",
+  "description": "Интерактивная учебная платформа: математика 7–11 классы, ОГЭ и ЕГЭ.",
   "orientation": "any",
   "categories": [
     "education"

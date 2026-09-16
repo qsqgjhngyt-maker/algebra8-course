@@ -1,0 +1,16 @@
+✔ health reports readiness without exposing secrets (16.0155ms)
+✔ health distinguishes missing configuration (0.3673ms)
+✔ wrong Origin is rejected (0.2811ms)
+✔ preflight allows only configured Origin (0.2315ms)
+✔ disabled chat fails before upstream (0.3451ms)
+✔ chat rejects missing signed enrollment without contacting model (1.1278ms)
+✔ unrecognized challenge purpose is rejected (0.4347ms)
+✔ removed voice route is not advertised as live API (0.32ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.1715

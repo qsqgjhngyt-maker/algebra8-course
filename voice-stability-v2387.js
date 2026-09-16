@@ -43,6 +43,7 @@
   let seq=0;
 
   let sessionBusy=false;
+  let sessionEpoch=0;
   let recording=false;
   let stream=null;
   let audioCtx=null;
@@ -314,24 +315,26 @@
 
     const w=ensureWorker();
     const timeout=mode==="base"?150000:120000;
+    const preferred=await preferredBackend(mode);
+    if(w!==worker)return false;
     const promise=createWaiter("load",timeout);
 
     w.postMessage({
       type:"load",
       model:mode,
-      preferred:await preferredBackend(mode)
+      preferred
     });
 
     try{
       await promise;
       return workerReady;
     }finally{
-      workerLoading=false;
-      updateSettingsUi();
+      if(w===worker){workerLoading=false;updateSettingsUi();}
     }
   }
 
   async function prepareWorker(){
+    const epoch=sessionEpoch;
     const requested=preferredModel();
 
     if(workerReady&&workerMode===requested)return true;
@@ -341,6 +344,7 @@
       try{
         return await loadRequestedModel(requested);
       }catch(error){
+        if(epoch!==sessionEpoch)throw error;
         if(requested!=="base")throw error;
 
         /* Never leave the UI hanging forever on Base.
@@ -353,6 +357,7 @@
         baseFallbackActive=true;
         await releaseOwnWorker();
         await sleep(180);
+        if(epoch!==sessionEpoch)return false;
 
         return await loadRequestedModel("tiny");
       }
@@ -361,7 +366,7 @@
     try{
       return await preparePromise;
     }finally{
-      preparePromise=null;
+      if(epoch===sessionEpoch)preparePromise=null;
     }
   }
 
@@ -392,7 +397,7 @@
     await sleep(isIOSLike()?160:50);
   }
 
-  async function beginDialogVoiceSession(){
+  async function beginDialogVoiceSession(epoch=sessionEpoch){
     if(!dialogOpen())return;
 
     clearTimeout(delayedReleaseTimer);
@@ -409,18 +414,21 @@
     }
 
     await stopWakeOnce();
+    if(epoch!==sessionEpoch||!dialogOpen())return;
 
     /* beta.3.8.6: free BOTH old Whisper and Piper exactly once per dialog.
        beta.3.8.4 bypassed Piper for speaking, but did not actually free
        an already prepared Piper runtime. That left Piper + pinned Whisper
        resident together and could still push WebKit over its memory budget. */
     await releaseLegacyWhisperOnce();
+    if(epoch!==sessionEpoch||!dialogOpen())return;
 
     if(isIOSLike()&&!piperReleasedForDialog){
       try{await window.KitsuneLiveConversation?.release?.()}catch{}
       piperReleasedForDialog=true;
       await sleep(220);
     }
+    if(epoch!==sessionEpoch||!dialogOpen())return;
 
     /* Stop any residual lightweight/system speech before opening microphone. */
     try{wrappedStopSpeech?.()}catch{}
@@ -430,6 +438,7 @@
   }
 
   function endDialogVoiceSession(){
+    stopUnified();
     clearTimeout(retryTimer);
     stopSystemSpeech();
     retryBudget=1;
@@ -771,12 +780,12 @@
     resolver?.({pcm,rate,heard,reason});
   }
 
-  async function captureUtterance(){
+  async function captureUtterance(epoch){
     if(!navigator.mediaDevices?.getUserMedia){
       throw new Error("Микрофон недоступен в этом браузере.");
     }
 
-    stream=await navigator.mediaDevices.getUserMedia({
+    const acquired=await navigator.mediaDevices.getUserMedia({
       audio:{
         channelCount:1,
         echoCancellation:true,
@@ -785,6 +794,8 @@
       },
       video:false
     });
+    if(epoch!==sessionEpoch||!dialogOpen()||document.hidden){acquired.getTracks().forEach(t=>t.stop());return null;}
+    stream=acquired;
 
     const AC=window.AudioContext||window.webkitAudioContext;
     audioCtx=new AC({latencyHint:"interactive"});
@@ -792,6 +803,7 @@
     if(audioCtx.state==="suspended"){
       try{await audioCtx.resume()}catch{}
     }
+    if(epoch!==sessionEpoch)return null;
 
     sampleRate=audioCtx.sampleRate||48000;
     sourceNode=audioCtx.createMediaStreamSource(stream);
@@ -867,6 +879,8 @@
   async function transcribe(samples){
     const id=++seq;
     const w=ensureWorker();
+    const preferred=await preferredBackend();
+    if(w!==worker)throw new Error("ASR session cancelled");
 
     const promise=new Promise((resolve,reject)=>{
       const timer=setTimeout(()=>{
@@ -883,7 +897,7 @@
       type:"transcribe",
       id,
       model:preferredModel(),
-      preferred:await preferredBackend(),
+      preferred,
       samples:copy.buffer
     },[copy.buffer]);
 
@@ -946,14 +960,17 @@
     }
 
     if(!fromRetry)retryBudget=1;
+    const epoch=++sessionEpoch;
     sessionBusy=true;
     updateSettingsUi();
 
     try{
-      await beginDialogVoiceSession();
+      await beginDialogVoiceSession(epoch);
+      if(epoch!==sessionEpoch||!dialogOpen()||document.hidden)return false;
 
       /* No model preparation here on second/third/etc turn if worker is ready. */
-      const captured=await captureUtterance();
+      const captured=await captureUtterance(epoch);
+      if(epoch!==sessionEpoch||!captured||!dialogOpen()||document.hidden)return false;
 
       if(!captured.heard||captured.reason==="no_speech"){
         setStatus("Я не услышала вопрос. Попробуй сказать чуть ближе к микрофону.","warn");
@@ -972,6 +989,7 @@
 
       setStatus("🧠 Преобразую речь в нормальный текст…","thinking");
       const text=await transcribe(samples);
+      if(epoch!==sessionEpoch||!dialogOpen()||document.hidden)return false;
       const problem=transcriptProblem(text);
 
       const input=document.querySelector("#v19DialogInput");
@@ -990,6 +1008,7 @@
       setStatus(`🎙️ Я услышала: «${text}»`,"ok");
 
       await sleep(220);
+      if(epoch!==sessionEpoch||!dialogOpen()||document.hidden)return false;
 
       if(input)input.value="";
       await originalSend?.(text);
@@ -997,6 +1016,7 @@
       /* IMPORTANT: worker remains pinned on iPhone until dialog closes. */
       return true;
     }catch(error){
+      if(epoch!==sessionEpoch)return false;
       cleanupCapture();
 
       setStatus(
@@ -1009,19 +1029,17 @@
       scheduleOneRetry();
       return false;
     }finally{
-      sessionBusy=false;
-      setMicUi(false);
-      updateSettingsUi();
+      if(epoch===sessionEpoch){sessionBusy=false;setMicUi(false);updateSettingsUi();}
     }
   }
 
   function stopUnified(){
+    sessionEpoch++;
     clearTimeout(retryTimer);
-
-    if(recording){
-      finishCapture("manual");
-      return true;
-    }
+    if(recording)finishCapture("cancel");
+    if(sessionBusy)releaseOwnWorker().catch(()=>{});
+    sessionBusy=false;
+    setMicUi(false);
 
     try{window.speechSynthesis?.cancel?.()}catch{}
     systemSpeaking=false;
@@ -1030,6 +1048,7 @@
   }
 
   async function releaseUnified(){
+    stopUnified();
     clearTimeout(retryTimer);
     if(recording)finishCapture("release");
     await releaseOwnWorker();
@@ -1161,7 +1180,7 @@
       event.stopImmediatePropagation();
 
       if(recording){
-        stopUnified();
+        finishCapture("manual");
       }else{
         startUnified(false,true).catch(()=>{});
       }
@@ -1264,6 +1283,7 @@
 
     document.addEventListener("visibilitychange",()=>{
       if(document.hidden){
+        stopUnified();
         clearTimeout(retryTimer);
         stopSystemSpeech();
         if(recording)finishCapture("hidden");
@@ -1273,6 +1293,7 @@
     });
 
     window.addEventListener("pagehide",()=>{
+      stopUnified();
       clearTimeout(retryTimer);
       if(recording)finishCapture("pagehide");
       releaseOwnWorker().catch(()=>{});

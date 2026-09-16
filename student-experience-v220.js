@@ -268,7 +268,7 @@
         host.appendChild(row);
       }
     });
-    sum.innerHTML=`<b>${result.pass}/${result.total} успешно</b> · предупреждений ${result.warn} · ошибок ${result.fail}`;
+    sum.innerHTML=`<b>${result.pass} из ${result.total} успешно</b> · предупреждений ${result.warn} · ошибок ${result.fail}`;
     sum.className=`sx-test-summary ${result.fail?"fail":result.warn?"warn":"pass"}`;
     btn.disabled=false;btn.textContent="↻ Повторить";
   }

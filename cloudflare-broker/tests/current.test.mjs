@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import worker from '../src/index.js';
+const origin='https://owner.github.io';
+const env={ALLOWED_ORIGIN:origin,GOOGLE_CLIENT_ID:'test-client',QWEN_TEMP_TOKEN_URL:'https://model.example/token',QWEN_API_BASE:'https://model.example/v1/',QWEN_MODEL:'qwen3.7-plus',QWEN_REGION:'test',DASHSCOPE_API_KEY:'unit-test-placeholder-key',GRANT_SIGNING_SECRET:'unit-test-placeholder-signing-key-32',PARENT_GOOGLE_SUB:'unit-owner',CHAT_ENABLED:'true'};
+const req=(url,body,headers={})=>new Request('https://broker.example'+url,{method:body?'POST':'GET',headers:{Origin:origin,...headers,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+test('health reports readiness without exposing secrets',async()=>{const r=await worker.fetch(req('/v1/health'),env),s=await r.text();assert.equal(r.status,200);assert.equal(JSON.parse(s).ready,true);assert.equal(JSON.parse(s).registryReady,false);assert(!s.includes(env.DASHSCOPE_API_KEY));assert.match(r.headers.get('cache-control'),/no-store/)});
+test('health distinguishes missing configuration',async()=>{const r=await worker.fetch(req('/v1/health'),{...env,DASHSCOPE_API_KEY:''});assert.equal((await r.json()).ready,false)});
+test('wrong Origin is rejected',async()=>{const r=await worker.fetch(req('/v1/health',null,{Origin:'https://other.example'}),env);assert.equal(r.status,403)});
+test('preflight allows only configured Origin',async()=>{const r=await worker.fetch(new Request('https://broker.example/v1/qwen/chat',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST'}}),env);assert(r.status>=200&&r.status<300);assert.equal(r.headers.get('Access-Control-Allow-Origin'),origin)});
+test('disabled chat fails before upstream',async()=>{const r=await worker.fetch(req('/v1/qwen/chat',{message:'Привет'}),{...env,CHAT_ENABLED:'false'});assert.equal(r.status,403)});
+test('chat rejects missing signed enrollment without contacting model',async()=>{let called=false;const saved=globalThis.fetch;globalThis.fetch=async()=>{called=true;throw new Error('unexpected upstream')};try{const r=await worker.fetch(req('/v1/qwen/chat',{message:'Расскажи о звёздах'}),env);assert.equal(r.status,401);assert.equal(called,false);assert.match(r.headers.get('cache-control'),/no-store/)}finally{globalThis.fetch=saved}});
+test('unrecognized challenge purpose is rejected',async()=>{const r=await worker.fetch(req('/v1/auth/challenge',{purpose:'invalid'}),env);assert.equal(r.status,400)});
+test('removed voice route is not advertised as live API',async()=>{const r=await worker.fetch(req('/v1/qwen/tts',{text:'Привет'}),env);assert.equal(r.status,404)});

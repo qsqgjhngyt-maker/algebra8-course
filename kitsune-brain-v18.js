@@ -1087,6 +1087,5 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
 
   // После PWA-обновления восстанавливаем только уже скачанную модель.
   // При обычном запуске сохраняется прежний lazy-start.
-  scheduleBrainRestoreAfterUpdate();
-  window.addEventListener("kitsune-pwa-updated",scheduleBrainRestoreAfterUpdate,{once:true});
+  // Cached models remain on disk until the user explicitly requests them.
 })();

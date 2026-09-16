@@ -71,7 +71,7 @@
   async function testGenerator(){
     const r=await window.KitsuneMath?.generateSet?.({mode:"marathon",difficulty:1});
     if(!r||r.tasks?.length!==51||new Set(r.tasks.map(x=>x.topicId)).size!==51)throw new Error("неполное покрытие");
-    return "51/51 тем";
+    return "51 из 51 тем";
   }
   async function testSearch(){
     const r=window.KitsuneCourseSearch?.search?.("Виета",3)||[];
@@ -81,7 +81,7 @@
   async function testCache(){
     if(!("caches" in window))throw new Error("CacheStorage отсутствует");
     const names=await caches.keys();
-    const app=names.find(x=>x.startsWith("algebra8-v"));
+    const app=names.find(x=>x===`kitsune-math-${window.KITSUNE_APP_VERSION}`)||names.find(x=>x.startsWith("kitsune-math-")&&!x.startsWith("kitsune-math-runtime-"));
     if(!app)throw new Error("app shell cache не найден");
     return app;
   }
@@ -142,10 +142,11 @@
     if(!confirm("Восстановить файлы приложения? Учебный прогресс и AI-модели не удалятся."))return false;
     const names=await caches.keys();
     for(const name of names){
-      if(name.startsWith("algebra8-v"))await caches.delete(name);
+      if(name.startsWith("algebra8-v")||name.startsWith("kitsune-math-"))await caches.delete(name);
     }
     const reg=await navigator.serviceWorker?.getRegistration?.();
-    try{await reg?.update?.()}catch(e){}
+    // Re-register on reload: update() alone does not reinstall an unchanged SW.
+    await reg?.unregister?.();
     sessionStorage.setItem("a8_repair_notice","1");
     location.reload();
     return true;
