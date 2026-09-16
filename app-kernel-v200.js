@@ -1,90 +1,65 @@
-{
-  "app.js": "76d3d8343762f47f8d7793952497352c7145b85b1abc8910825ea822f099d863",
-  "chapter1-v02.js": "b30addc4eb7b4a0df66d4e88801dc9b630e7b5e89a21e06e7d8f9cd1d4e8d958",
-  "course-theory-v120.js": "7cee9eb3e45be4aa344aa3d40d23c2e2cc3f55c1fb89eef2c4ac05534e2289e1",
-  "course-v1.js": "bdf9d69814843ffefa5bd6a0405572536ebdf42c5e6ba57ed5ce3286c0d0eed3",
-  "platform-content-egeb-1-v310.js": "9fcd8599d6313ea43bf3ddc4cc81a02994adde55aa0e27412aaf87f02f3683b1",
-  "platform-content-egeb-2-v310.js": "9d59039cf0d48598ff2fdbd46ec66d1b9f8ce5c6f94bf837dff5c05b31fdd667",
-  "platform-content-egeb-3-v310.js": "96f54a1f21a5ae5a07015342a547897fd1b3b1590d95b83f0bf577e11f684e4d",
-  "platform-content-egeb-4-v310.js": "f3f6f1e24cac41edde5f0bd60f21e1195cdfb9931d7ca1b9910d193f511145ed",
-  "platform-content-egeb-5-v310.js": "bd28741f72ef2206c7e42252b03480fbae788ced92b49dfa45d4268327c04d57",
-  "platform-content-egeb-6-v310.js": "6d40df4b0b0b59228906ccf3eaaf0104299681cc2a6b685cf5aee7bb48ec51ec",
-  "platform-content-egep-1-v310.js": "de6cf6922d530f6f34bc48a7ade2b988ab17397904ad0eba7d9667d7bc5ba47c",
-  "platform-content-egep-2-v310.js": "2db3990e5ed529927764bd79e7cf6ff454138a62136ce444a052f9d56394476c",
-  "platform-content-egep-3-v310.js": "e63538dd77bd4507fe02ea406ff632c51cdddc5bcc4509d7d05ec1801e70622f",
-  "platform-content-egep-4-v310.js": "726f815ab66f3f935cc249bb8b1be5853c20aa3e35eb01e662af46e4443e5830",
-  "platform-content-egep-5-v310.js": "4caa3c927fb0aea3f5841054f1c31b89c1386d496ebc28f2dcfe858af873cf0d",
-  "platform-content-egep-6-v310.js": "207fe491771fd3cf88155c33cd528d4770be97cfbe622eab826ff162d653bba1",
-  "platform-content-egep-7-v310.js": "bb0ba3b1a9a281490ed35ecd24961c3ea5dfc9e2a9e5be52ea8fddfc50296842",
-  "platform-content-egep-8-v310.js": "0a67809ee60680971cd4453ff4dda3eaf4ea699cc4d55a6e49c7c9194188c795",
-  "platform-content-egep-9-v310.js": "fcb2024da666b4b2a8d582d0e68e28e32f9c6fb18732454f1ad2a3b5a21f842f",
-  "platform-content-grade10-a1-v310.js": "bba1a80918aec02a429d73d4c83d7bfb37b882eb66ca63250cfde2bf5b517183",
-  "platform-content-grade10-a2-v310.js": "72c7420617375a1660d28075819150d43281cb501f17d2120bd33c17e9d35802",
-  "platform-content-grade10-a3-v310.js": "e0575c7cf7e067fe4f82d5477aed16fdcb7d6dce4ec91a3cca151cbf31bb74cc",
-  "platform-content-grade10-a4-v310.js": "0670f8e09b3749e55df224d313d4485954bb4f69eaf75f9f37b4f538fa9b891e",
-  "platform-content-grade10-a5-v310.js": "e266b0b6818c50fb8f7170fb87b005a4d474017703e2a2ec17ac4e910febe959",
-  "platform-content-grade10-a6-v310.js": "7f4b090398772555823463ea60962cce21cd3bdf68e5b236feddacf6a171384a",
-  "platform-content-grade10-g1-v310.js": "ce5f61a07512c1d19d77e9613bdeef8a2ef1a1c4cfbe66d592df16e5e2434912",
-  "platform-content-grade10-g2-v310.js": "ddd6de27a74f2afb9ab15d6bbd4eed57313da3240f50d0b87af47a0bcc4fb847",
-  "platform-content-grade10-g3-v310.js": "4011ecfdd6742bf481d6c4bff2e97ddf32574e55a95d0bd82351cf5451e9150d",
-  "platform-content-grade10-s1-v310.js": "4eed9218736233546bc2b3da8a8918d968376cb257d109736f18a1a7aa33940e",
-  "platform-content-grade10-s2-v310.js": "d7043d85d4f00c6072a9f23fe50b7af2b62f26c59046987b9dc8149c0a848dcb",
-  "platform-content-grade10-s3-v310.js": "9453da829f7eaaa666587b70f5e8d0f0b260b4590e18d717ba03cb3618b89810",
-  "platform-content-grade11-a1-v310.js": "4ac5ddc375c42db06848d6750d59948573aa3b91fba248f8d009a7fb46fb5a84",
-  "platform-content-grade11-a2-v310.js": "9e87680168902eda8c6dabf827bbb7195681ed6c3c1f9d27b20d98c9de96f2bf",
-  "platform-content-grade11-a3-v310.js": "cb27c13ed477dd7eb2a4294b51383f6360c1441ddee650f6a67cf4dbb62c228d",
-  "platform-content-grade11-a4-v310.js": "91f08faef1b787eda74c1aeba5469c0f2eab3f799c82e093dda2e27e28f3a0bf",
-  "platform-content-grade11-a5-v310.js": "9689db81e6ddebf17a29fb08153b14c6f6077c0fd95712ccd00b88c7484317e3",
-  "platform-content-grade11-a6-v310.js": "64e78e93ad7e4b3269d457eb0ab35207c042c18189d9ebbd0458be851064cd99",
-  "platform-content-grade11-g1-v310.js": "ba183bd42fdace418efabf69410904c41a437cd5723e0bfc05d9844f23f390bf",
-  "platform-content-grade11-g2-v310.js": "3b0ea52118291c5140e5aaff7dff7839186fad06f90abe5dc39aba4fb5463447",
-  "platform-content-grade11-g3-v310.js": "f9030d19a3b3370c60558b7120b82ef6bc091f8f2d2bd0ef7833f105025b96b3",
-  "platform-content-grade11-s1-v310.js": "f8c5563543a4103152f4549d2c9dacf8f65827de4cb4c2aa78c15f033f3dab2b",
-  "platform-content-grade11-s2-v310.js": "5460d0435374a70065a66d94eb7969712ab756d882666ee5cc6db1f9905dd729",
-  "platform-content-grade7-a1-v310.js": "f3aca71846b0fed96b406e987da1eefcc14a2fbcb46aa566af368de74929b0ca",
-  "platform-content-grade7-a2-v310.js": "e3265994280a55315ee182ba6090214e502ada99694203408569b847c0a69f39",
-  "platform-content-grade7-a3-v310.js": "fcd10fd062299c46694ae0ef16e35083e32f691c4868f6a0a8f605dbd292c59b",
-  "platform-content-grade7-a4-v310.js": "ae7e0c6eeeb6a421e99d28ad38fe3976bc0c3e1021202ec96d70d0564e79d010",
-  "platform-content-grade7-a5-v310.js": "38c22cff81c4120595b74f63f232762da86461d8f1c8a1e6f061fe81e9cd7552",
-  "platform-content-grade7-a6-v310.js": "8c516dc5851e525b925cac8aef5500551416e4222301d313c033541e0037bef6",
-  "platform-content-grade7-a7-v310.js": "2f0addbb452ce756a60dd0db557fd1b18bdd71f9e928a452a912c900452d0335",
-  "platform-content-grade7-g1-v310.js": "42a59bd4d4756e7294c98a837cdf6beafd4bd6b38c7ed53d991b79cc21cae89e",
-  "platform-content-grade7-g2-v310.js": "5a5d10bc1577ade2bb81d9e202e3f3976b73d8e04c2c0b11c76c0757a79a0c8e",
-  "platform-content-grade7-g3-v310.js": "8c1d64eeee20e885e05fde34572f1d552178901955d43842e33e959e0dac092e",
-  "platform-content-grade7-g4-v310.js": "379ad30ff070118d829a51af8bb48dbe1d990736a11f6473d52b924f723331bb",
-  "platform-content-grade7-g5-v310.js": "3212e2770c54c7f0244a5c012c85e4ae6b8d1d814053b9736815a9e56c4a36e9",
-  "platform-content-grade7-s1-v310.js": "8523d6d606747c1a17c4f3508d2b33680fc935612713c13773b08b12f48f8c17",
-  "platform-content-grade7-s2-v310.js": "1fbc79a218d761c9a45dd0189216f05b8f0c9de1a8b2b5e200f8f9af7e168aa6",
-  "platform-content-grade7-s3-v310.js": "301119f401ff228cf44520a18bf4f2b2d8df2686991695c75eafdea10c701dba",
-  "platform-content-grade8-algebra-v311.js": "db591359c538920304d5e8775137d93d0f7b7034f8677834df7edf3ca5db4980",
-  "platform-content-grade8-frp-v311.js": "3d6d6b5e845a881d2a56a536bd65c60c3f45d39ddc97de8c0966870093209bab",
-  "platform-content-grade8-g1-v310.js": "2064c19e0969047e733aefc3890c17e40a9de0cac41ca3fa9d387f3cd4a81239",
-  "platform-content-grade8-g2-v310.js": "ac029b6334c4c49e8cbc530b68f7ed507358c6f82247716d518068ea5eb88102",
-  "platform-content-grade8-g3-v310.js": "1976af901cd23b9c30275265d47537dddee86cbbcb5a1fac7c1359b750b81cb6",
-  "platform-content-grade8-g4-v310.js": "17eda37d2f2be56b75df6d306f897abec57d7925889c86cd7293f88e271a89b1",
-  "platform-content-grade8-g5-v310.js": "fe20aaf081c8cb222e87f23b91eba42cabc073cb9b0a9bd748c886f16d804750",
-  "platform-content-grade8-s1-v310.js": "3029463ff373ee6ed1d79ce01986320bebb928d37431de85eb4d667e5e59fc51",
-  "platform-content-grade8-s2-v310.js": "19daf8b1bc8b7b4c3822a5804279fbb6cf26eb9c95000612da919c9ac1ab7048",
-  "platform-content-grade8-s3-v310.js": "f4371d306472914082fcdcef074e53581894df20eb759d5aabe000f26c6ae019",
-  "platform-content-grade9-a1-v310.js": "aa82b0c4311287499c5223a682c7ef2598ec44e00d71db75113a2e172026eb4b",
-  "platform-content-grade9-a2-v310.js": "4e88342fae331fef85e047b9707c1f5b544ee3bdc1a454fe6c44f844ef40d986",
-  "platform-content-grade9-a3-v310.js": "0f83d8eeac84230e556f1d7379e6d26dd356ec9f116d33e8addcbad5c0a104c9",
-  "platform-content-grade9-a4-v310.js": "5f74118c4c4038cbd5d5d85f8d0eecdd94a9b0353839fdb25cbf6560a073cc39",
-  "platform-content-grade9-a5-v310.js": "73f83ebacd4f84dd974da6f75f6cc4d106bc2ff21ab54ccbe5364f6ea4fa6701",
-  "platform-content-grade9-a6-v310.js": "bf2efbdf3cedbb591c75b6bb1e9314e7d196bc6437eafe8d97298aa9f61342d4",
-  "platform-content-grade9-g1-v310.js": "ef0eb7c3551167e525922c98a50eb09cff35358a9a3f590d812f73deff515fd2",
-  "platform-content-grade9-g2-v310.js": "af94965bed3d60c36776665613456c89301a7b278d3ab218ae83e59c184fff7d",
-  "platform-content-grade9-g3-v310.js": "df0c14db53e773351337fb6131e717ff6e863f691b08a9e2624c61135cf0da15",
-  "platform-content-grade9-g4-v310.js": "cff853bb94962fa08bcc882729c6de940a8215c85ccecd4c477edd3533e1a51e",
-  "platform-content-grade9-s1-v310.js": "7928a1ce40cfa9201a3d5feb59d4c377692ad35a93f61caba7415d3a08ecb180",
-  "platform-content-grade9-s2-v310.js": "04edc9788e0fe0d754f228c993132d49c1563ff4f39db30208405cd9a0be27f5",
-  "platform-content-oge-1-v310.js": "2e93596d01ae5b778af67b70f331ab9941e1f54e190ff92ca4975f139514e553",
-  "platform-content-oge-2-v310.js": "88d41b2337a5a89135f95bd59994050ab79eee98ccf7820c7224c78317d47b51",
-  "platform-content-oge-3-v310.js": "1f879bf6584b5b43a68a70b74afe66164cd89a7cc722ddc0e1253eb84aaf05b3",
-  "platform-content-oge-4-v310.js": "36a04630fb761054d1cb04665771ada1b6255a9e580e131e984a203c85c71a8c",
-  "platform-content-oge-5-v310.js": "e132cd83faeabc02154e456384c9b1f5ca95dcf9148af19e03b136eda44e7b69",
-  "platform-content-oge-6-v310.js": "1f50ab6b4a1407a1084cc403a69a8e29c38ae01a191da1c27e3f0ae0a5e558ba",
-  "platform-content-oge-7-v310.js": "0069cb1619e610421bec63cfe23d0b599fdef486c5a1dcd90bbf90a4693899b0",
-  "platform-content-oge-8-v310.js": "a1a8cde43957123a8df3ef0c0ef17c1110ae373d9ccd7f04a806e10217fe2c3a",
-  "platform-content-v300.js": "8b4604cbd31ec25d3694fba26a67959b5e4d2622be81d36c41d8cd7f4e4e32e1"
-}
+
+/* =====================================================================
+   Kitsune App Kernel v2.2.3
+   Final navigation authority. Loaded after all legacy route modules.
+   ===================================================================== */
+(() => {
+  "use strict";
+  const VERSION=window.KITSUNE_APP_VERSION||"2.2.3";
+  const legacyGo=typeof window.go==="function"?window.go:null;
+
+  function closeMobileSidebar(){
+    try{
+      document.querySelector("#sidebar")?.classList.remove("open");
+      document.body.classList.remove("sidebar-mobile-open");
+      document.querySelector("#sidebarScrim")?.setAttribute("aria-hidden","true");
+    }catch(e){}
+  }
+
+  function route(view){
+    switch(String(view||"")){
+      case "home": return typeof renderHome==="function"?renderHome():legacyGo?.(view);
+      case "course": return typeof renderCourse==="function"?renderCourse():legacyGo?.(view);
+      case "trainer": return typeof renderTrainer==="function"?renderTrainer():legacyGo?.(view);
+      case "mathlab": return window.KitsuneMathLab?.open?.()||window.renderMathLab?.();
+      case "route": return window.KitsuneLearning?.render?.();
+      case "search": return window.KitsuneCourseSearch?.render?.();
+      case "offline": return window.KitsuneOffline?.render?.();
+      case "adult": return window.KitsuneStudentExperience?.routeAdult?.();
+      case "chapterfinal":
+        if(typeof renderChapterFinal==="function")return renderChapterFinal();
+        if(typeof v1RenderChapterFinal==="function")return v1RenderChapterFinal(1,"test");
+        return legacyGo?.(view);
+      case "mastery": return typeof renderMastery==="function"?renderMastery():legacyGo?.(view);
+      case "mistakes": return typeof renderMistakes==="function"?renderMistakes():legacyGo?.(view);
+      case "progress": return typeof renderProgress==="function"?renderProgress():legacyGo?.(view);
+      default: return legacyGo?.(view);
+    }
+  }
+
+  window.go=route;
+  window.KitsuneAppKernel={version:VERSION,route};
+
+  document.addEventListener("click",e=>{
+    if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    /* Inline Tutor controls must never be interpreted as app navigation,
+       even if a future layout places them inside an element with data-view. */
+    if(e.target.closest?.(".v16-tutor-btn,.v173-inline-tutor,.v173-alfi-shortcut"))return;
+    const target=e.target.closest?.("[data-view],[data-view-jump]");
+    if(!target)return;
+    const view=target.dataset.view||target.dataset.viewJump;
+    if(!view)return;
+
+    /* Document-capture authority prevents later/legacy go() wrappers from
+       swallowing a route. This is intentionally the single final router. */
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    closeMobileSidebar();
+    route(view);
+  },true);
+
+  window.addEventListener("popstate",()=>{
+    const view=new URLSearchParams(location.search).get("view");
+    if(view)route(view);
+  });
+})();

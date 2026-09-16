@@ -1,0 +1,17 @@
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.wrangler/
+*.zip
+test-results/
+playwright-report/
+tests/release/*-results.json
+tests/release/*-settled.png
+tests/release/desktop-home.png
+tests/release/mobile-lesson.png
+tests/release/upgrade-screenshot.png
