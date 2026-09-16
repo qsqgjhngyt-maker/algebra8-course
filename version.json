@@ -1,6 +1,6 @@
 {
   "name": "Kitsune Math 7–11",
-  "version": "3.1.0-rc.2",
+  "version": "3.1.0-rc.5",
   "channel": "release-candidate",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
@@ -9,7 +9,7 @@
   "generator_topics": 551,
   "classic_generator_topics": 51,
   "generator_mode": "selected-course-authored-exercises",
-  "release": "GITHUB_UNIFIED_COURSE_RC2",
+  "release": "GITHUB_RC5_LIVING_MOTION_REPAIR",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -172,7 +172,13 @@
     "all-course-renderers-postformatted",
     "inline-fraction-math-axis-alignment",
     "fraction-text-single-visual-line",
-    "formula-line-height-adjustment"
+    "formula-line-height-adjustment",
+    "cinematic-startup-intro",
+    "cinematic-startup-living-motion-v3",
+    "startup-mode-auto-full-short-off",
+    "startup-edge-vignette-pulse",
+    "startup-no-crossfade-double-mascot",
+    "startup-offline-precache"
   ],
   "curriculum_topics": 551,
   "icon_version": "math-v310"

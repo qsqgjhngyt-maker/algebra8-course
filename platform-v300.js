@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const VERSION="3.1.0-rc.2";
+  const VERSION="3.1.0-rc.5";
   let legacyMode=false;
   const KEY="kitsune_math_track_v300";
   const catalog=window.KitsuneCurriculum;

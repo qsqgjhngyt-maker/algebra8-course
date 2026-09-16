@@ -14,38 +14,38 @@
 
   const groups={
     mathlab:[
-      "./math-lab-v130.js?v=3.1.0-rc.2",
-      "./camera-import-v210.js?v=3.1.0-rc.2"
+      "./math-lab-v130.js?v=3.1.0-rc.5",
+      "./camera-import-v210.js?v=3.1.0-rc.5"
     ],
-    search:["./course-search-v200.js?v=3.1.0-rc.2"],
-    offline:["./offline-center-v200.js?v=3.1.0-rc.2"],
+    search:["./course-search-v200.js?v=3.1.0-rc.5"],
+    offline:["./offline-center-v200.js?v=3.1.0-rc.5"],
     progress:[
-      "./mastery-score-v220.js?v=3.1.0-rc.2",
-      "./reliability-center-v220.js?v=3.1.0-rc.2"
+      "./mastery-score-v220.js?v=3.1.0-rc.5",
+      "./reliability-center-v220.js?v=3.1.0-rc.5"
     ],
-    privacy:["./privacy-v1111.js?v=3.1.0-rc.2"],
+    privacy:["./privacy-v1111.js?v=3.1.0-rc.5"],
     cloud:[
-      "./cloud-config-v230.js?v=3.1.0-rc.2",
-      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
-      "./access-admin-v235.js?v=3.1.0-rc.2"
+      "./cloud-config-v230.js?v=3.1.0-rc.5",
+      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.5",
+      "./access-admin-v235.js?v=3.1.0-rc.5"
     ],
     assistant:[
       /* Dependency order from the confirmed 3.8.7 stack. */
-      "./neural-voice-v17.js?v=3.1.0-rc.2",
-      "./kitsune-brain-v18.js?v=3.1.0-rc.2",
-      "./kitsune-voice-v19.js?v=3.1.0-rc.2",
-      "./kitsune-live-v110.js?v=3.1.0-rc.2",
-      "./privacy-v1111.js?v=3.1.0-rc.2",
-      "./cloud-config-v230.js?v=3.1.0-rc.2",
-      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
-      "./access-admin-v235.js?v=3.1.0-rc.2",
-      "./intelligence-router-v230.js?v=3.1.0-rc.2",
-      "./cloud-chat-ux-v231.js?v=3.1.0-rc.2",
-      "./local-voice-lab-v231.js?v=3.1.0-rc.2",
-      "./voice-conversation-v237.js?v=3.1.0-rc.2",
-      "./kitsune-presence-v238.js?v=3.1.0-rc.2",
-      "./voice-stability-v2387.js?v=3.1.0-rc.2",
-      "./chat-dialog-firewall-v231.js?v=3.1.0-rc.2"
+      "./neural-voice-v17.js?v=3.1.0-rc.5",
+      "./kitsune-brain-v18.js?v=3.1.0-rc.5",
+      "./kitsune-voice-v19.js?v=3.1.0-rc.5",
+      "./kitsune-live-v110.js?v=3.1.0-rc.5",
+      "./privacy-v1111.js?v=3.1.0-rc.5",
+      "./cloud-config-v230.js?v=3.1.0-rc.5",
+      "./hybrid-infrastructure-v230.js?v=3.1.0-rc.5",
+      "./access-admin-v235.js?v=3.1.0-rc.5",
+      "./intelligence-router-v230.js?v=3.1.0-rc.5",
+      "./cloud-chat-ux-v231.js?v=3.1.0-rc.5",
+      "./local-voice-lab-v231.js?v=3.1.0-rc.5",
+      "./voice-conversation-v237.js?v=3.1.0-rc.5",
+      "./kitsune-presence-v238.js?v=3.1.0-rc.5",
+      "./voice-stability-v2387.js?v=3.1.0-rc.5",
+      "./chat-dialog-firewall-v231.js?v=3.1.0-rc.5"
     ]
   };
 

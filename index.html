@@ -18,8 +18,8 @@
              child-src 'self' blob: https://cdn.jsdelivr.net;
              frame-src https://accounts.google.com;
              connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com http://127.0.0.1:17865;" />
-  <meta name="kitsune-app-version" content="3.1.0-rc.2" />
-  <script src="./security-bootstrap-v1111.js?v=3.1.0-rc.2"></script>
+  <meta name="kitsune-app-version" content="3.1.0-rc.5" />
+  <script src="./security-bootstrap-v1111.js?v=3.1.0-rc.5"></script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#49b447" />
   <meta name="description" content="Kitsune Math — математика 7–11 классов, ОГЭ и ЕГЭ." />
@@ -27,8 +27,11 @@
   <link rel="icon" href="./assets/kitsune-math-favicon-64-v310.png" type="image/png" />
   <link rel="apple-touch-icon" sizes="180x180" href="./assets/kitsune-math-apple-touch-180-v310.png" />
   <link rel="preload" as="image" href="./assets/kitsune/kitsune-sprite-v1101.png" />
-  <link rel="stylesheet" href="./styles.css?v=3.1.0-rc.2" />
-  <link rel="stylesheet" href="./platform-v300.css?v=3.1.0-rc.2" />
+  <link rel="stylesheet" href="./styles.css?v=3.1.0-rc.5" />
+  <link rel="stylesheet" href="./platform-v300.css?v=3.1.0-rc.5" />
+  <link rel="stylesheet" href="./startup-intro.css?v=3.1.0-rc.5" />
+  <link rel="preload" as="image" type="image/webp" href="./assets/kitsune-startup-motion-v315.webp?v=3.1.0-rc.5" />
+  <link rel="preload" as="image" type="image/webp" href="./assets/kitsune-startup-idle-v315.webp?v=3.1.0-rc.5" />
   <title>Kitsune — Математика 7–11 · ОГЭ · ЕГЭ</title>
 
   <style id="kitsuneRuntime2395Style">
@@ -51,6 +54,24 @@
   </style>
 </head>
 <body>
+  <div id="kitsuneStartupIntro" class="kitsune-startup-intro" role="dialog" aria-label="Запуск Kitsune Math" aria-modal="true">
+    <div class="kitsune-startup-intro__aurora" aria-hidden="true"></div>
+    <div class="kitsune-startup-intro__vignette" aria-hidden="true"></div>
+    <div class="kitsune-startup-intro__scene" aria-hidden="true">
+      <div class="kitsune-startup-intro__motion" data-motion aria-hidden="true"></div>
+      <img class="kitsune-startup-intro__character" data-frame="idle" data-preload alt="" src="./assets/kitsune-startup-idle-v315.webp?v=3.1.0-rc.5">
+      <img class="kitsune-startup-intro__character" data-frame="blink" data-preload alt="" src="./assets/kitsune-startup-blink-v315.webp?v=3.1.0-rc.5">
+      <img class="kitsune-startup-intro__character" data-frame="magic" data-preload alt="" src="./assets/kitsune-startup-magic-v315.webp?v=3.1.0-rc.5">
+      <div class="kitsune-startup-intro__brand">
+        <span class="kitsune-startup-intro__brand-title">Kitsune</span>
+        <span class="kitsune-startup-intro__brand-sub">математика</span>
+        <span class="kitsune-startup-intro__brand-shine" aria-hidden="true"></span>
+      </div>
+    </div>
+    <button class="kitsune-startup-intro__skip" type="button" aria-label="Пропустить заставку">Пропустить</button>
+    <div class="kitsune-startup-intro__hint" aria-hidden="true">Коснись экрана, чтобы пропустить</div>
+  </div>
+  <script src="./startup-intro.js?v=3.1.0-rc.5"></script>
   <canvas id="particlesCanvas" class="particles-canvas" aria-hidden="true"></canvas>
   <div class="bg-orb orb-1" aria-hidden="true"></div>
   <div class="bg-orb orb-2" aria-hidden="true"></div>
@@ -88,8 +109,9 @@
         <button id="designBtn" class="ghost">🎮 Дизайн: игровой</button>
         <button id="themeBtn" class="ghost">🌙 Тёмная тема</button>
         <button id="effectsBtn" class="ghost">✨ Эффекты: авто</button>
+        <button id="startupIntroBtn" class="ghost" type="button" aria-pressed="true">🎬 Запуск: авто</button>
         <button id="privacyBtn" class="ghost">🔒 Приватность</button>
-        <button id="updateBtn" class="ghost" type="button">🔄 LOCAL 3.1.0-rc.2</button>
+        <button id="updateBtn" class="ghost" type="button">🔄 LOCAL 3.1.0-rc.5</button>
         <button id="installBtn" class="ghost hidden">⬇️ Установить приложение</button>
       </div>
     </aside>
@@ -175,133 +197,133 @@
           <span class="eyebrow">Полный курс</span>
           <h3>Все 6 глав</h3>
         </div>
-        <span class="status-chip">платформа · LOCAL 3.1.0-rc.2</span>
+        <span class="status-chip">платформа · LOCAL 3.1.0-rc.5</span>
       </div>
       <div id="homeTopics" class="cards-grid"></div>
     </section>
   </template>
 
-  <script src="./school-notation-v3045.js?v=3.1.0-rc.2"></script>
-  <script src="./app.js?v=3.1.0-rc.2"></script>
-  <script src="./pwa-update.js?v=3.1.0-rc.2"></script>
-  <script src="./chapter1-v02.js?v=3.1.0-rc.2"></script>
-  <script src="./course-v1.js?v=3.1.0-rc.2"></script>
-  <script src="./course-theory-v120.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-catalog-v300.js?v=3.1.0-rc.2"></script>
-  <script src="./curriculum-overlay-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./curriculum-sources-v302.js?v=3.1.0-rc.2"></script>
-  <script src="./migration-v302.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-v300.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-algebra-v311.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-frp-v311.js?v=3.1.0-rc.2"></script>
-  <script src="./grade8-progress-bridge-v311.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-a7-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-g1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-g2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-g3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-g4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-g5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-s1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-s2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade7-s3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-g1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-g2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-g3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-g4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-g5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-s1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-s2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade8-s3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-a6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-g1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-g2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-g3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-g4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-s1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade9-s2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-a6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-g1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-g2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-g3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-s1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-s2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade10-s3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-a6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-g1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-g2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-g3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-s1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-grade11-s2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egeb-6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-7-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-8-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-egep-9-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-1-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-2-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-3-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-4-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-5-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-6-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-7-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-content-oge-8-v310.js?v=3.1.0-rc.2"></script>
-  <script src="./coach-v12.js?v=3.1.0-rc.2"></script>
-  <script src="./pedagogy-v12.js?v=3.1.0-rc.2"></script>
-  <script src="./mastery-data-v13.js?v=3.1.0-rc.2"></script>
-  <script src="./mastery-v13.js?v=3.1.0-rc.2"></script>
-  <script src="./design-v14.js?v=3.1.0-rc.2"></script>
-  <script src="./performance-manager-v150.js?v=3.1.0-rc.2"></script>
-  <script src="./runtime-stability-v2395.js?v=3.1.0-rc.2"></script>
-  <script src="./learning-fx-v142.js?v=3.1.0-rc.2"></script>
-  <script src="./live-assistant-v15.js?v=3.1.0-rc.2"></script>
-  <script src="./tutor-lite-v16.js?v=3.1.0-rc.2"></script>
-  <script src="./tutor-smart-v173.js?v=3.1.0-rc.2"></script><script src="./math-engine-v130.js?v=3.1.0-rc.2"></script>
-<script src="./learning-intelligence-v150.js?v=3.1.0-rc.2"></script>
-<script src="./student-experience-v220.js?v=3.1.0-rc.2"></script>
-  <script src="./navigation-stability-v2396.js?v=3.1.0-rc.2"></script>
-  <script src="./runtime-loader-v2395.js?v=3.1.0-rc.2"></script>
-  <script src="./mobile-voice-entry-v2397.js?v=3.1.0-rc.2"></script>
-  <script src="./curriculum-sources-ui-v302.js?v=3.1.0-rc.2"></script>
-  <script src="./platform-v300.js?v=3.1.0-rc.2"></script>
-  <script src="./app-kernel-v200.js?v=3.1.0-rc.2"></script>
-  <script src="./auto-setup-v210.js?v=3.1.0-rc.2"></script>
-  <script src="./reveal-manager-v221.js?v=3.1.0-rc.2"></script>
-  <script src="./theory-engine-v300.js?v=3.1.0-rc.2"></script>
-  <script src="./school-typography-ui-v3045.js?v=3.1.0-rc.2"></script>
+  <script src="./school-notation-v3045.js?v=3.1.0-rc.5"></script>
+  <script src="./app.js?v=3.1.0-rc.5"></script>
+  <script src="./pwa-update.js?v=3.1.0-rc.5"></script>
+  <script src="./chapter1-v02.js?v=3.1.0-rc.5"></script>
+  <script src="./course-v1.js?v=3.1.0-rc.5"></script>
+  <script src="./course-theory-v120.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-catalog-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-overlay-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-sources-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./migration-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-algebra-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-frp-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./grade8-progress-bridge-v311.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-a7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-g5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade7-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-g5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade8-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-g4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade9-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade10-s3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-a6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-g3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-s1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-grade11-s2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egeb-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-8-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-egep-9-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-1-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-2-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-3-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-4-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-5-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-6-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-7-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-content-oge-8-v310.js?v=3.1.0-rc.5"></script>
+  <script src="./coach-v12.js?v=3.1.0-rc.5"></script>
+  <script src="./pedagogy-v12.js?v=3.1.0-rc.5"></script>
+  <script src="./mastery-data-v13.js?v=3.1.0-rc.5"></script>
+  <script src="./mastery-v13.js?v=3.1.0-rc.5"></script>
+  <script src="./design-v14.js?v=3.1.0-rc.5"></script>
+  <script src="./performance-manager-v150.js?v=3.1.0-rc.5"></script>
+  <script src="./runtime-stability-v2395.js?v=3.1.0-rc.5-autovoice.1"></script>
+  <script src="./learning-fx-v142.js?v=3.1.0-rc.5"></script>
+  <script src="./live-assistant-v15.js?v=3.1.0-rc.5-autovoice.1"></script>
+  <script src="./tutor-lite-v16.js?v=3.1.0-rc.5"></script>
+  <script src="./tutor-smart-v173.js?v=3.1.0-rc.5"></script><script src="./math-engine-v130.js?v=3.1.0-rc.5"></script>
+<script src="./learning-intelligence-v150.js?v=3.1.0-rc.5"></script>
+<script src="./student-experience-v220.js?v=3.1.0-rc.5"></script>
+  <script src="./navigation-stability-v2396.js?v=3.1.0-rc.5"></script>
+  <script src="./runtime-loader-v2395.js?v=3.1.0-rc.5"></script>
+  <script src="./mobile-voice-entry-v2397.js?v=3.1.0-rc.5"></script>
+  <script src="./curriculum-sources-ui-v302.js?v=3.1.0-rc.5"></script>
+  <script src="./platform-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./app-kernel-v200.js?v=3.1.0-rc.5"></script>
+  <script src="./auto-setup-v210.js?v=3.1.0-rc.5"></script>
+  <script src="./reveal-manager-v221.js?v=3.1.0-rc.5"></script>
+  <script src="./theory-engine-v300.js?v=3.1.0-rc.5"></script>
+  <script src="./school-typography-ui-v3045.js?v=3.1.0-rc.5"></script>
 
   <!-- Живой диалог + присутствие персонажа -->
 <!-- Final navigation authority for open Kitsune dialog -->
-<div id="kitsuneReleaseMarker" hidden>3.1.0-rc.2</div>
+<div id="kitsuneReleaseMarker" hidden>3.1.0-rc.5</div>
 </body>
 </html>
