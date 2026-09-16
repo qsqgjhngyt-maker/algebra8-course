@@ -1,368 +1,314 @@
 /* =====================================================================
-   Kitsune Runtime Stability v2.3.0-beta.3.9.5.1
+   Kitsune Service Worker 3.1.0-rc.2
 
-   Consolidated mobile/low-memory guard:
-   - prevents automatic heavy AI preparation on constrained devices;
-   - keeps automatic speech available on mobile devices through system TTS;
-   - preserves constrained-device protection for heavy background AI/voice work;
-   - stops the Smart Tutor relabel MutationObserver from self-triggering;
-   - makes lazy buttons work on the first press;
-   - adds clear Math Lab validation instead of silent no-op buttons.
+   - exact-release shell: no old/new HTML-JS mixing;
+   - core scripts cached sequentially, never as a phone-killing burst;
+   - heavy optional AI/voice modules are cached only when actually requested;
+   - installed navigation remains immutable until the next release activates.
    ===================================================================== */
-(() => {
-  "use strict";
+const CACHE="kitsune-math-3.1.0-rc.2-autovoice.1";
+const RUNTIME_CACHE="kitsune-math-runtime-3.1.0-rc.2-autovoice.1";
+const NEURAL_CACHE="algebra8-ai-runtime-v1";
+const RELEASE="3.1.0-rc.2";
 
-  const VERSION="2.3.0-beta.3.9.5.1";
-  const ZERO_CONFIG_KEY="a8_zero_config_enabled_v210";
-  const REPLAY_KEY="kitsuneStabilityReplay2395";
+const CORE_ASSETS=[
+  "./index.html?v=3.1.0-rc.2",
+  "./security-bootstrap-v1111.js?v=3.1.0-rc.2",
+  "./manifest.json",
+  "./assets/kitsune-math-favicon-64-v310.png",
+  "./assets/kitsune-math-apple-touch-180-v310.png",
+  "./assets/kitsune/kitsune-sprite-v1101.png",
+  "./styles.css?v=3.1.0-rc.2",
+  "./platform-v300.css?v=3.1.0-rc.2",
+  "./school-notation-v3045.js?v=3.1.0-rc.2",
+  "./app.js?v=3.1.0-rc.2",
+  "./pwa-update.js?v=3.1.0-rc.2",
+  "./chapter1-v02.js?v=3.1.0-rc.2",
+  "./course-v1.js?v=3.1.0-rc.2",
+  "./course-theory-v120.js?v=3.1.0-rc.2",
+  "./platform-catalog-v300.js?v=3.1.0-rc.2",
+  "./curriculum-overlay-v310.js?v=3.1.0-rc.2",
+  "./curriculum-sources-v302.js?v=3.1.0-rc.2",
+  "./migration-v302.js?v=3.1.0-rc.2",
+  "./platform-content-v300.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-algebra-v311.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-frp-v311.js?v=3.1.0-rc.2",
+  "./grade8-progress-bridge-v311.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-a7-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-g1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-g2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-g3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-g4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-g5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-s1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-s2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade7-s3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-g1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-g2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-g3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-g4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-g5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-s1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-s2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade8-s3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-a6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-g1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-g2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-g3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-g4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-s1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade9-s2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-a6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-g1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-g2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-g3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-s1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-s2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade10-s3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-a6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-g1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-g2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-g3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-s1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-grade11-s2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egeb-6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-7-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-8-v310.js?v=3.1.0-rc.2",
+  "./platform-content-egep-9-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-1-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-2-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-3-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-4-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-5-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-6-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-7-v310.js?v=3.1.0-rc.2",
+  "./platform-content-oge-8-v310.js?v=3.1.0-rc.2",
+  "./coach-v12.js?v=3.1.0-rc.2",
+  "./pedagogy-v12.js?v=3.1.0-rc.2",
+  "./mastery-data-v13.js?v=3.1.0-rc.2",
+  "./mastery-v13.js?v=3.1.0-rc.2",
+  "./design-v14.js?v=3.1.0-rc.2",
+  "./performance-manager-v150.js?v=3.1.0-rc.2",
+  "./runtime-stability-v2395.js?v=3.1.0-rc.2-autovoice.1",
+  "./learning-fx-v142.js?v=3.1.0-rc.2",
+  "./live-assistant-v15.js?v=3.1.0-rc.2-autovoice.1",
+  "./tutor-lite-v16.js?v=3.1.0-rc.2",
+  "./tutor-smart-v173.js?v=3.1.0-rc.2",
+  "./math-engine-v130.js?v=3.1.0-rc.2",
+  "./learning-intelligence-v150.js?v=3.1.0-rc.2",
+  "./student-experience-v220.js?v=3.1.0-rc.2",
+  "./navigation-stability-v2396.js?v=3.1.0-rc.2",
+  "./runtime-loader-v2395.js?v=3.1.0-rc.2",
+  "./mobile-voice-entry-v2397.js?v=3.1.0-rc.2",
+  "./curriculum-sources-ui-v302.js?v=3.1.0-rc.2",
+  "./platform-v300.js?v=3.1.0-rc.2",
+  "./app-kernel-v200.js?v=3.1.0-rc.2",
+  "./auto-setup-v210.js?v=3.1.0-rc.2",
+  "./reveal-manager-v221.js?v=3.1.0-rc.2",
+  "./theory-engine-v300.js?v=3.1.0-rc.2",
+  "./school-typography-ui-v3045.js?v=3.1.0-rc.2",
+  "./math-lab-v130.js?v=3.1.0-rc.2",
+  "./camera-import-v210.js?v=3.1.0-rc.2",
+  "./course-search-v200.js?v=3.1.0-rc.2",
+  "./offline-center-v200.js?v=3.1.0-rc.2",
+  "./mastery-score-v220.js?v=3.1.0-rc.2",
+  "./reliability-center-v220.js?v=3.1.0-rc.2",
+  "./privacy-v1111.js?v=3.1.0-rc.2",
+  "./cloud-config-v230.js?v=3.1.0-rc.2",
+  "./hybrid-infrastructure-v230.js?v=3.1.0-rc.2",
+  "./access-admin-v235.js?v=3.1.0-rc.2",
+  "./neural-voice-v17.js?v=3.1.0-rc.2",
+  "./kitsune-brain-v18.js?v=3.1.0-rc.2",
+  "./kitsune-voice-v19.js?v=3.1.0-rc.2",
+  "./kitsune-live-v110.js?v=3.1.0-rc.2",
+  "./intelligence-router-v230.js?v=3.1.0-rc.2",
+  "./cloud-chat-ux-v231.js?v=3.1.0-rc.2",
+  "./local-voice-lab-v231.js?v=3.1.0-rc.2",
+  "./voice-conversation-v237.js?v=3.1.0-rc.2",
+  "./kitsune-presence-v238.js?v=3.1.0-rc.2",
+  "./voice-stability-v2387.js?v=3.1.0-rc.2",
+  "./chat-dialog-firewall-v231.js?v=3.1.0-rc.2",
+  "./assets/kitsune-math-icon-192-v310.png",
+  "./assets/kitsune-math-icon-512-v310.png",
+  "./assets/kitsune-math-icon-maskable-192-v310.png",
+  "./assets/kitsune-math-icon-maskable-512-v310.png",
+  "./assets/kitsune/idle.png",
+  "./math-worker-v130.js?v=3.1.0-rc.2",
+  "./voice-asr-worker-v2386.js",
+  "./whisper-worker-v1116.js"
+];
 
-  function isIOS(){
-    const ua=String(navigator.userAgent||"");
-    const platform=String(navigator.platform||"");
-    return /iPhone|iPad|iPod/i.test(ua) ||
-      (platform==="MacIntel"&&Number(navigator.maxTouchPoints)>1);
+const CHILD_CSP=[
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "frame-src https://accounts.google.com",
+  "form-action 'none'",
+  "manifest-src 'self'",
+  "img-src 'self' data: blob:",
+  "media-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com",
+  "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://accounts.google.com",
+  "worker-src 'self' blob: https://cdn.jsdelivr.net",
+  "child-src 'self' blob: https://cdn.jsdelivr.net",
+  "connect-src 'self' https://accounts.google.com https://kitsune-hybrid-broker.akronikl.workers.dev https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://hf.co https://*.hf.co https://raw.githubusercontent.com https://github.com https://objects.githubusercontent.com http://127.0.0.1:17865",
+  "upgrade-insecure-requests"
+].join("; ");
+
+const CHILD_PERMISSIONS=[
+  "camera=(self)","geolocation=()","payment=()","usb=()",
+  "accelerometer=()","gyroscope=()","magnetometer=()",
+  "encrypted-media=()","picture-in-picture=()","microphone=(self)",
+  "fullscreen=(self)","autoplay=(self)"
+].join(", ");
+
+function isPrivatePath(pathname){
+  return pathname.startsWith("/v1/auth/") ||
+    pathname.startsWith("/v1/enroll") ||
+    pathname.startsWith("/v1/temporary-credential") ||
+    pathname.startsWith("/v1/qwen/") ||
+    pathname.startsWith("/v1/tts/") ||
+    pathname.startsWith("/v1/admin/");
+}
+
+function secureSameOriginResponse(request,response){
+  if(!response)return response;
+  const headers=new Headers(response.headers);
+  headers.set("X-Content-Type-Options","nosniff");
+  headers.set("Referrer-Policy","no-referrer");
+  const isDocument=request.mode==="navigate"||request.destination==="document";
+  if(isDocument){
+    headers.set("Content-Security-Policy",CHILD_CSP);
+    headers.set("Permissions-Policy",CHILD_PERMISSIONS);
+    headers.set("X-Frame-Options","DENY");
   }
+  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+}
 
-  function fallbackProfile(){
-    const mem=Number(navigator.deviceMemory||0);
-    const cpu=Number(navigator.hardwareConcurrency||0);
-    if(isIOS())return "careful";
-    if((mem&&mem<=4)||(cpu&&cpu<=4))return "careful";
-    if((mem&&mem<=8)||(cpu&&cpu<=6))return "balanced";
-    return "full";
-  }
+async function networkAndCache(request,cache){
+  try{
+    const response=await fetch(request);
+    if(response&&response.ok)cache.put(request,response.clone()).catch(()=>{});
+    return response;
+  }catch{return null}
+}
 
-  function policy(){
-    let profile="";
-    try{profile=window.KitsunePerformance?.info?.()?.profile||""}catch{}
-    if(!profile)profile=fallbackProfile();
-    const constrained=profile!=="full";
-    const ttsConstrained=isIOS()||profile==="careful"||profile==="emergency";
-    return {profile,constrained,ttsConstrained,ios:isIOS()};
-  }
-
-  const initialPolicy=policy();
-
-  /* Critical: these keys are read synchronously by modules that load later. */
-  if(initialPolicy.constrained){
-    try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}
-  }
-
-  function injectStyles(){
-    if(document.querySelector("#kitsuneStability2395Style"))return;
-    const style=document.createElement("style");
-    style.id="kitsuneStability2395Style";
-    style.textContent=`
-      .kitsune-runtime-loading{opacity:.72!important;cursor:progress!important;filter:saturate(.88)}
-      .kitsune-runtime-loading::after{content:"";display:inline-block;width:.8em;height:.8em;margin-left:.45em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-.08em;animation:kitsuneSpin2395 .75s linear infinite}
-      @keyframes kitsuneSpin2395{to{transform:rotate(360deg)}}
-      .kitsune-runtime-toast2395{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:100000;max-width:min(92vw,560px);padding:11px 15px;border-radius:15px;background:rgba(24,30,28,.92);color:white;font:600 14px/1.35 system-ui,-apple-system,sans-serif;box-shadow:0 12px 34px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .18s ease,transform .18s ease}
-      .kitsune-runtime-toast2395.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
-      .kitsune-auto-voice-note2395{display:block;margin-top:5px;font-size:11px;line-height:1.35;opacity:.72}
-    `;
-    document.head.appendChild(style);
-  }
-
-  let toastTimer=null;
-  function toast(message){
-    injectStyles();
-    let el=document.querySelector("#kitsuneRuntimeToast2395");
-    if(!el){
-      el=document.createElement("div");
-      el.id="kitsuneRuntimeToast2395";
-      el.className="kitsune-runtime-toast2395";
-      el.setAttribute("role","status");
-      document.body.appendChild(el);
+self.addEventListener("install",event=>{
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    for(const url of CORE_ASSETS){
+      try{
+        const request=new Request(url,{cache:"reload"});
+        const response=await fetch(request);
+        if(!response?.ok)throw new Error(`Required offline asset unavailable: ${url}`);
+        await cache.put(request,response.clone());
+      }catch(error){await caches.delete(CACHE);throw error;}
     }
-    el.textContent=String(message||"");
-    el.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer=setTimeout(()=>el.classList.remove("show"),3200);
-  }
+  })());
+});
 
-  /* ------------------------------------------------------------------
-     Smart Tutor relabel loop fix.
+self.addEventListener("message",event=>{
+  const data=event.data||{};
+  if(data.type==="SKIP_WAITING"){self.skipWaiting();return}
+  if(data.type==="TRIM_RUNTIME")event.waitUntil(caches.delete(RUNTIME_CACHE));
+});
 
-     tutor-smart-v173 observes #content and relabels every .v16-tutor-btn by
-     assigning innerHTML. Assigning the same innerHTML creates a childList
-     mutation, which schedules relabel again. On WebKit this can become a
-     permanent 30 ms DOM loop. We do not replace Tutor: we make duplicate
-     innerHTML writes on those exact buttons idempotent before Tutor loads.
-     ------------------------------------------------------------------ */
-  const innerDesc=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");
-  let suppressedTutorWrites=0;
+self.addEventListener("activate",event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>
+      (k.startsWith("algebra8-v")&&k!==CACHE) ||
+      (k.startsWith("algebra8-runtime-v")&&k!==RUNTIME_CACHE) ||
+      (k.startsWith("kitsune-math-")&&k!==CACHE&&k!==RUNTIME_CACHE)
+    ).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
 
-  function stabilizeTutorButton(button){
-    if(!button||button.__kitsuneStableHtml2395||!innerDesc?.get||!innerDesc?.set)return;
-    try{
-      Object.defineProperty(button,"innerHTML",{
-        configurable:true,
-        enumerable:innerDesc.enumerable,
-        get(){return innerDesc.get.call(this)},
-        set(value){
-          const next=String(value??"");
-          let current="";
-          try{current=innerDesc.get.call(this)}catch{}
-          if(current===next){suppressedTutorWrites++;return}
-          return innerDesc.set.call(this,next);
+self.addEventListener("fetch",event=>{
+  if(event.request.method!=="GET")return;
+  const url=new URL(event.request.url);
+  const sameOrigin=url.origin===self.location.origin;
+  if(sameOrigin&&url.pathname==="/api/curriculum-status")return;
+  if(sameOrigin&&isPrivatePath(url.pathname))return;
+
+  if(sameOrigin){
+    const isNavigation=event.request.mode==="navigate"||event.request.destination==="document";
+    if(isNavigation){
+      event.respondWith((async()=>{
+        const shell=await caches.open(CACHE);
+        const cached=await shell.match("./index.html?v="+RELEASE) || await shell.match(event.request,{ignoreSearch:true});
+        if(cached){
+          // Keep the installed HTML immutable until the next worker activates.
+          return secureSameOriginResponse(event.request,cached);
         }
-      });
-      button.__kitsuneStableHtml2395=true;
-    }catch{}
-  }
-
-  function scanTutorButtons(root=document){
-    if(root?.matches?.(".v16-tutor-btn"))stabilizeTutorButton(root);
-    root?.querySelectorAll?.(".v16-tutor-btn")?.forEach(stabilizeTutorButton);
-  }
-
-  function installTutorGuard(){
-    const content=document.querySelector("#content");
-    if(!content||content.__kitsuneTutorGuard2395)return false;
-    content.__kitsuneTutorGuard2395=true;
-    scanTutorButtons(content);
-    const observer=new MutationObserver(records=>{
-      for(const record of records){
-        for(const node of record.addedNodes){
-          if(node?.nodeType===1)scanTutorButtons(node);
-        }
-      }
-    });
-    observer.observe(content,{childList:true,subtree:true});
-    return true;
-  }
-
-  /* ------------------------------------------------------------------
-     Mobile voice policy.
-     Constrained devices still keep heavy background AI preparation disabled,
-     but lightweight system auto narration remains available by user choice.
-     ------------------------------------------------------------------ */
-  function applyAutoVoicePolicy(){
-    const p=policy();
-    const checkbox=document.querySelector("#v151AutoVoice");
-    if(!checkbox)return;
-    checkbox.disabled=false;
-    checkbox.removeAttribute("disabled");
-    checkbox.title=p.ttsConstrained
-      ?"Автоозвучка доступна. На этом устройстве используется облегчённый системный голос."
-      :"Автоматически озвучивать важные советы Kitsune.";
-    const host=checkbox.closest("label")||checkbox.parentElement;
-    host?.querySelector(".kitsune-auto-voice-note2395")?.remove();
-  }
-
-  /* AutoSetup stays fully available manually. Only background preparation is
-     blocked on constrained devices. Original reset()/run() need enabled()==1,
-     so manual operations temporarily enable the legacy key and restore it. */
-  function patchZeroConfig(){
-    const p=policy();
-    const api=window.KitsuneZeroConfig;
-    if(!p.constrained||!api||api.__kitsuneStability2395)return !!api;
-
-    const originalRun=typeof api.run==="function"?api.run.bind(api):null;
-    const originalReset=typeof api.reset==="function"?api.reset.bind(api):null;
-    const originalSetEnabled=typeof api.setEnabled==="function"?api.setEnabled.bind(api):null;
-
-    const temporaryEnabled=async fn=>{
-      let previous="0";
-      try{previous=localStorage.getItem(ZERO_CONFIG_KEY)??"0";localStorage.setItem(ZERO_CONFIG_KEY,"1")}catch{}
-      try{return await fn()}
-      finally{try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}}
-    };
-
-    if(originalRun){
-      api.run=opts=>{
-        if(!opts?.manual)return Promise.resolve(false);
-        return temporaryEnabled(()=>originalRun({...opts,manual:true}));
-      };
-    }
-    if(originalReset){
-      api.reset=()=>temporaryEnabled(()=>originalReset());
-    }
-    if(originalSetEnabled){
-      api.setEnabled=value=>{
-        if(value){
-          try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}
-          toast("На этом устройстве фоновая подготовка AI отключена. Нужный модуль загрузится по вашему действию.");
-          return false;
-        }
-        return originalSetEnabled(false);
-      };
-    }
-    api.__kitsuneStability2395=true;
-    try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}
-    return true;
-  }
-
-  async function runtimeLoader(timeout=3500){
-    const started=performance.now();
-    while(performance.now()-started<timeout){
-      if(window.KitsuneRuntimeLoader)return window.KitsuneRuntimeLoader;
-      await new Promise(resolve=>setTimeout(resolve,40));
-    }
-    return null;
-  }
-
-  function busy(button,on){
-    if(!button)return;
-    button.classList.toggle("kitsune-runtime-loading",!!on);
-    if(on)button.setAttribute("aria-busy","true");
-    else button.removeAttribute("aria-busy");
-  }
-
-  async function ensure(group,button){
-    const loader=await runtimeLoader();
-    if(!loader)throw new Error("Загрузчик модулей ещё не готов");
-    busy(button,true);
-    try{return await loader.ensure(group,{urgent:true,reason:"explicit-ui",background:false})}
-    finally{busy(button,false)}
-  }
-
-  function stopEvent(event){
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-  }
-
-  function replay(button){
-    if(!button?.isConnected)return;
-    button.dataset[REPLAY_KEY]="1";
-    try{button.click()}finally{delete button.dataset[REPLAY_KEY]}
-  }
-
-  async function handleLazyButton(button,kind){
-    try{
-      if(kind==="adult"){
-        await ensure("progress",button);
-        window.KitsuneStudentExperience?.routeAdult?.();
-        return;
-      }
-      if(kind==="ask"){
-        await ensure("assistant",button);
-        const api=window.KitsuneVoiceDialogue;
-        if(api?.open)api.open(null);
-        else toast("Голосовой диалог не удалось подготовить. Попробуйте ещё раз.");
-        return;
-      }
-      if(kind==="camera"){
-        await ensure("mathlab",button);
-        const api=window.KitsuneCameraImport;
-        if(api?.open)api.open();
-        else toast("Модуль камеры пока недоступен.");
-        return;
-      }
-      if(kind==="privacy"){
-        await ensure("privacy",button);
-        document.querySelector("#privacyBtn")?.click();
-        return;
-      }
-      if(kind==="voice-action"){
-        await ensure("assistant",button);
-        replay(button);
-        return;
-      }
-    }catch(error){
-      toast(String(error?.message||error||"Не удалось открыть модуль"));
-    }
-  }
-
-  function validateMathLab(event,button){
-    const title=(document.querySelector("#pageTitle")?.textContent||"").toLowerCase();
-    if(!title.includes("math lab"))return false;
-    const label=(button.textContent||"").trim();
-    const calculate=/рассчитать/i.test(label);
-    const verify=/проверить решение/i.test(label);
-    if(!calculate&&!verify)return false;
-
-    const fields=[...document.querySelectorAll("#content textarea,#content input[type='text'],#content input:not([type])")]
-      .filter(el=>!el.disabled&&el.getClientRects().length);
-    const field=fields[0];
-    if(!field||String(field.value||"").trim())return false;
-
-    stopEvent(event);
-    const message=calculate
-      ?"Сначала введи задание. Серый пример внутри поля — это подсказка."
-      :"Сначала введи решение по шагам, затем нажми «Проверить решение».";
-    try{
-      field.setCustomValidity(message);
-      field.reportValidity();
-      field.addEventListener("input",()=>field.setCustomValidity(""),{once:true});
-      field.focus({preventScroll:false});
-    }catch{toast(message)}
-    return true;
-  }
-
-  /* Registered before App Kernel / Runtime Loader capture handlers. */
-  document.addEventListener("click",event=>{
-    const button=event.target.closest?.("button");
-    if(!button)return;
-    if(button.dataset?.[REPLAY_KEY]==="1")return;
-
-    if(validateMathLab(event,button))return;
-
-    if(button.id==="adultCenterBtn"){
-      stopEvent(event);handleLazyButton(button,"adult");return;
-    }
-    if(button.id==="sxAsk"){
-      stopEvent(event);handleLazyButton(button,"ask");return;
-    }
-    if(button.id==="sxCamera"){
-      stopEvent(event);handleLazyButton(button,"camera");return;
-    }
-    if(button.id==="sxPrivacy"){
-      stopEvent(event);handleLazyButton(button,"privacy");return;
-    }
-
-    const tab=button.dataset?.sxTab;
-    const tabGroup=tab==="cloud"?"cloud":(["mastery","reliability"].includes(tab)?"progress":"");
-    if(tabGroup&&window.KitsuneRuntimeLoader&&!window.KitsuneRuntimeLoader.ready(tabGroup)){
-      stopEvent(event);
-      ensure(tabGroup,button).then(()=>replay(button)).catch(err=>toast(err?.message||err));
+        const fresh=await networkAndCache(event.request,shell);
+        if(fresh)return secureSameOriginResponse(event.request,fresh);
+        return new Response("Kitsune offline shell unavailable",{status:503,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+      })());
       return;
     }
 
-    const text=(button.textContent||"").replace(/\s+/g," ").trim();
-    if(/(?:Поговорить|Сказать Kitsune|текстом или голосом)/i.test(text) &&
-       !window.KitsuneVoiceDialogue &&
-       !button.matches("#v15SpeakBtn,#v151TestVoice")){
-      stopEvent(event);handleLazyButton(button,"voice-action");
+    event.respondWith((async()=>{
+      const shell=await caches.open(CACHE);
+      const runtime=await caches.open(RUNTIME_CACHE);
+      const shellHit=await shell.match(event.request);
+      if(shellHit)return secureSameOriginResponse(event.request,shellHit);
+      const runtimeHit=await runtime.match(event.request);
+      if(runtimeHit)return secureSameOriginResponse(event.request,runtimeHit);
+      const response=await networkAndCache(event.request,runtime);
+      if(response)return secureSameOriginResponse(event.request,response);
+      return new Response("Kitsune resource unavailable offline",{status:503,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+    })());
+    return;
+  }
+
+  if(url.hostname==="cdn.jsdelivr.net"){
+    const path=url.pathname.toLowerCase();
+    const cacheable=event.request.destination==="script"||event.request.destination==="worker"||/\.(?:js|mjs|wasm)$/.test(path);
+    if(cacheable){
+      event.respondWith((async()=>{
+        const cache=await caches.open(NEURAL_CACHE);
+        const cached=await cache.match(event.request);
+        if(cached)return cached;
+        const response=await fetch(event.request);
+        if(response&&(response.ok||response.type==="opaque"))cache.put(event.request,response.clone()).catch(()=>{});
+        return response;
+      })());
     }
-  },true);
-
-  function quietAudio(){
-    try{window.speechSynthesis?.cancel?.()}catch{}
-    try{window.KitsunePresence?.wake?.stop?.("page-hidden",true)}catch{}
   }
-
-  document.addEventListener("visibilitychange",()=>{
-    if(document.hidden)quietAudio();
-  });
-  window.addEventListener("pagehide",quietAudio);
-
-  injectStyles();
-  installTutorGuard();
-  setTimeout(installTutorGuard,120);
-  setTimeout(installTutorGuard,700);
-
-  /* Core modules are ordinary synchronous scripts below this file. */
-  for(const delay of [120,500,1300,3000]){
-    setTimeout(()=>{
-      patchZeroConfig();
-      applyAutoVoicePolicy();
-      installTutorGuard();
-    },delay);
-  }
-
-  window.addEventListener("kitsune-runtime-group-loaded",()=>{
-    applyAutoVoicePolicy();
-    patchZeroConfig();
-  });
-
-  window.KitsuneRuntimeStability={
-    version:VERSION,
-    policy,
-    toast,
-    tutorSuppressedWrites:()=>suppressedTutorWrites,
-    applyVoicePolicy:applyAutoVoicePolicy,
-    patchZeroConfig
-  };
-})();
+});
