@@ -572,12 +572,6 @@ function v15Speak(){
 function v151AutoSpeak(text,state){
   if(!v151VoiceEnabled||!v151VoiceAuto||v15Mode==="off")return;
   if(!v151SpeechUnlocked)return;
-  if(v151IsIOSLike()){
-    /* iOS Safari/PWA: keep speech inside the already-unlocked audio context. */
-    try{speechSynthesis.resume()}catch(e){}
-    v151Speak(text,{state,force:false});
-    return;
-  }
   setTimeout(()=>v151Speak(text,{state,force:false}),80);
 }
 function v161CompareVoices(){
