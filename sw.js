@@ -6,8 +6,8 @@
    - heavy optional AI/voice modules are cached only when actually requested;
    - installed navigation remains immutable until the next release activates.
    ===================================================================== */
-const CACHE="kitsune-math-3.1.0-rc.2-autovoice.1";
-const RUNTIME_CACHE="kitsune-math-runtime-3.1.0-rc.2-autovoice.1";
+const CACHE="kitsune-math-3.1.0-rc.2";
+const RUNTIME_CACHE="kitsune-math-runtime-3.1.0-rc.2";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
 const RELEASE="3.1.0-rc.2";
 
@@ -121,14 +121,14 @@ const CORE_ASSETS=[
   "./mastery-v13.js?v=3.1.0-rc.2",
   "./design-v14.js?v=3.1.0-rc.2",
   "./performance-manager-v150.js?v=3.1.0-rc.2",
-  "./runtime-stability-v2395.js?v=3.1.0-rc.2-autovoice.1",
+  "./runtime-stability-v2395.js?v=3.1.0-rc.2",
   "./learning-fx-v142.js?v=3.1.0-rc.2",
-  "./live-assistant-v15.js?v=3.1.0-rc.2-autovoice.1",
+  "./live-assistant-v15.js?v=3.1.0-rc.2",
   "./tutor-lite-v16.js?v=3.1.0-rc.2",
   "./tutor-smart-v173.js?v=3.1.0-rc.2",
   "./math-engine-v130.js?v=3.1.0-rc.2",
   "./learning-intelligence-v150.js?v=3.1.0-rc.2",
-  "./student-experience-v220.js?v=3.1.0-rc.2-cloudbrain.1",
+  "./student-experience-v220.js?v=3.1.0-rc.2",
   "./navigation-stability-v2396.js?v=3.1.0-rc.2",
   "./runtime-loader-v2395.js?v=3.1.0-rc.2",
   "./mobile-voice-entry-v2397.js?v=3.1.0-rc.2",

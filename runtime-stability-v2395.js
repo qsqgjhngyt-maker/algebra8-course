@@ -1,10 +1,10 @@
 /* =====================================================================
-   Kitsune Runtime Stability v2.3.0-beta.3.9.5.1
+   Kitsune Runtime Stability v2.3.0-beta.3.9.5
 
    Consolidated mobile/low-memory guard:
    - prevents automatic heavy AI preparation on constrained devices;
-   - keeps automatic speech available on mobile devices through system TTS;
-   - preserves constrained-device protection for heavy background AI/voice work;
+   - keeps automatic speech off on iPhone / very weak devices, while manual
+     speech and the full voice dialogue remain available by explicit action;
    - stops the Smart Tutor relabel MutationObserver from self-triggering;
    - makes lazy buttons work on the first press;
    - adds clear Math Lab validation instead of silent no-op buttons.
@@ -12,8 +12,9 @@
 (() => {
   "use strict";
 
-  const VERSION="2.3.0-beta.3.9.5.1";
+  const VERSION="2.3.0-beta.3.9.5";
   const ZERO_CONFIG_KEY="a8_zero_config_enabled_v210";
+  const AUTO_SPEAK_KEY="a8_alfi_voice_auto";
   const REPLAY_KEY="kitsuneStabilityReplay2395";
 
   function isIOS(){
@@ -46,6 +47,9 @@
   /* Critical: these keys are read synchronously by modules that load later. */
   if(initialPolicy.constrained){
     try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}
+  }
+  if(initialPolicy.ttsConstrained){
+    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
   }
 
   function injectStyles(){
@@ -133,21 +137,26 @@
   }
 
   /* ------------------------------------------------------------------
-     Mobile voice policy.
-     Constrained devices still keep heavy background AI preparation disabled,
-     but lightweight system auto narration remains available by user choice.
+     Low-memory voice policy.
+     Auto narration is the feature the real iPhone test identified as the
+     remaining crash trigger. Manual speaker/voice dialogue are untouched.
      ------------------------------------------------------------------ */
   function applyAutoVoicePolicy(){
     const p=policy();
+    if(!p.ttsConstrained)return;
+    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
     const checkbox=document.querySelector("#v151AutoVoice");
     if(!checkbox)return;
-    checkbox.disabled=false;
-    checkbox.removeAttribute("disabled");
-    checkbox.title=p.ttsConstrained
-      ?"Автоозвучка доступна. На этом устройстве используется облегчённый системный голос."
-      :"Автоматически озвучивать важные советы Kitsune.";
+    checkbox.checked=false;
+    checkbox.disabled=true;
+    checkbox.title="На этом устройстве автоозвучка отключена для стабильности. Ручная кнопка озвучки работает.";
     const host=checkbox.closest("label")||checkbox.parentElement;
-    host?.querySelector(".kitsune-auto-voice-note2395")?.remove();
+    if(host&&!host.querySelector(".kitsune-auto-voice-note2395")){
+      const note=document.createElement("small");
+      note.className="kitsune-auto-voice-note2395";
+      note.textContent="На этом устройстве автоозвучка отключена для стабильности. Ручная 🔊 озвучка и голосовой диалог доступны.";
+      host.appendChild(note);
+    }
   }
 
   /* AutoSetup stays fully available manually. Only background preparation is
@@ -326,6 +335,17 @@
        !button.matches("#v15SpeakBtn,#v151TestVoice")){
       stopEvent(event);handleLazyButton(button,"voice-action");
     }
+  },true);
+
+  document.addEventListener("change",event=>{
+    const target=event.target;
+    if(target?.id!=="v151AutoVoice")return;
+    const p=policy();
+    if(!p.ttsConstrained||!target.checked)return;
+    stopEvent(event);
+    target.checked=false;
+    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
+    toast("Автоозвучка на этом устройстве отключена для стабильности. Кнопка ручной озвучки работает.");
   },true);
 
   function quietAudio(){
