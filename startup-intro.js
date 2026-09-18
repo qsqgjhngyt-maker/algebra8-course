@@ -1,4 +1,4 @@
-/* Kitsune Math cinematic startup intro · cinematic-v316.1
+/* Kitsune Math cinematic startup intro · cinematic-v316.2
    Drop-in replacement for the existing startup-intro.js.
    Keeps the current auto/full/short/off preference model and public API.
 */
@@ -11,7 +11,7 @@
   const KEY_ENABLED = "kitsune:intro:enabled";
   const KEY_MODE = "kitsune:intro:mode";
   const VERSION = document.querySelector('meta[name="kitsune-app-version"]')?.content || "3.1.0-rc.5";
-  const INTRO_REV = "cinematic-v316.1";
+  const INTRO_REV = "cinematic-v316.2";
   const RELEASE_TOKEN = `${VERSION}|${INTRO_REV}`;
   const VIDEO_URL = `./assets/kitsune-cinematic-intro-v316.mp4?v=${encodeURIComponent(INTRO_REV)}`;
   const POSTER_URL = `./assets/kitsune-cinematic-poster-v316.webp?v=${encodeURIComponent(INTRO_REV)}`;
