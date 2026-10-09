@@ -1,9 +1,11 @@
 const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert/strict');
 const {chromium,devices}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(process.env.KITSUNE_QA_ROOT||path.join(__dirname,'../..')),results=[],errors=[];
+const release=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8')).version;
+const shellCache=fs.readFileSync(path.join(root,'sw.js'),'utf8').match(/const CACHE="([^"]+)"/)[1];
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.wasm':'application/wasm'};
 let update=false,broken=false;
-const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://localhost');let p=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!p.startsWith(root+path.sep)&&p!==root){res.writeHead(403).end();return;}if(p===root||u.pathname.endsWith('/'))p=path.join(p,'index.html');if(!fs.existsSync(p)||!fs.statSync(p).isFile()||(broken&&p.endsWith('platform-v300.js'))){res.writeHead(404).end();return;}res.setHeader('Content-Type',mime[path.extname(p)]||'application/octet-stream');res.setHeader('Cache-Control','no-store');let data=fs.readFileSync(p);if(update&&/\.(html|js|json)$/.test(p))data=Buffer.from(data.toString().replaceAll('3.1.0-rc.2','3.1.0-rc.2-qa-update'));res.end(data);});
+const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://localhost');let p=path.resolve(root,'.'+decodeURIComponent(u.pathname));if(!p.startsWith(root+path.sep)&&p!==root){res.writeHead(403).end();return;}if(p===root||u.pathname.endsWith('/'))p=path.join(p,'index.html');if(!fs.existsSync(p)||!fs.statSync(p).isFile()||(broken&&p.endsWith('platform-v300.js'))){res.writeHead(404).end();return;}res.setHeader('Content-Type',mime[path.extname(p)]||'application/octet-stream');res.setHeader('Cache-Control','no-store');let data=fs.readFileSync(p);if(update&&/\.(html|js|json)$/.test(p))data=Buffer.from(data.toString().replaceAll(release,release+'-qa-update'));res.end(data);});
 const test=async(name,fn)=>{if(process.env.QA_PWA_ONLY&&!/PWA|Offline/.test(name))return;try{await fn();results.push({name,status:'PASS'});console.log('PASS',name)}catch(e){results.push({name,status:'FAIL',error:e.message});console.log('FAIL',name,e.message.slice(0,500))}};
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
@@ -77,7 +79,7 @@ const test=async(name,fn)=>{if(process.env.QA_PWA_ONLY&&!/PWA|Offline/.test(name
    const n=await page.evaluate(()=>Object.keys(KitsuneTheoryContent).length);assert(n>=551);
    await page.locator('.main-nav [data-view="mathlab"]').click();await page.locator('[data-ml-tab="trainer"]').click();await page.locator('#mlGenerateBtn').click();await page.locator('[data-gen-card]').first().waitFor();
    assert.equal(await page.evaluate(async()=>{KitsuneMath.terminate();return (await KitsuneMath.generatorCatalog()).length}),51);
-   const cache=await page.evaluate(async()=>{await KitsuneRuntimeLoader.ensure('offline');return (await KitsuneOffline.status()).cache});assert.equal(cache.release,'kitsune-math-3.1.0-rc.2');assert(cache.shell);await context.setOffline(false);
+   const cache=await page.evaluate(async()=>{await KitsuneRuntimeLoader.ensure('offline');return (await KitsuneOffline.status()).cache});assert.equal(cache.release,shellCache);assert(cache.shell);await context.setOffline(false);
  });
  await context.setOffline(false);
  await test('PWA update: failed install keeps current worker; successful waiting → apply preserves progress',async()=>{
@@ -89,7 +91,7 @@ const test=async(name,fn)=>{if(process.env.QA_PWA_ONLY&&!/PWA|Offline/.test(name
    await page.waitForFunction(()=>!!KitsunePWAUpdate.registration?.waiting&&document.querySelector('#updateBtn').dataset.updateState==='available',null,{timeout:20000});
    await page.locator('#pwaUpdateNow').click();await page.waitForFunction(()=>document.querySelector('meta[name="kitsune-app-version"]').content.includes('qa-update'),null,{timeout:20000});console.log('PWA activated and reloaded');
    assert.equal(await page.evaluate(()=>localStorage.getItem('kitsune:v3:progress:grade7')),before);
-   assert(!(await page.evaluate(()=>caches.keys())).includes('kitsune-math-3.1.0-rc.2'));update=false;
+   assert(!(await page.evaluate(()=>caches.keys())).includes(shellCache));update=false;
  });
  await context.close();
  const mobile=await browser.newContext({...devices['iPhone 13'],defaultBrowserType:undefined}),mp=await mobile.newPage();mp.setDefaultTimeout(7000);mp.on('pageerror',e=>errors.push('mobile: '+e.message));const heavy=[];mp.on('request',r=>{if(/huggingface|transformers|onnxruntime|whisper-worker|piper.*wasm/i.test(r.url()))heavy.push(r.url())});

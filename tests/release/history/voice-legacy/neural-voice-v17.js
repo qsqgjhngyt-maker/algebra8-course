@@ -41,7 +41,7 @@
   }
 
   function reportActualEngine(detail={}){
-    const engine=detail.engine==="neural"?"neural":"system";
+    const engine=["neural","static"].includes(detail.engine)?detail.engine:"system";
     const fallback=!!detail.fallback;
     lastActualEngine={...detail,engine,fallback};
 
@@ -50,7 +50,9 @@
     if(!box||!text)return;
 
     box.className=`v17-engine-live ${engine}${fallback?" fallback":""}`;
-    if(engine==="neural"){
+    if(engine==="static"){
+      text.textContent="🎭 Kitsune Voice Engine · WAV v0.4 · активен";
+    }else if(engine==="neural"){
       text.textContent="🎭 Neural Voice · Piper RT 1.1.1 · активен";
     }else if(fallback){
       text.textContent=`📱 ${detail.label||"Системный голос"} · fallback`;
@@ -246,7 +248,6 @@
     });
     slider?.addEventListener("change",()=>{
       save();
-      if(modelReady) v17Test();
     });
 
     block.querySelector("#v17Download")?.addEventListener("click",downloadAndPrepare);
@@ -443,10 +444,6 @@
         updateUi({refreshStatus:false});
         setStatus("✅ Neural Voice полностью готов! Нажми «Тест нейроголоса».","ok");
 
-        setTimeout(()=>v17SpeakNeural(
-          "Ура! Мой новый голос готов. Теперь давай разбираться в алгебре вместе!",
-          {state:"celebrate",force:true}
-        ),180);
 
       }catch(warmErr){
         /* Модель остаётся READY: пользователь НЕ должен качать 63 МБ заново. */
@@ -560,10 +557,12 @@
 
   function stopNeural(){
     neuralRun++;
+    if(audioSource)audioSource.onended=null;
     try{audioSource?.stop()}catch(e){}
     try{audioSource?.disconnect()}catch(e){}
     audioSource=null;
     neuralBusy=false;
+    try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
     try{window.v161MarkSpeaking?.(false,"idle")}catch(e){}
   }
 
@@ -628,6 +627,7 @@
     try{window.v161MarkSpeaking?.(true,state)}catch(e){}
 
     source.onended=()=>{
+      if((runId!==null&&runId!==neuralRun)||audioSource!==source)return;
       if(audioSource===source)audioSource=null;
       neuralBusy=false;
       try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
@@ -648,10 +648,14 @@
     }catch(e){}
   }
 
-  async function v17SpeakNeural(text,{state="explain",force=false,onDone=null}={}){
+  async function v17SpeakNeural(text,{state="explain",force=false,onDone=null,skipStatic=false}={}){
+    if(!text||!v151VoiceEnabled||(!force&&!v151SpeechUnlocked))return false;
+    if(!force&&window.v151IsSpeechBusy?.())return false;
+    // Новый явный запрос заменяет прежнюю речь во всех движках.
+    if(window.v161StopSpeech)window.v161StopSpeech();
+    else{stopNeural();try{systemStop?.()}catch(e){}}
     const myRun=++neuralRun;
     neuralBusy=true;
-    try{systemStop?.()}catch(e){}
 
     /* v1.10: во время генерации WAV Kitsune НЕ двигает ртом.
        Разговорная анимация начинается только когда реально стартует audio source. */
@@ -660,6 +664,7 @@
       if(myRun!==neuralRun)return false;
 
       const ready=await verifyStored();
+      if(myRun!==neuralRun)return false;
       if(!ready)throw new Error("Нейроголос ещё не скачан.");
 
       const phrase=cleanText(text);
@@ -677,6 +682,7 @@
       return true;
 
     }catch(err){
+      if(myRun!==neuralRun)return false;
       neuralBusy=false;
       try{window.KitsuneLive?.detachAnalyser?.()}catch(e){}
       try{window.v161MarkSpeaking?.(false,state)}catch(e){}
@@ -702,7 +708,7 @@
           };
           window.dispatchEvent(new CustomEvent("kitsune-audio-unlock"));
         }catch(e){}
-        return systemSpeak(text,{state,force:true,onDone});
+        return systemSpeak(text,{state,force:true,onDone,skipStatic});
       }
       return false;
     }
@@ -728,6 +734,10 @@
      автоозвучки, Tutor Lite и реакций остаётся прежней. */
   if(systemSpeak){
     window.v151Speak=function(text,opts={}){
+      if(!text||!v151VoiceEnabled||(!opts.force&&!v151SpeechUnlocked))return false;
+      if(!opts.force&&window.v151IsSpeechBusy?.())return false;
+      if(window.KitsuneStaticVoice?.trySpeak(text,opts,
+        ()=>window.v151Speak(text,{...opts,skipStatic:true})))return true;
       if(shouldUseNeural()){
         v17SpeakNeural(text,opts);
         return true;
@@ -783,6 +793,7 @@
     verify:()=>verifyStored({silent:true}),
     release:releaseNeuralMemory,
     isReady:()=>modelReady,
+    isBusy:()=>neuralBusy,
     mode:()=>mode,
     actualEngine:()=>lastActualEngine?{...lastActualEngine}:null
   };

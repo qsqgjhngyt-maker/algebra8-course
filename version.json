@@ -1,6 +1,7 @@
 {
   "name": "Kitsune Math 7–11",
-  "version": "3.1.0-rc.5",
+  "version": "3.1.0-rc.6",
+  "build_revision": "voice-piper-v074-progress-rc6",
   "channel": "release-candidate",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
@@ -9,7 +10,7 @@
   "generator_topics": 551,
   "classic_generator_topics": 51,
   "generator_mode": "selected-course-authored-exercises",
-  "release": "GITHUB_RC5_LIVING_MOTION_REPAIR",
+  "release": "GITHUB_RC6_KITSUNE_PIPER_READER",
   "features": [
     "accessibility",
     "adult-only-cloud-diagnostics",
@@ -178,8 +179,17 @@
     "startup-mode-auto-full-short-off",
     "startup-edge-vignette-pulse",
     "startup-no-crossfade-double-mascot",
-    "startup-offline-precache"
+    "startup-offline-precache",
+    "kitsune-piper-offline-voice",
+    "auto-voice-switch",
+    "mathematical-speech",
+    "reader-pause-resume-bookmarks",
+    "progress-preserving-update"
   ],
   "curriculum_topics": 551,
-  "icon_version": "math-v310"
+  "icon_version": "math-v310",
+  "voice_engine": "kitsune-piper-v07",
+  "ondevice_generation": "ready_user_validated",
+  "public_distribution": "pending_base_dataset_license",
+  "progress_storage": "unchanged"
 }

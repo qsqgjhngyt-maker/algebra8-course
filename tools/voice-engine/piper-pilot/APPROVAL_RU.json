@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "voice_approved_by_user",
+  "approval_date": "2026-10-09",
+  "user_statement": "Да, все Ок! Ото что нужно!",
+  "scope": "Прослушанная обученная проба Kitsune Piper; выбор тембра для следующего локального этапа",
+  "model_sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913",
+  "config_sha256": "4df10841559dac37f783b4a7329603afbf51508177d0861601a3fe630f9cd176",
+  "reference_sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+  "PC_browser": "not_tested",
+  "Android": "not_tested",
+  "iOS": "not_tested",
+  "public_distribution": "not_prepared"
+}

@@ -326,6 +326,8 @@
 
   async function releaseHeavyVoice(reason="learning"){
     if(dialogOpen())return false;
+    // Отложенная очистка после навигации не должна отменять уже начатое чтение.
+    if(window.v151IsSpeechBusy?.()||window.KitsuneDynamicVoice?.isBusy?.()||window.KitsuneStaticVoice?.isBusy?.())return false;
 
     /* Never create the beta.3.9.0 unload/reload churn around every button. */
     if(heavyReleasePromise)return heavyReleasePromise;

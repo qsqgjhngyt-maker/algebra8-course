@@ -1,0 +1,283 @@
+{
+  "candidate": "3.1.0-rc.6",
+  "status": "local_candidate_not_published",
+  "base_commit": "30d1df32c06db937858b71bda3d1698128448053",
+  "voice_tests": {
+    "passed": 107,
+    "failed": 0
+  },
+  "application_checks": {
+    "passed": 13,
+    "failed": 0
+  },
+  "progress_checks": {
+    "grade8_merge": "passed",
+    "idempotent_reopen": "passed",
+    "legacy_delta": "passed",
+    "other_course_keys": "preserved",
+    "voice_preferences": "preserved",
+    "reader_bookmarks": "preserved",
+    "exact_GitHub_RC5_worker_to_RC6": "passed_in_VM",
+    "failed_install": "passed",
+    "rollback": "passed"
+  },
+  "browser_upgrade_RC5_to_RC6": {
+    "status": "not_completed",
+    "reason": "Local test URL returned ERR_CONNECTION_TIMED_OUT in the verification browser"
+  },
+  "user_v074_devices": [
+    "PC",
+    "Android",
+    "iOS"
+  ],
+  "preserved_files": [
+    {
+      "path": "manifest.json",
+      "sha256": "33fc6ae29296fe4f56c4c7f3620551ab4f48aeb3f5c6c023db219f932c37c93a"
+    },
+    {
+      "path": "grade8-progress-bridge-v311.js",
+      "sha256": "62b6c43522aefcb63847d8ccd3263be6039c9d9d3ccbb31d77cb8a48a985975e"
+    },
+    {
+      "path": "migration-v302.js",
+      "sha256": "c588e285c681635c10314c4805f87b00d1fb3ad62f8adcb41a2f7b88a55bcd55"
+    },
+    {
+      "path": "app.js",
+      "sha256": "76d3d8343762f47f8d7793952497352c7145b85b1abc8910825ea822f099d863"
+    }
+  ],
+  "approved_wav": [
+    {
+      "path": "assets/voice/pilot_v04/clips/fractions_001_ea346eb9d899.wav",
+      "sha256": "942a1545b3a52f99bdfa8afa56b7dfcad2630345672cb801fc3457917f380bf5",
+      "bytes": 184364
+    },
+    {
+      "path": "assets/voice/pilot_v04/clips/fractions_002_ec94a8119911.wav",
+      "sha256": "74067a378a42c739301c4bac1c6af91e173a8632a88a9d64e1442fbbaa6b7061",
+      "bytes": 153644
+    },
+    {
+      "path": "assets/voice/pilot_v04/clips/fractions_003_87bcb4daa823.wav",
+      "sha256": "b454986f3d3c7bab6ee550ce1ca578480f71b6e8d4f03d399abc9fd725286e63",
+      "bytes": 241964
+    },
+    {
+      "path": "assets/voice/pilot_v04/clips/equations_001_2b443897b3f5.wav",
+      "sha256": "c794bec06d33470d4b4646209e725b0fcd78e5a6f02872af8a7d54a6d779947d",
+      "bytes": 276524
+    },
+    {
+      "path": "assets/voice/pilot_v04/clips/equations_002_fa29d1b6e692.wav",
+      "sha256": "f1fc848e235bf6dd67367abf80fca5cf71289c6e3353377702166bc91f393bff",
+      "bytes": 414764
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_001_671d2828ef37.wav",
+      "sha256": "b7a48b3b8eae7d9b6d9b359e8693a0975a94a7794365a406752db4cb94fd262a",
+      "bytes": 464684
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_002_2df80c59ebcf.wav",
+      "sha256": "cdef60449f91f9e9f631eb8cac6f5de743c7197bf61abf3d75536a1228bc7c18",
+      "bytes": 276524
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_003_3bd5c0ed8b97.wav",
+      "sha256": "98b755539addc31f58acb5edf165d1259d0cc4e150d27ba6e43ebddcb56bf6d5",
+      "bytes": 153644
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_004_3866119b8c7d.wav",
+      "sha256": "79ae9ebeabc80eb36baec90a3bbc5f8fee9e130f45b938a161161fcf0278a47f",
+      "bytes": 503084
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_005_a46688f1b1b5.wav",
+      "sha256": "2c517367cdb245de1dcf375a9adda9ff36df19a1cef081c707953cbb9c5796fd",
+      "bytes": 257324
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_006_3e7e56e74957.wav",
+      "sha256": "e8d4e305f8411ad07decc2988aea92532329aab6f0232f49cb4527d88be2d11c",
+      "bytes": 480044
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_007_f82e3a5f244a.wav",
+      "sha256": "950301e2e5d824682a93ad46f5645d937660cd06d3c964de4793e0bc12c6f751",
+      "bytes": 276524
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_008_f052844df8a6.wav",
+      "sha256": "def3937f791fc1eae3819ded3206c7ad2a108c02f70ad904b7af39996c0ed753",
+      "bytes": 457004
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_009_68866a3fd130.wav",
+      "sha256": "6d1ec5850ae140f9b99bee6828877bba7e02494291ee78a74a9802569cc84d65",
+      "bytes": 211244
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_010_e1fc63fbd074.wav",
+      "sha256": "3a88a5a0df295437b85e6986e5ac2538024f0911320db348e45f919bd4125e7b",
+      "bytes": 326444
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-1_011_b9db320a51ae.wav",
+      "sha256": "72569469d71c3af981c33de968d06512984a4c446dd2fb03c6034e0cf8197c7a",
+      "bytes": 495404
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_001_7bf93a302c21.wav",
+      "sha256": "b0f50808f2e920c70b690cda80a0538ee06f88e0237705fa07e93505cf8c300a",
+      "bytes": 729644
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_002_8ecdfebb7a6f.wav",
+      "sha256": "8556d6dea2bbc813ccf326138eb1be6746b857e6ce6a98f1f8ae0c8d3d8262b3",
+      "bytes": 199724
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_003_a11e3fb6a585.wav",
+      "sha256": "a4e76f321f6ef4be87b4fc0531818470a3f99c36fd0fe810637313d1f4f83003",
+      "bytes": 426284
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_004_723605f524aa.wav",
+      "sha256": "db439f948c33f3ee2f6acd092aa842c9abc09712f5ca91d7aee65f214b39cb5d",
+      "bytes": 387884
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_005_bf01b8dfdd6e.wav",
+      "sha256": "5728c515a69ca98d8766a72cf4246a37591510a9a2b102c8895fbe92b2578987",
+      "bytes": 326444
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_006_ecc335599eda.wav",
+      "sha256": "061efa8bcdb835a275aedceb9d7d6be672ddb11a8b9106a659a9a20339aefb12",
+      "bytes": 345644
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_007_4fbd46e5f6a0.wav",
+      "sha256": "c615aa2e0de5f1522bb416c43e6bf28bc3f83f3c093c4fa9096089beab8c5050",
+      "bytes": 553004
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-2_008_652a71015388.wav",
+      "sha256": "2f51daa815053c98137f051049e827fbe4532ca1cc27f6d7d13c255210a1147e",
+      "bytes": 418604
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_001_3ae43fea9c94.wav",
+      "sha256": "ba4aac1158edde950f0e5fa78ba74804c7e47c33bcaaa3f64542fcfca85d8afb",
+      "bytes": 253484
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_002_7aea3de2d08b.wav",
+      "sha256": "39335b72589b014a82c66c8b6b45280d1b37b6173309185e0fb11829227bd6f0",
+      "bytes": 322604
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_003_203af2e0b5e2.wav",
+      "sha256": "220074256cc856e60e84bdcaeccf2d2f4ceb6715d36958c5f783b1b79792d24f",
+      "bytes": 553004
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_004_f4abbecad141.wav",
+      "sha256": "2a887ecd7d993705041b4bfae3aae4228284b620a1f248e3e53cf5fd0ac96fdb",
+      "bytes": 503084
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_005_84b8ecbf8c8b.wav",
+      "sha256": "ecc24db89362d80fecda133f4c2109649e1323c17fc4aa1ef85e69db5f4fdc8a",
+      "bytes": 526124
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_006_1f69e41096fb.wav",
+      "sha256": "fec68f0f4caeea8cfcfcb2911f3ca020498c8becb844811153af628d943d7a59",
+      "bytes": 245804
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_007_09b4b0c1ef98.wav",
+      "sha256": "e202142ded6cc587d689828092d62dd0467c7f832becc9ae67187b07c04aa2ce",
+      "bytes": 222764
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_008_7d1ecf868209.wav",
+      "sha256": "0812c2baad97a8fe2007920991d0fef712da91f3d7c1e567fc80389d7f0c9d38",
+      "bytes": 295724
+    },
+    {
+      "path": "assets/voice/grade8_algebra_v05/clips/grade8_1-3_009_ff98f264a0f3.wav",
+      "sha256": "0b82f86174c7787e0044c2cc38083febda6a08d3a69c7de89ff1aa2a7d175e78",
+      "bytes": 307244
+    }
+  ],
+  "runtime_files": [
+    {
+      "path": "assets/voice/kitsune_piper_v07/model/kitsune.onnx",
+      "bytes": 63522235,
+      "sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/model/kitsune.onnx.json",
+      "bytes": 5067,
+      "sha256": "4df10841559dac37f783b4a7329603afbf51508177d0861601a3fe630f9cd176"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/model/phoneme-cases.json",
+      "bytes": 19161,
+      "sha256": "016c13340074e2a0a1a168ec4e315e9b55a4f5644635a4f050746ebe02a298b7"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/ort.wasm.min.js",
+      "bytes": 48327,
+      "sha256": "65e09376df69107e881b5c34d2d37aed333a366b6d941073ec518168e269b87d"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/ort-wasm-simd-threaded.mjs",
+      "bytes": 20856,
+      "sha256": "30dd851d9c00622940500f71ddd2ff8820c5cb65270816080175b958705385a8"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/ort-wasm-simd-threaded.wasm",
+      "bytes": 11210254,
+      "sha256": "71aef04959c5c1b6de461b6538e2058e306610034a85aad2742d0c7fd4533fe4"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/LICENSE_ONNXRUNTIME.txt",
+      "bytes": 1094,
+      "sha256": "c250d6278f0b47a6439fb7592b08b58a55eb9f535aa49a1db63211c3f982b674"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/ru_dict.bin",
+      "bytes": 9053144,
+      "sha256": "ad087eb02abe6eb061d74e8cb438aab322443bd6dd3620e76497c5694310fe6c"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/piper_phonemize.js",
+      "bytes": 120714,
+      "sha256": "fef0c2fc442d24fdef5c7c7cc37d5da2314407640fe11ab1bfe347c723dff19b"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/piper_phonemize.wasm",
+      "bytes": 635212,
+      "sha256": "b777cd107a91d2bcc6a1ea46f2c26a662a7407394fe84589198aeaa83dd7a9d6"
+    },
+    {
+      "path": "assets/voice/kitsune_piper_v07/runtime/piper_phonemize.data",
+      "bytes": 18077249,
+      "sha256": "29f1025eb23a5b5c192cd14a6efbce4509402ff265405072ee6f7d1a09b78f8c"
+    }
+  ],
+  "publication_blockers": [
+    "GitHub write access unavailable in this session",
+    "Irina base dataset MODEL_CARD License Unknown; training chain needs clarification",
+    "Corresponding source for npm phonemizer binary needs verification",
+    "Real browser RC5 to RC6 update test remains incomplete"
+  ],
+  "runtime_bytes": 102713313,
+  "stress_words": 7
+}

@@ -529,6 +529,16 @@
     const first=ctx?safeNextStep(ctx,steps[0]||strip(ctx.exercise?.hint)):"";
     const rule=ctx?(strip(ctx.lesson?.remember)||strip(ctx.lesson?.why)||strip(ctx.lesson?.formula)):"";
     const quoted=q.length>95?q.slice(0,92)+"…":q;
+    if(/что (?:ты )?умеешь|что (?:ты )?можешь|(?:какие|твои|твоих) (?:у тебя )?навык|твои возможност|чем (?:ты )?(?:можешь )?помо/i.test(low)){
+      return ctx
+        ?"Я помогу разобраться в этом задании: объясню правило, подскажу следующий шаг и проверю твой ход решения. Напиши, на каком шаге нужна помощь."
+        :"Я помогаю учить математику: объясняю темы курса, разбираю задания по шагам, проверяю твой ход решения и читаю объяснения вслух. Открой упражнение и нажми «Разобрать с Kitsune» — тогда я увижу сам пример.";
+    }
+    if(/(?:какая|какую|твоя|твоей|наша|новая|новую|нашу) (?:сейчас )?цел[ьи]|(?:на что|что) (?:мы )?(?:хотим|нужно) (?:изучить|понять|выучить)|зачем ты (?:нужна|здесь)/i.test(low)){
+      return first
+        ?"Наша цель — понять это задание и научиться решать похожие примеры самостоятельно. Начнём с одного шага: "+first
+        :"Наша цель — понять математику и научиться решать задачи самостоятельно. Выбери тему или упражнение, которое хочешь разобрать, и начнём с одного понятного шага.";
+    }
 
     if(/привет|здравств|как дела|ты тут|kitsune|кицун/i.test(low)){
       return "Я здесь 🦊 Можешь написать или сказать вслух, что именно непонятно в текущем задании.";
@@ -557,7 +567,7 @@
     if(ctx){
       return `Я прочитала твой вопрос: «${quoted}». Он не похож на просьбу о следующем шаге текущего примера. В локальном режиме я не буду придумывать ответ: могу надёжно объяснить правило этой темы, проверить твой математический шаг или разобрать конкретное задание.`;
     }
-    return `Я прочитала: «${quoted}». Сейчас локальный режим надёжно отвечает по математике и материалам курса. Для свободных вопросов на любые темы нужен расширенный Cloud Brain — его мы как раз готовим.`;
+    return "Уточни, пожалуйста, что хочешь разобрать по математике. Можешь написать выражение, назвать тему курса или открыть задание и нажать «Разобрать с Kitsune».";
   }
 
   function isExplicitAnswerRequest(message){
@@ -895,6 +905,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
 
   async function say(panel,ctx,facts){
     const row=comicHost(panel);
+    const turn=(Number(row.dataset.replyTurn)||0)+1;row.dataset.replyTurn=String(turn);
     const text=row.querySelector(".v18-comic-text");
     const thinking=row.querySelector(".v18-comic-thinking");
     thinking.classList.add("show");
@@ -902,12 +913,12 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
     if(facts.errorType)rememberError(ctx,facts.errorType);
 
     const reply=await coachReply(ctx,facts);
+    if(row.dataset.replyTurn!==String(turn)||!panel.isConnected||!panel.classList.contains("show"))return;
     thinking.classList.remove("show");
     text.textContent=reply;
 
-    try{
-      if(typeof v151AutoSpeak==="function"&&v151VoiceAuto)v151AutoSpeak(reply,facts.status==="correct_step"?"happy":"think");
-    }catch(e){}
+    // Озвучка конкретного шага принадлежит Smart Tutor: поздний ответ Brain
+    // не прерывает чтение и не запускает дубликат той же подсказки.
   }
 
   function factsFromOpen(ctx,opts){
@@ -955,6 +966,7 @@ ${hintOnly?"Это ПОДСКАЗКА: не называй финальный о
             ?"✅ Шаг математически согласуется с проверенной цепочкой."
             :"Kitsune сейчас покажет, где именно возникло расхождение.";
           out.className=`v173-work-result ${facts.status==="correct_step"?"good":"warn"} show`;
+          window.KitsuneLessonVoice?.announce(ctx,out.textContent+" "+facts.nextStep,facts.status==="correct_step"?"happy":"think");
         }
         await say(panel,ctx,facts);
       });

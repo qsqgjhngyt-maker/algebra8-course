@@ -1,0 +1,18 @@
+{
+  "status": "wasm_v8_passed",
+  "runtime": {
+    "common": "1.22.0",
+    "web": "1.22.0"
+  },
+  "duration_seconds": 4.32,
+  "generation_seconds": 217.6612551,
+  "network": "blocked",
+  "text": "Привет! Я Китсуне. Давай решим новую задачу вместе.",
+  "Android": "not_tested",
+  "iOS": "not_tested",
+  "PC_browser": "not_tested",
+  "listening": "pending",
+  "rms": 0.06290827254512799,
+  "peak": 0.754364013671875,
+  "audio_sha256": "a90c7e0f7e8597a4aafea95269bc4fc88938a8c0ea1cae9ef0710eb6239ffdea"
+}

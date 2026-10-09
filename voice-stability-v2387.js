@@ -5,9 +5,8 @@
    - NO Whisper unload/reload before every dictation on iPhone;
    - one Tiny/WASM ASR worker is pinned for the whole open dialog;
    - wake microphone + legacy v19 Whisper are released once per dialog;
-   - while iPhone dialog is active, replies use lightweight system TTS
-     instead of loading Piper Irina next to Whisper;
-   - when dialog closes, ASR is released and normal Irina behavior returns.
+   - replies use the shared Kitsune player for WAV and local generation;
+   - when dialog closes, ASR is released without stopping page narration.
 
    Manual mic and hands-free share the same local STT path.
    Raw audio never leaves the device.
@@ -69,6 +68,8 @@
   let legacyWhisperReleased=false;
   let wakeReleased=false;
   let systemSpeaking=false;
+  let systemSpeechInDialog=false;
+  let systemSpeechRun=0;
   let systemSpeechPoll=null;
   let systemSpeechWatchdog=null;
   let activeSystemFinish=null;
@@ -440,7 +441,7 @@
   function endDialogVoiceSession(){
     stopUnified();
     clearTimeout(retryTimer);
-    stopSystemSpeech();
+    if(systemSpeechInDialog)stopSystemSpeech();
     retryBudget=1;
     wakeReleased=false;
     legacyWhisperReleased=false;
@@ -449,24 +450,13 @@
     clearIosSessionMarker();
 
     /* Let close animation finish, then free ASR memory.
-       Presence module may restart wake after the dialog is closed.
-       Irina can be prepared again later because its runtime was intentionally
-       released while the iPhone dialog was active. */
+       Presence module may restart wake after the dialog is closed. */
     clearTimeout(delayedReleaseTimer);
     delayedReleaseTimer=setTimeout(()=>{
       if(!dialogOpen()){
         releaseOwnWorker().catch(()=>{});
       }
     },900);
-  }
-
-  function selectRussianSystemVoice(){
-    try{
-      const voices=window.speechSynthesis?.getVoices?.()||[];
-      return voices.find(v=>/^ru[-_]/i.test(v.lang||"")) ||
-        voices.find(v=>/russian|рус/i.test(v.name||"")) ||
-        null;
-    }catch{return null}
   }
 
   function clearSystemSpeechTimers(){
@@ -478,93 +468,14 @@
 
   function stopSystemSpeech({runDone=false}={}){
     const finish=activeSystemFinish;
+    if(runDone)finish?.("cancel");
+    systemSpeechRun++;
     activeSystemFinish=null;
     clearSystemSpeechTimers();
     try{window.speechSynthesis?.cancel?.()}catch{}
     systemSpeaking=false;
-    if(runDone){
-      try{finish?.("cancel")}catch{}
-    }
-  }
-
-  function speakSystemIOS(text,opts={}){
-    if(!("speechSynthesis" in window)||typeof SpeechSynthesisUtterance==="undefined"){
-      return wrappedSpeak?.(text,opts);
-    }
-
-    /* iOS Safari/PWA sometimes fails to fire SpeechSynthesisUtterance.onend.
-       beta.3.8.6 then left systemSpeaking=true forever, so the second press
-       of «Говорить» returned immediately and looked like a dead microphone. */
-    stopSystemSpeech();
-
-    const utterance=new SpeechSynthesisUtterance(String(text||""));
-    utterance.lang="ru-RU";
-    utterance.rate=.98;
-    utterance.pitch=1.02;
-    utterance.volume=1;
-
-    const voice=selectRussianSystemVoice();
-    if(voice)utterance.voice=voice;
-
-    systemSpeaking=true;
-    const startedAt=performance.now();
-    let finished=false;
-
-    const finish=(reason="end")=>{
-      if(finished)return;
-      finished=true;
-      activeSystemFinish=null;
-      clearSystemSpeechTimers();
-      systemSpeaking=false;
-
-      try{opts?.onDone?.()}catch{}
-
-      if(!iosInterruptedRecovery&&handsFreeEnabled()&&dialogOpen()&&!document.hidden){
-        clearTimeout(retryTimer);
-        retryTimer=setTimeout(()=>{
-          if(!sessionBusy&&!recording&&!systemSpeaking&&dialogOpen()){
-            startUnified(false,false).catch(()=>{});
-          }
-        },700);
-      }
-    };
-
-    activeSystemFinish=finish;
-    utterance.onend=()=>finish("onend");
-    utterance.onerror=()=>finish("onerror");
-
-    window.speechSynthesis.speak(utterance);
-
-    /* Safari fallback #1:
-       after a short grace period, watch the actual synth state.
-       If speech has stopped but onend never arrived, unlock the microphone. */
-    systemSpeechPoll=setInterval(()=>{
-      if(finished)return;
-      if(performance.now()-startedAt<700)return;
-
-      let speaking=false;
-      let pending=false;
-      try{
-        speaking=!!window.speechSynthesis?.speaking;
-        pending=!!window.speechSynthesis?.pending;
-      }catch{}
-
-      if(!speaking&&!pending){
-        finish("state-watchdog");
-      }
-    },250);
-
-    /* Safari fallback #2: absolute guard against a permanently stuck flag. */
-    const maxMs=Math.max(
-      7000,
-      Math.min(32000,2500+String(text||"").length*95)
-    );
-    systemSpeechWatchdog=setTimeout(
-      ()=>finish("timeout-watchdog"),
-      maxMs
-    );
-
-    return true;
+    systemSpeechInDialog=false;
+    try{window.v161MarkSpeaking?.(false,"idle")}catch{}
   }
 
   function wrapIOSDialogSpeech(){
@@ -576,11 +487,22 @@
       :null;
 
     window.v151Speak=function(text,opts={}){
-      if(isIOSLike()&&iosDialogSession&&dialogOpen()){
-        /* Do not load Piper next to pinned Whisper on iPhone. */
-        return speakSystemIOS(text,opts);
-      }
-      return wrappedSpeak(text,opts);
+      if(!text||(!opts.force&&(!v151VoiceEnabled||!v151SpeechUnlocked)))return false;
+      if(!opts.force&&window.v151IsSpeechBusy?.())return false;
+      const inDialog=dialogOpen();
+      ++systemSpeechRun;
+      let run=null,finished=false;
+      const accepted=wrappedSpeak(text,{...opts,onDone:()=>{
+        if(run!==null&&run!==systemSpeechRun)return;
+        finished=true;
+        systemSpeaking=false;
+        systemSpeechInDialog=false;
+        opts.onDone?.();
+      }});
+      run=systemSpeechRun;
+      systemSpeaking=!!accepted&&!finished;
+      systemSpeechInDialog=systemSpeaking&&inDialog;
+      return accepted;
     };
 
     window.v161StopSpeech=function(){
@@ -1042,8 +964,6 @@
     setMicUi(false);
 
     try{window.speechSynthesis?.cancel?.()}catch{}
-    systemSpeaking=false;
-
     try{return originalStop?.()}catch{return false}
   }
 
@@ -1107,7 +1027,7 @@
         <div>
           <strong>🎯 Единый голосовой ввод · iPhone Stable</strong>
           <div style="opacity:.75;margin-top:2px">
-            Кнопка + hands-free · iPhone освобождает Irina один раз на диалог
+            Кнопка + разговор без рук · голос Kitsune
           </div>
         </div>
         <span>v${VERSION}</span>
@@ -1122,7 +1042,7 @@
       <label style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;cursor:pointer">
         <input id="v2387DesktopAccurate" type="checkbox">
         <span><b>Максимальная точность на ПК · Whisper Base q8</b><br>
-        <small>ПК: Base WASM/q8. iPhone: Tiny; Irina полностью выгружается на время диалога, чтобы не конкурировать за память с Whisper.</small></span>
+        <small>ПК: Base WASM/q8. iPhone: Tiny. Микрофон останавливает чтение Kitsune, чтобы слышать только ваш вопрос.</small></span>
       </label>
 
       <div id="v2387VoiceStatus" style="margin:9px 0;opacity:.82">

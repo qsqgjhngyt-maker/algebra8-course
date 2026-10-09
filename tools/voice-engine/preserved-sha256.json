@@ -1,0 +1,107 @@
+[
+  {
+    "path": "assets/voice/pilot_v04/manifest.json",
+    "sha256": "42038b989915b9ee8fc278019451d53ed33762c028a513d77ce6c27becee6c8f",
+    "bytes": 2234
+  },
+  {
+    "path": "assets/voice/pilot_v04/clips/equations_001_2b443897b3f5.wav",
+    "sha256": "c794bec06d33470d4b4646209e725b0fcd78e5a6f02872af8a7d54a6d779947d",
+    "bytes": 276524
+  },
+  {
+    "path": "assets/voice/pilot_v04/clips/equations_002_fa29d1b6e692.wav",
+    "sha256": "f1fc848e235bf6dd67367abf80fca5cf71289c6e3353377702166bc91f393bff",
+    "bytes": 414764
+  },
+  {
+    "path": "assets/voice/pilot_v04/clips/fractions_001_ea346eb9d899.wav",
+    "sha256": "942a1545b3a52f99bdfa8afa56b7dfcad2630345672cb801fc3457917f380bf5",
+    "bytes": 184364
+  },
+  {
+    "path": "assets/voice/pilot_v04/clips/fractions_002_ec94a8119911.wav",
+    "sha256": "74067a378a42c739301c4bac1c6af91e173a8632a88a9d64e1442fbbaa6b7061",
+    "bytes": 153644
+  },
+  {
+    "path": "assets/voice/pilot_v04/clips/fractions_003_87bcb4daa823.wav",
+    "sha256": "b454986f3d3c7bab6ee550ce1ca578480f71b6e8d4f03d399abc9fd725286e63",
+    "bytes": 241964
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/kitsune_master_v1.wav",
+    "sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+    "bytes": 576044
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/kitsune_v7_math.wav",
+    "sha256": "99098e790bd4f1c5dec00d166f36ae7aee19bf276f9a4d746eba000908d8448a",
+    "bytes": 453164
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/kitsune_v7_support.wav",
+    "sha256": "a40587739a94db5fcffc36ccdbdc88c76400881fef60f30442364f692bfd62fa",
+    "bytes": 399404
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/kitsune_voice_v7.py",
+    "sha256": "96d0a26f2e32875c8c655c15549c44b119235858c8f973107bc109d2ebacb1b7",
+    "bytes": 1774
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/requirements.txt",
+    "sha256": "a40374c030d6ba5ea2944eff7839db6d4e46591ec9db376744d8890411fa4880",
+    "bytes": 1612
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V7_APPROVED/SHA256SUMS.txt",
+    "sha256": "753575321afd02d56bbee428f8ff665ca7b136d51a506ad6c467d605b9ab05e7",
+    "bytes": 437
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/kitsune_master_v1.wav",
+    "sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+    "bytes": 576044
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/kitsune_pronunciation.py",
+    "sha256": "4a760cd613b5312bbdeb210542697a7cf031374d121a9592716d4d460715400c",
+    "bytes": 1039
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/kitsune_v8_math_auto.wav",
+    "sha256": "a1d4c0e0cac1bbb68a6af4ac2a77573511f8324e5f4d5b535f3a0af8ee0aa1d1",
+    "bytes": 437804
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/kitsune_voice_v8.py",
+    "sha256": "a72eac8cdefecbce7104260fdbe2cd562f8bf9d6238f497e3c392855f9f6eeb5",
+    "bytes": 1439
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/requirements.txt",
+    "sha256": "a40374c030d6ba5ea2944eff7839db6d4e46591ec9db376744d8890411fa4880",
+    "bytes": 1612
+  },
+  {
+    "path": "tools/voice-engine/VOICE_V8_APPROVED/SHA256SUMS.txt",
+    "sha256": "2595bd38613e42d9addbc53484edeb37a486a1152b52d5b404cbec22e8eee56c",
+    "bytes": 444
+  },
+  {
+    "path": "tools/voice-engine/kitsune_pronunciation.py",
+    "sha256": "4a760cd613b5312bbdeb210542697a7cf031374d121a9592716d4d460715400c",
+    "bytes": 1039
+  },
+  {
+    "path": "tools/voice-engine/kitsune_batch_v04.py",
+    "sha256": "294b5228adf34b52c7f2509f1905aeae42a2214d5fd97e841ea088a61144da42",
+    "bytes": 7230
+  },
+  {
+    "path": "tools/voice-engine/kitsune_lessons_v04.json",
+    "sha256": "8dbfdbe900cb561b8f145272e58cfd1266934b0d5d213526fd75f501bfa099e6",
+    "bytes": 667
+  }
+]

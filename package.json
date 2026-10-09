@@ -1,6 +1,6 @@
 {
   "name": "kitsune-math",
-  "version": "3.1.0-rc.2",
+  "version": "3.1.0-rc.6",
   "private": true,
   "scripts": {
     "test": "node tests/release/qa-static.cjs",
@@ -8,8 +8,17 @@
     "test:voice": "node tests/release/qa-voice.cjs",
     "test:visual": "node tests/release/qa-visual.cjs",
     "test:upgrade": "node tests/release/qa-upgrade.cjs",
-    "test:broker": "node --test cloudflare-broker/tests/current.test.mjs"
+    "test:broker": "node --test cloudflare-broker/tests/current.test.mjs",
+    "test:voice-pwa": "node tests/release/qa-voice-pwa.cjs",
+    "test:local-server": "pwsh -NoProfile -File tests/local-server-launch.ps1",
+    "test:voice-unit": "node --test tests/static-voice-v04.test.cjs tests/course-voice-v05.test.cjs tests/device-voice-v06.test.cjs tests/auto-voice-toggle.test.cjs tests/speech-overlap.test.cjs tests/dialog-voice-lifecycle.test.cjs tests/lesson-voice.test.cjs tests/pwa-offline-lifecycle.test.cjs tests/piper-voice-v07.test.cjs tests/reading-v074.test.cjs tests/progress-preservation.test.cjs",
+    "voice:verify": "node tools/voice-engine/verify-pack.cjs && node tools/voice-engine/verify-course-pack.cjs",
+    "voice:device-check": "node tools/voice-engine/device/readiness.cjs"
   },
-  "devDependencies": { "playwright": "1.62.1" },
-  "engines": { "node": ">=22" }
+  "devDependencies": {
+    "playwright": "1.62.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }

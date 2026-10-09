@@ -1,0 +1,85 @@
+{
+  "status": "passed_in_tested_PC_browser",
+  "date": "2026-10-09",
+  "build": "voice-piper-v07-a255b5e3f2e2",
+  "environment": "Chromium in Codex In-app Browser on Windows; local PWA; actual saved Piper package, Worker and Web Audio",
+  "tests": {
+    "reader": {
+      "navigation": "Читалка Kitsune in main menu",
+      "text": "six phrases with paragraphs and math, kept verbatim after reload",
+      "pause": "phrase 2 of 6",
+      "reload": "same text retained; starts phrase 2 of 6",
+      "resume": "same phrase; completed phrases skipped",
+      "final_build": "same saved phrase 2 of 6 restored and paused",
+      "screenshot": "reader-final-v074.jpg"
+    },
+    "lesson": {
+      "source": "full theory, rational expressions",
+      "total": 57,
+      "pause": "phrase 9 of 57",
+      "reload": "starts at phrase 9 of 57",
+      "restart": "starts phrase 1 of 57",
+      "old_stop_button": "pauses and keeps bookmark",
+      "helper_button": "title Продолжить чтение; resumes phrase 1 of 57 in final build",
+      "finish": "reading bar hidden; session released"
+    },
+    "reload_test_build": "voice-piper-v07-9e961d18effb",
+    "final_update": "accepted Обновить сейчас to a255b5e3f2e2 without reinstalling voice",
+    "console_errors": 0,
+    "auto_voice_setting": "left off as found"
+  },
+  "responsive": {
+    "method": "viewport emulation, not physical phones",
+    "desktop": {
+      "width": 1265,
+      "height": 712,
+      "screenshot": "reader-final-v074.jpg"
+    },
+    "sizes": [
+      {
+        "width": 390,
+        "height": 844,
+        "reader": "reader-mobile-paused-v074-390.jpg",
+        "lesson": "lesson-mobile-v074-390.jpg"
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "reader": "reader-mobile-v074-320.jpg",
+        "dialog_scrolls": true
+      }
+    ],
+    "result": "controls fit; long textarea and narrow dialog scroll"
+  },
+  "automated": {
+    "voice_tests": 106,
+    "application_checks": 13,
+    "shell_assets": 174,
+    "static_plan": "approved WAV segments retained; no extra segment pause added"
+  },
+  "storage": {
+    "local_only": true,
+    "text_limit": 20000,
+    "bookmarks_limit": 40,
+    "reload_autoplay": false,
+    "position": "phrase boundary; interrupted phrase repeats"
+  },
+  "preservation": {
+    "approved_static_WAVs": 33,
+    "lesson_files_byte_identical": 88,
+    "model_unchanged": true,
+    "stress_dictionary_unchanged": true,
+    "saved_generator_reused": true,
+    "old_archives_kept": true
+  },
+  "previous_devices": {
+    "version": "0.7.2",
+    "PC": "passed_by_user",
+    "Android": "passed_by_user",
+    "iOS": "passed_by_user"
+  },
+  "user_v073": "User rechecked and confirmed all good; exact devices for this confirmation not specified",
+  "v074_physical_devices": "pending_user_check",
+  "pushed": false,
+  "published": false
+}

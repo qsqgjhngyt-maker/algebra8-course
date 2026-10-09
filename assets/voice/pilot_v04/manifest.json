@@ -1,0 +1,48 @@
+{
+  "engine_version": "0.4.0",
+  "pack_id": "pilot_v04",
+  "model": "siriusfreak/qwen3-tts-12hz-1.7b-ru-stress-cf",
+  "reference_sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+  "segments": [
+    {
+      "item_id": "fractions",
+      "index": 1,
+      "text": "Привет! Сегодня мы продолжим изучать дроби.",
+      "prepared_text": "Привет! Сегодня мы продолжим изучать дро́би.",
+      "audio": "clips/fractions_001_ea346eb9d899.wav",
+      "pause_after_ms": 300
+    },
+    {
+      "item_id": "fractions",
+      "index": 2,
+      "text": "В каждой дроби есть числитель и знаменатель.",
+      "prepared_text": "В каждой дро́би есть числи́тель и знамена́тель.",
+      "audio": "clips/fractions_002_ec94a8119911.wav",
+      "pause_after_ms": 300
+    },
+    {
+      "item_id": "fractions",
+      "index": 3,
+      "text": "Давай разберём один интересный пример вместе!",
+      "prepared_text": "Давай разберём один интересный пример вместе!",
+      "audio": "clips/fractions_003_87bcb4daa823.wav",
+      "pause_after_ms": 300
+    },
+    {
+      "item_id": "equations",
+      "index": 1,
+      "text": "Смотри! Эти чи́сла помогут нам разобраться с уравнением.",
+      "prepared_text": "Смотри! Эти чи́сла помогут нам разобраться с уравнением.",
+      "audio": "clips/equations_001_2b443897b3f5.wav",
+      "pause_after_ms": 300
+    },
+    {
+      "item_id": "equations",
+      "index": 2,
+      "text": "Сначала определим неизвестное. Затем перенесём слагаемые и найдём ответ. Не торопись!",
+      "prepared_text": "Сначала определим неизвестное. Затем перенесём слагаемые и найдём ответ. Не торопись!",
+      "audio": "clips/equations_002_fa29d1b6e692.wav",
+      "pause_after_ms": 300
+    }
+  ]
+}

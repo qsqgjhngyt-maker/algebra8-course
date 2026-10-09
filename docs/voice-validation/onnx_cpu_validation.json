@@ -1,0 +1,42 @@
+{
+  "status": "native_cpu_generation_passed",
+  "text": "Привет! Я Китсуне. Давай решим новую задачу вместе.",
+  "tokens": 291,
+  "duration_seconds": 11.64,
+  "generation_seconds": 53.12248039999395,
+  "language_model_seconds": 24.464489899997716,
+  "rms": 0.04278656467795372,
+  "dynamic_shapes": [
+    [
+      17,
+      [
+        1,
+        80,
+        534
+      ]
+    ],
+    [
+      49,
+      [
+        1,
+        80,
+        598
+      ]
+    ],
+    [
+      291,
+      [
+        1,
+        80,
+        1082
+      ]
+    ]
+  ],
+  "onnxruntime": "1.30.0",
+  "execution_provider": "CPUExecutionProvider",
+  "audio_sha256": "0c4f85943b5a40aad341370b38b886fd5eee31efe64e2a6c28e15809c3f6a937",
+  "browser_wasm": "not_tested",
+  "Android": "not_tested",
+  "iOS": "not_tested",
+  "listening": "pending"
+}

@@ -18,25 +18,11 @@ let v15State="idle";
 /* v1.6.1 · Живая озвучка Kitsune */
 const v151VoiceEnabledKey="a8_alfi_voice_enabled";
 const v151VoiceAutoKey="a8_alfi_voice_auto";
-const v151VoiceProfileKey="a8_alfi_voice_profile";
-const v151VoiceNameKey="a8_alfi_voice_name";
-const v161VoiceEnergyKey="a8_alfi_voice_energy";
-
-/* Более умеренная высота тона + динамическая фразовая интонация звучит
-   естественнее, чем постоянный высокий pitch. */
-const v151VoiceProfiles={
-  lively:{name:"Живой+",rate:1.00,pitch:1.06,volume:1,dynamic:1.00},
-  soft:{name:"Мягкий",rate:.92,pitch:1.01,volume:.97,dynamic:.52},
-  clear:{name:"Чёткий",rate:.89,pitch:.99,volume:1,dynamic:.34}
-};
 let v151VoiceEnabled=true;
 let v151VoiceAuto=false;
-let v151VoiceProfile="lively";
-let v151VoiceName="";
-let v161VoiceEnergy=72;
-let v151Voices=[];
 let v151SpeechUnlocked=false;
 let v151Speaking=false;
+let v151VoiceNotice="";
 
 function v151IsIOSLike(){
   const ua=String(navigator.userAgent||"");
@@ -46,16 +32,13 @@ function v151IsIOSLike(){
 }
 let v161SpeechRun=0;
 let v161SpeechTimer=null;
+let v151AutoSpeechTimer=null;
 try{
   const e=localStorage.getItem(v151VoiceEnabledKey);
   v151VoiceEnabled=e===null?true:e==="1";
   v151VoiceAuto=localStorage.getItem(v151VoiceAutoKey)==="1";
-  v151VoiceProfile=localStorage.getItem(v151VoiceProfileKey)||"lively";
-  v151VoiceName=localStorage.getItem(v151VoiceNameKey)||"";
-  const energy=Number(localStorage.getItem(v161VoiceEnergyKey));
-  if(Number.isFinite(energy)&&energy>=0&&energy<=100)v161VoiceEnergy=energy;
 }catch(e){}
-if(!v151VoiceProfiles[v151VoiceProfile])v151VoiceProfile="lively";
+
 
 let v15TypeTimer=null;
 let v15IdleTimer=null;
@@ -146,6 +129,7 @@ function v15Markup(){
         <button class="v15-action primary-action" id="v15TipBtn">💡 Совет</button>
         <button class="v15-action" id="v15SimpleBtn">🌱 Объясни проще</button>
       </div>
+      <button type="button" class="v15-action v151-auto-toggle" id="v151AutoVoiceToggle" aria-pressed="false">Автоозвучка: выкл.</button>
       <div class="v15-settings" id="v15Settings">
         <span class="v15-settings-label">Как часто Kitsune вмешивается</span>
         <div class="v15-mode-row">
@@ -159,30 +143,16 @@ function v15Markup(){
             <span>🎙️ Голос Kitsune</span>
             <button class="v151-toggle" id="v151VoiceEnabledBtn" type="button" aria-pressed="true">Вкл.</button>
           </div>
-          <div class="v151-profile-row" id="v151ProfileRow">
-            <button type="button" class="v151-profile-btn" data-voice-profile="lively">⚡ Живой+</button>
-            <button type="button" class="v151-profile-btn" data-voice-profile="soft">🌿 Мягкий</button>
-            <button type="button" class="v151-profile-btn" data-voice-profile="clear">📘 Чёткий</button>
-          </div>
-          <label class="v161-energy-field">
-            <span><b>✨ Живость</b><output id="v161EnergyValue">72%</output></span>
-            <input id="v161Energy" type="range" min="0" max="100" step="1" value="72">
-            <small>Меняет выразительность, паузы и перепады интонации.</small>
-          </label>
-          <label class="v151-voice-field">
-            <span>Голос устройства</span>
-            <select id="v151VoiceSelect" aria-label="Голос Kitsune">
-              <option value="">Автовыбор лучшего русского голоса</option>
-            </select>
-          </label>
-          <button type="button" class="v151-compare-btn" id="v161CompareVoices">🎧 Сравнить лучшие голоса</button>
           <label class="v151-auto-row">
             <input type="checkbox" id="v151AutoVoice">
-            <span><b>Автоозвучка</b><small>Kitsune сам читает важные советы и реакции.</small></span>
+            <span><b>Автоозвучка</b><small>Kitsune читает своим голосом. Можно выключить в любой момент.</small></span>
           </label>
           <div class="v151-voice-actions">
             <button type="button" class="v15-action primary-action" id="v151TestVoice">▶ Послушать Kitsune</button>
-            <span class="v151-voice-note" id="v151VoiceNote">На телефоне используется лучший доступный русский голос.</span>
+            <button type="button" class="v15-action" id="v151TestGenerator" disabled>✨ Создать новую фразу</button>
+            <button type="button" class="v15-action" id="v151DownloadVoice">⬇ Сохранить голос офлайн</button>
+            <button type="button" class="v15-action" id="v151InstallGenerator">⬇ Сохранить генератор · около 600 МБ</button>
+            <span class="v151-voice-note" id="v151VoiceNote">Голос Kitsune · готовые записи</span>
           </div>
         </div>
       </div>
@@ -321,157 +291,14 @@ function v151SaveVoice(){
   try{
     localStorage.setItem(v151VoiceEnabledKey,v151VoiceEnabled?"1":"0");
     localStorage.setItem(v151VoiceAutoKey,v151VoiceAuto?"1":"0");
-    localStorage.setItem(v151VoiceProfileKey,v151VoiceProfile);
-    localStorage.setItem(v151VoiceNameKey,v151VoiceName);
-    localStorage.setItem(v161VoiceEnergyKey,String(v161VoiceEnergy));
   }catch(e){}
 }
-function v151VoiceScore(v){
-  const name=(v.name||"").toLowerCase();
-  let score=0;
-  if(/^ru/i.test(v.lang||""))score+=120;
-
-  /* Современные neural/natural голоса обычно заметно приятнее старых compact TTS. */
-  if(/natural|neural|enhanced|online|premium/.test(name))score+=42;
-  if(/google/.test(name))score+=30;
-  if(/microsoft/.test(name))score+=27;
-  if(/samsung/.test(name))score+=23;
-  if(/yandex/.test(name))score+=21;
-
-  /* Для персонажа обычно лучше более светлые русские тембры, но пользователь
-     всё равно может выбрать любой системный голос вручную. */
-  if(/svetlana|irina|milena|alena|alyona|anna|tatiana|dariya|daria|female|жен/.test(name))score+=14;
-  if(/pavel|dmitry|yuri|male|муж/.test(name))score+=4;
-
-  if(v.localService)score+=8;
-  if(/compact|legacy|classic|old/.test(name))score-=18;
-  return score;
-}
-function v151RefreshVoices(){
-  if(!("speechSynthesis" in window))return;
-  const all=speechSynthesis.getVoices?.()||[];
-  const russian=all.filter(v=>/^ru/i.test(v.lang||""));
-  v151Voices=(russian.length?russian:all).sort((a,b)=>v151VoiceScore(b)-v151VoiceScore(a));
-  const select=document.querySelector("#v151VoiceSelect");
-  if(select){
-    const old=v151VoiceName;
-    select.innerHTML=`<option value="">Автовыбор лучшего русского голоса</option>`+
-      v151Voices.map((v,i)=>`<option value="${String(v.name).replace(/"/g,"&quot;")}">${i<3?"★ ":""}${v.name}${v.localService?" · устройство":""}</option>`).join("");
-    if(v151Voices.some(v=>v.name===old))select.value=old;
-    else select.value="";
-  }
-  v151UpdateVoiceUi();
-}
-function v151SelectedVoice(){
-  if(!v151Voices.length&&"speechSynthesis" in window){
-    const all=speechSynthesis.getVoices?.()||[];
-    const russian=all.filter(v=>/^ru/i.test(v.lang||""));
-    v151Voices=(russian.length?russian:all).sort((a,b)=>v151VoiceScore(b)-v151VoiceScore(a));
-  }
-  if(v151VoiceName){
-    const chosen=v151Voices.find(v=>v.name===v151VoiceName);
-    if(chosen)return chosen;
-  }
-  return v151Voices[0]||null;
-}
-function v151Emotion(state=v15State){
-  /* Значения здесь — не итоговые rate/pitch, а небольшие эмоциональные дельты. */
-  const table={
-    idle:{rate:0,pitch:0,pause:70},
-    wave:{rate:.035,pitch:.025,pause:62},
-    think:{rate:-.055,pitch:-.012,pause:115},
-    explain:{rate:-.060,pitch:-.018,pause:105},
-    happy:{rate:.070,pitch:.035,pause:52},
-    oops:{rate:-.075,pitch:-.035,pause:125},
-    focus:{rate:-.070,pitch:-.040,pause:135},
-    cheer:{rate:.105,pitch:.050,pause:44},
-    celebrate:{rate:.115,pitch:.058,pause:42},
-    sleep:{rate:-.145,pitch:-.050,pause:155}
-  };
-  return table[state]||table.idle;
-}
-function v161CleanSpeechText(text){
-  let s=v15Strip(text);
-
-  /* Не заставляем TTS произносить эмодзи и технические символы. */
-  try{s=s.replace(/\p{Extended_Pictographic}/gu,"")}catch(e){}
-  s=s.replace(/[⭐🌟🔥🎯💡🧠🚀✅❌🙂🦊✨🌱📘🏆🎓]/g,"");
-
-  /* Небольшой математический словарь делает учебные реплики на порядок понятнее. */
-  s=s
-    .replace(/\bОДЗ\b/gi,"область допустимых значений")
-    .replace(/\bНОЗ\b/gi,"наименьший общий знаменатель")
-    .replace(/\bНОК\b/gi,"наименьшее общее кратное")
-    .replace(/√/g," корень из ")
-    .replace(/≠/g," не равно ")
-    .replace(/≥/g," больше или равно ")
-    .replace(/≤/g," меньше или равно ")
-    .replace(/−/g," минус ")
-    .replace(/²/g," в квадрате ")
-    .replace(/³/g," в кубе ")
-    .replace(/\bx\b/gi,"икс")
-    .replace(/\by\b/gi,"игрек")
-    .replace(/\s*=\s*/g," равно ")
-    .replace(/\s*>\s*/g," больше ")
-    .replace(/\s*<\s*/g," меньше ");
-
-  return s.replace(/\s+/g," ").replace(/\s+([,.!?;:])/g,"$1").trim();
-}
-function v161SplitSpeech(text){
-  const clean=v161CleanSpeechText(text);
-  if(!clean)return [];
-
-  /* Сначала предложения, затем слишком длинные предложения дробим по запятым.
-     Отдельные utterance позволяют реально менять интонацию внутри одной реплики. */
-  const sentences=clean.match(/[^.!?;:]+[.!?;:]?|.+$/g)||[clean];
-  const out=[];
-  for(const raw of sentences){
-    const sentence=raw.trim();
-    if(!sentence)continue;
-    if(sentence.length<=105){out.push(sentence);continue}
-
-    const parts=sentence.split(/(?<=,)\s+/);
-    let buf="";
-    for(const part of parts){
-      if((buf+" "+part).trim().length>92&&buf){
-        out.push(buf.trim());
-        buf=part;
-      }else{
-        buf=(buf+" "+part).trim();
-      }
-    }
-    if(buf)out.push(buf);
-  }
-  return out.slice(0,12);
-}
-function v161Prosody(segment,index,total,state){
-  const base=v151VoiceProfiles[v151VoiceProfile]||v151VoiceProfiles.lively;
-  const emo=v151Emotion(state);
-  const energy=(v161VoiceEnergy/100)*(base.dynamic??1);
-  const text=segment.trim();
-
-  let rate=base.rate+emo.rate*energy;
-  let pitch=base.pitch+emo.pitch*energy;
-  let pause=emo.pause;
-
-  /* Микро-вариативность — главное отличие от «одной ровной настройки». */
-  const wave=((index%3)-1)*.012*energy;
-  rate+=wave;
-  pitch-=wave*.7;
-
-  if(/\?$/.test(text)){pitch+=.028*energy;rate-=.012}
-  if(/!$/.test(text)){pitch+=.035*energy;rate+=.025*energy}
-  if(/[:,;]$/.test(text)){rate-=.020;pause+=45}
-  if(text.length>82)rate-=.025;
-  if(index===total-1){rate-=.015;pitch-=.012*energy;pause+=25}
-
-  /* Не завышаем pitch — именно чрезмерный pitch часто даёт «робота/мультяшку». */
-  rate=Math.max(.72,Math.min(1.24,rate));
-  pitch=Math.max(.86,Math.min(1.22,pitch));
-
-  return {rate,pitch,volume:base.volume,pause};
-}
 function v161StopSpeech(){
+  window.KitsuneReading?.stopped?.();
+  clearTimeout(v151AutoSpeechTimer);
+  v151AutoSpeechTimer=null;
+  window.KitsuneStaticVoice?.stop();
+  window.KitsuneDynamicVoice?.stop();
   v161SpeechRun++;
   clearTimeout(v161SpeechTimer);
   v161SpeechTimer=null;
@@ -481,132 +308,93 @@ function v161StopSpeech(){
 }
 function v161MarkSpeaking(on,state){
   v151Speaking=on;
+  if(on)v151VoiceNotice="";
   document.querySelector("#v15SpeakBtn")?.classList.toggle("speaking",on);
   if(on)v15SetState(state);
   v151UpdateVoiceUi();
 }
-function v151Speak(text=v15LastSpoken,{state=v15State,force=false,voiceOverride=null,onDone=null}={}){
-  if(!("speechSynthesis" in window)||!text||!v151VoiceEnabled)return false;
-  if(!force&&!v151SpeechUnlocked)return false;
-
-  const segments=v161SplitSpeech(text);
-  if(!segments.length)return false;
-
-  v161StopSpeech();
-  const run=++v161SpeechRun;
-  const voice=voiceOverride||v151SelectedVoice();
-  let index=0;
-
-  const next=()=>{
-    if(run!==v161SpeechRun)return;
-    if(index>=segments.length){
-      v161MarkSpeaking(false,state);
-      onDone?.();
-      return;
-    }
-
-    const segment=segments[index];
-    const prosody=v161Prosody(segment,index,segments.length,state);
-    const u=new SpeechSynthesisUtterance(segment);
-    u.lang=voice?.lang||"ru-RU";
-    if(voice)u.voice=voice;
-    u.rate=prosody.rate;
-    u.pitch=prosody.pitch;
-    u.volume=prosody.volume;
-
-    u.onstart=()=>{
-      v161MarkSpeaking(true,state);
-      try{
-        const fallback=window.__KITSUNE_SYSTEM_VOICE_FALLBACK__||null;
-        window.dispatchEvent(new CustomEvent("kitsune-voice-engine",{
-          detail:{
-            engine:"system",
-            label:v151IsIOSLike()?"Системный голос iOS":"Системный голос устройства",
-            fallback:!!fallback,
-            reason:String(fallback?.reason||""),
-            ts:Date.now()
-          }
-        }));
-        window.__KITSUNE_SYSTEM_VOICE_FALLBACK__=null;
-      }catch(e){}
-    };
-    u.onend=()=>{
-      if(run!==v161SpeechRun)return;
-      index++;
-      /* Короткая «дыхательная» пауза. Chrome/Samsung обычно соблюдают её лучше,
-         чем многоточия внутри одного большого utterance. */
-      v161SpeechTimer=setTimeout(next,prosody.pause);
-    };
-    u.onerror=()=>{
-      if(run!==v161SpeechRun)return;
-      /* Некоторые мобильные движки иногда отклоняют один сегмент — идём дальше. */
-      index++;
-      v161SpeechTimer=setTimeout(next,80);
-    };
-
-    try{speechSynthesis.speak(u)}
-    catch(e){
-      index++;
-      v161SpeechTimer=setTimeout(next,80);
-    }
+function v151StopSpeaking(){
+  return window.v161StopSpeech?.();
+}
+function v151IsSpeechBusy(){
+  return v151Speaking||v161SpeechTimer!==null||
+    !!window.KitsuneReading?.isBusy?.()||
+    !!window.KitsuneStaticVoice?.isBusy?.()||
+    !!window.KitsuneDynamicVoice?.isBusy?.()||
+    !!window.AlfiNeuralVoice?.isBusy?.()||
+    !!window.speechSynthesis?.speaking||!!window.speechSynthesis?.pending;
+}
+function v151Speak(text=v15LastSpoken,{state=v15State,force=false,onDone=null,onError=null,lessonOwner=null,readingOwner=null}={}){
+  let completed=false;
+  const done=()=>{if(!completed){completed=true;onDone?.();}};
+  const unavailable=(reason)=>{
+    if(completed)return;
+    const message=typeof reason==='string'?reason:"Для этого текста запись Kitsune ещё не подготовлена.";
+    v151VoiceNotice=message;
+    const note=document.querySelector("#v151VoiceNote");
+    if(note)note.textContent=message;
+    v151UpdateVoiceUi();
+    if(force)window.KitsuneRuntimeStability?.toast?.(message);
+    try{onError?.(message);}catch{}
+    done();
   };
-
-  /* iOS Safari/PWA can lose user activation if speech starts after a timer.
-     Start immediately there; keep the micro-delay for Chrome/Samsung. */
-  try{speechSynthesis.resume()}catch(e){}
-  if(v151IsIOSLike()){
-    next();
-  }else{
-    v161SpeechTimer=setTimeout(next,34);
-  }
-  return true;
+  if(!text)return false;
+  if(!v151VoiceEnabled){if(force)unavailable("Включи голос Kitsune кнопкой «Вкл.» в настройках.");return false;}
+  if(!force&&(!v151SpeechUnlocked||v151IsSpeechBusy()))return false;
+  window.KitsuneLessonVoice?.speechRequested?.(lessonOwner);
+  window.KitsuneReading?.requested?.(readingOwner);
+  v151VoiceNotice="";
+  if(window.KitsuneStaticVoice?.trySpeak(text,{state,force,onDone:done},unavailable))return true;
+  if(window.KitsuneDynamicVoice?.trySpeak(text,{state,force,onDone:done},unavailable))return true;
+  if(force)window.v161StopSpeech?.();
+  unavailable(window.KitsuneDynamicVoice?.info?.().reason);
+  return false;
 }
 function v15Speak(){
   v151SpeechUnlocked=true;
-  if(v151Speaking){
+  if(window.KitsuneReading?.snapshot?.()?.phase==="paused"){
+    window.KitsuneReading.resume();return;
+  }
+  if(v151IsSpeechBusy()){
     v161StopSpeech();
     return;
   }
   v151Speak(v15LastSpoken,{state:v15State,force:true});
 }
+function v151SetAutoVoice(enabled){
+  v151VoiceAuto=!!enabled;
+  clearTimeout(v151AutoSpeechTimer);
+  v151AutoSpeechTimer=null;
+  if(v151VoiceAuto){
+    v151VoiceEnabled=true;
+    if(window.KitsuneStaticVoice?.info?.()?.enabled===false)window.KitsuneStaticVoice.enable(true);
+    v151SpeechUnlocked=true;
+  }else{
+    v161StopSpeech();
+  }
+  v151SaveVoice();
+  v151UpdateVoiceUi();
+}
 function v151AutoSpeak(text,state){
   if(!v151VoiceEnabled||!v151VoiceAuto||v15Mode==="off")return;
   if(!v151SpeechUnlocked)return;
-  setTimeout(()=>v151Speak(text,{state,force:false}),80);
+  if(v151IsSpeechBusy()||v151SettingsVisible())return;
+  clearTimeout(v151AutoSpeechTimer);
+  v151AutoSpeechTimer=setTimeout(()=>{
+    v151AutoSpeechTimer=null;
+    if(!v151VoiceEnabled||!v151VoiceAuto||v15Mode==="off"||!v151SpeechUnlocked)return;
+    if(v151IsSpeechBusy()||v151SettingsVisible())return;
+    v151Speak(text,{state,force:false});
+  },80);
 }
-function v161CompareVoices(){
-  if(!("speechSynthesis" in window))return;
-  v151SpeechUnlocked=true;
-  if(!v151Voices.length)v151RefreshVoices();
-  const candidates=v151Voices.slice(0,Math.min(3,v151Voices.length));
-  if(!candidates.length){
-    v151Speak("Привет! Я Kitsune. Давай попробуем мой голос.",{state:"happy",force:true});
-    return;
-  }
-
-  v161StopSpeech();
-  let i=0;
-  const original=v151VoiceName;
-  const note=document.querySelector("#v151VoiceNote");
-
-  const play=()=>{
-    if(i>=candidates.length){
-      v151VoiceName=original;
-      v151UpdateVoiceUi();
-      if(note)note.textContent="🎧 Сравнение закончено — выбери понравившийся голос в списке.";
-      return;
-    }
-    const voice=candidates[i];
-    if(note)note.textContent=`🎧 Вариант ${i+1} из ${candidates.length}: ${voice.name}`;
-    v151Speak(
-      `Вариант ${i+1}. Привет! Я Kitsune. Смотри, сейчас попробуем решить задачу вместе.`,
-      {state:i===0?"happy":i===1?"explain":"wave",force:true,voiceOverride:voice,onDone:()=>{
-        i++;
-        setTimeout(play,340);
-      }}
-    );
-  };
-  play();
+function v151SettingsVisible(){
+  return !!(document.querySelector("#v15Assistant")?.classList.contains("open")&&document.querySelector("#v15Settings")?.classList.contains("show"));
+}
+/* Учебное действие заменяет предыдущую реплику; фоновые советы её не прерывают. */
+function v151LessonSpeak(text,state="explain",options={}){
+  if(!v151VoiceEnabled||!v151VoiceAuto||v15Mode==="off"||!v151SpeechUnlocked||v151SettingsVisible())return false;
+  clearTimeout(v151AutoSpeechTimer);v151AutoSpeechTimer=null;
+  return v151Speak(text,{...options,state,force:true});
 }
 function v151UpdateVoiceUi(){
   const enabled=document.querySelector("#v151VoiceEnabledBtn");
@@ -618,32 +406,42 @@ function v151UpdateVoiceUi(){
 
   const auto=document.querySelector("#v151AutoVoice");
   if(auto)auto.checked=v151VoiceAuto;
-
-  document.querySelectorAll("[data-voice-profile]").forEach(
-    b=>b.classList.toggle("active",b.dataset.voiceProfile===v151VoiceProfile)
-  );
-
-  const energy=document.querySelector("#v161Energy");
-  if(energy)energy.value=String(v161VoiceEnergy);
-  const energyOut=document.querySelector("#v161EnergyValue");
-  if(energyOut)energyOut.textContent=`${v161VoiceEnergy}%`;
-
-  const select=document.querySelector("#v151VoiceSelect");
-  if(select)select.value=v151VoiceName&&v151Voices.some(v=>v.name===v151VoiceName)?v151VoiceName:"";
+  const autoToggle=document.querySelector("#v151AutoVoiceToggle");
+  if(autoToggle){
+    autoToggle.textContent=v151VoiceAuto?"Автоозвучка: вкл.":"Автоозвучка: выкл.";
+    autoToggle.setAttribute("aria-pressed",String(v151VoiceAuto));
+    autoToggle.classList.toggle("primary-action",v151VoiceAuto);
+  }
 
   const note=document.querySelector("#v151VoiceNote");
-  if(note&&!note.textContent.startsWith("🎧 Вариант")){
-    const v=v151SelectedVoice();
-    note.textContent=v
-      ?`Сейчас: ${v.name} · ${v151VoiceProfiles[v151VoiceProfile]?.name||"Живой+"} · живость ${v161VoiceEnergy}%`
-      :"Русский системный голос пока не найден. Браузер может загрузить его после первого запуска.";
+  if(note){
+    const info=window.KitsuneStaticVoice?.info();
+    const dynamic=window.KitsuneDynamicVoice?.info();
+    note.textContent=v151VoiceNotice||dynamic?.message||(dynamic?.ready ? (dynamic?.status==='installed_candidate' ? (dynamic.engine==='piper-v07'?"Голос Китсуне · Piper сохранён для проверки на этом устройстве.":"Голос Китсуне · генератор сохранён для проверки. Новая фраза готовится несколько минут.") : "Голос Китсуне · генератор сохранён") :
+      (info?.topics ? `Голос Kitsune · учебных тем: ${info.topics}` : "Голос Kitsune · учебные записи готовятся"));
+  }
+  const testGenerator=document.querySelector("#v151TestGenerator");
+  const installGenerator=document.querySelector("#v151InstallGenerator");
+  if(installGenerator&&window.KitsuneDynamicVoice?.info?.().engine==='piper-v07'&&!window.KitsuneDynamicVoice.info().installing)installGenerator.textContent="⬇ Сохранить генератор · около 100 МБ";
+  if(testGenerator)testGenerator.disabled=!window.KitsuneDynamicVoice?.info?.().ready||!v151VoiceEnabled;
+  const dialog=document.querySelector("#v19Dialog"),dialogLive=document.querySelector("#v19DialogLive");
+  if(dialogLive&&dialog?.classList.contains("show")){
+    const dynamic=window.KitsuneDynamicVoice?.info();
+    const text=v151VoiceNotice||dynamic?.message||(v151Speaking?"Китсуне читает ответ…":"");
+    if(text){
+      dialogLive.textContent=text;dialogLive.dataset.kitsuneVoiceMessage=text;
+      dialogLive.className="v19-dialog-live "+(v151VoiceNotice?"warn":v151Speaking?"speaking":"thinking");
+    }else if(dialogLive.textContent===dialogLive.dataset.kitsuneVoiceMessage){
+      dialogLive.textContent="";dialogLive.className="v19-dialog-live";delete dialogLive.dataset.kitsuneVoiceMessage;
+    }
   }
 
   const speak=document.querySelector("#v15SpeakBtn");
   if(speak){
-    speak.style.display=("speechSynthesis" in window&&v151VoiceEnabled)?"":"none";
-    speak.title=v151Speaking?"Остановить озвучку":"Прочитать совет вслух";
+    speak.style.display=(!!window.KitsuneStaticVoice&&v151VoiceEnabled)?"":"none";
+    speak.title=window.KitsuneReading?.snapshot?.()?.phase==="paused"?"Продолжить чтение":v151Speaking?"Остановить озвучку":v151IsSpeechBusy()?"Остановить подготовку речи":"Прочитать совет вслух";
   }
+  window.KitsuneLessonVoice?.updateUi?.();
 }
 
 function v15ShowTip(){
@@ -701,9 +499,11 @@ function v15Bind(){
   root.querySelector("#v15TipBtn").addEventListener("click",v15ShowTip);
   root.querySelector("#v15SimpleBtn").addEventListener("click",v15ExplainSimple);
   root.querySelector("#v15SpeakBtn").addEventListener("click",v15Speak);
-  if(!("speechSynthesis" in window))root.querySelector("#v15SpeakBtn").style.display="none";
+
 
   root.querySelector("#v15SettingsBtn").addEventListener("click",()=>{
+    clearTimeout(v151AutoSpeechTimer);
+    v151AutoSpeechTimer=null;
     root.querySelector("#v15Settings").classList.toggle("show");
   });
   root.querySelectorAll("[data-mode-choice]").forEach(btn=>{
@@ -714,6 +514,7 @@ function v15Bind(){
   const voiceEnabled=root.querySelector("#v151VoiceEnabledBtn");
   voiceEnabled?.addEventListener("click",()=>{
     v151VoiceEnabled=!v151VoiceEnabled;
+    window.KitsuneStaticVoice?.enable(v151VoiceEnabled);
     if(!v151VoiceEnabled){
       v161StopSpeech();
     }else{
@@ -721,48 +522,44 @@ function v15Bind(){
     }
     v151SaveVoice();v151UpdateVoiceUi();
   });
-  root.querySelectorAll("[data-voice-profile]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      v151VoiceProfile=btn.dataset.voiceProfile;
-      v151SaveVoice();v151UpdateVoiceUi();
-      v151SpeechUnlocked=true;
-      v151Speak("Привет! Это мой новый голос. Так объяснять алгебру будет гораздо веселее!",{state:"happy",force:true});
-    });
-  });
-  const voiceSelect=root.querySelector("#v151VoiceSelect");
-  voiceSelect?.addEventListener("change",()=>{
-    v151VoiceName=voiceSelect.value;
-    v151SaveVoice();v151UpdateVoiceUi();
-    v151SpeechUnlocked=true;
-    v151Speak("Отлично. Этот голос выбран для Kitsune.",{state:"happy",force:true});
-  });
-
-  const energy=root.querySelector("#v161Energy");
-  energy?.addEventListener("input",()=>{
-    v161VoiceEnergy=Math.max(0,Math.min(100,Number(energy.value)||0));
-    const out=root.querySelector("#v161EnergyValue");
-    if(out)out.textContent=`${v161VoiceEnergy}%`;
-  });
-  energy?.addEventListener("change",()=>{
-    v151SaveVoice();v151UpdateVoiceUi();
-    v151SpeechUnlocked=true;
-    v151Speak("Проверяем живость. Теперь голос должен звучать чуть естественнее и эмоциональнее.",{state:"happy",force:true});
-  });
-
-  root.querySelector("#v161CompareVoices")?.addEventListener("click",v161CompareVoices);
-
   const autoVoice=root.querySelector("#v151AutoVoice");
   autoVoice?.addEventListener("change",()=>{
-    v151VoiceAuto=autoVoice.checked;
-    if(v151VoiceAuto)v151SpeechUnlocked=true;
-    v151SaveVoice();v151UpdateVoiceUi();
-    if(v151VoiceAuto)v151Speak("Автоозвучка включена. Теперь важные советы я буду говорить сам.",{state:"happy",force:true});
+    v151SetAutoVoice(autoVoice.checked);
   });
+  root.querySelector("#v151AutoVoiceToggle")?.addEventListener("click",()=>v151SetAutoVoice(!v151VoiceAuto));
   root.querySelector("#v151TestVoice")?.addEventListener("click",()=>{
     v151SpeechUnlocked=true;
-    v151Speak("Привет! Я Kitsune. Отлично, что ты здесь! Смотри: сложную задачу не будем брать штурмом. Сначала найдём один понятный шаг, а дальше всё сложится.",{state:"happy",force:true});
+    v151Speak(window.KitsuneStaticVoice?.sample(),{state:"happy",force:true});
   });
-  v151RefreshVoices();
+  root.querySelector("#v151TestGenerator")?.addEventListener("click",()=>{
+    v151SpeechUnlocked=true;
+    v151Speak("Привет! Я Китсуне. Давай решим новую задачу вместе.",{state:"happy",force:true});
+  });
+  root.querySelector("#v151DownloadVoice")?.addEventListener("click",async event=>{
+    const button=event.currentTarget;button.disabled=true;
+    try{
+      await window.KitsuneStaticVoice.download();
+      button.textContent="✓ Голос сохранён офлайн";
+    }catch{
+      button.textContent="Повторить сохранение голоса";
+      window.KitsuneRuntimeStability?.toast?.("Не удалось сохранить все записи. Проверь подключение.");
+    }finally{button.disabled=false;}
+  });
+  root.querySelector("#v151InstallGenerator")?.addEventListener("click",async event=>{
+    const button=event.currentTarget;button.disabled=true;
+    const note=root.querySelector("#v151VoiceNote");
+    try{
+      await window.KitsuneDynamicVoice.install(({percent})=>{button.textContent=`Сохранение генератора: ${percent}%`;});
+      button.textContent="✓ Генератор сохранён";
+      v151UpdateVoiceUi();
+      if(note)note.textContent="Новые фразы теперь готовятся на этом устройстве. Первая озвучка займёт время.";
+    }catch(error){
+      button.textContent="Повторить сохранение генератора";
+      if(note)note.textContent=error.message;
+      window.KitsuneRuntimeStability?.toast?.(error.message);
+    }finally{button.disabled=false;}
+  });
+  if(window.KitsuneStaticVoice?.info?.()?.enabled!==v151VoiceEnabled)window.KitsuneStaticVoice?.enable?.(v151VoiceEnabled);
   v151UpdateVoiceUi();
 
   const mascot=root.querySelector("#v15MascotBtn");
@@ -778,12 +575,6 @@ function v15Bind(){
   }
 }
 
-/* Список системных голосов на Android/iOS нередко появляется асинхронно. */
-if("speechSynthesis" in window){
-  speechSynthesis.addEventListener?.("voiceschanged",v151RefreshVoices);
-  setTimeout(v151RefreshVoices,250);
-  setTimeout(v151RefreshVoices,1200);
-}
 /* Первый осознанный тап разблокирует озвучку в мобильных браузерах. */
 function v151UnlockSpeech(){
   v151SpeechUnlocked=true;
@@ -950,13 +741,18 @@ document.addEventListener("click",e=>{
        При ошибке разбор показывается локально под заданием (Smart Tutor).
        Kitsune может только дать короткий ненавязчивый chip возле персонажа. */
     setTimeout(()=>{
+      if(!container.isConnected)return;
       if(v15LooksCorrect(container)){
         v15ReactCorrect();
+        if(window.KitsuneLessonVoice?.result)window.KitsuneLessonVoice.result(container,v15FindFeedback(container)?.textContent,"happy");
+        else v151LessonSpeak(v15FindFeedback(container)?.textContent,"happy");
       }else if(v15LooksWrong(container)){
         v15RightStreak=0;
         v15WrongStreak++;
         v15SetState("oops");
         if(v15Mode==="active")v15Chip("Разбор появился под заданием 💡");
+        if(window.KitsuneLessonVoice?.result)window.KitsuneLessonVoice.result(container,v15FindFeedback(container)?.textContent,"oops");
+        else v151LessonSpeak(v15FindFeedback(container)?.textContent,"oops");
         setTimeout(()=>v15SetState("idle"),850);
       }
     },95);
@@ -1042,7 +838,7 @@ if(v15ResetButton){
 
 v15Ensure();
 v15ApplyMode(v15Mode,false);
-v151RefreshVoices();
+
 v151UpdateVoiceUi();
 v15ResetIdle();
 v15ContextMessage();

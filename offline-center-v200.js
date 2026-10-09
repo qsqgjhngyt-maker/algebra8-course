@@ -131,9 +131,9 @@
         ${statusCard("Whisper","🎙️",w.cachedMarker||w.runtimeReady,
           !w.available?"Voice Dialogue API не загружен":w.runtimeReady?`Runtime активен · ${esc(w.backend||"локально")}`:w.cachedMarker?"Модель отмечена как подготовленная":"Whisper ещё не подготовлен",
           "koPrepareWhisper",w.cachedMarker||w.runtimeReady?"Загрузить из кэша":"Подготовить Whisper")}
-        ${statusCard("Neural Voice","🔊",n.verified,
-          !n.available?"Neural Voice API не загружен":n.verified?`Модель ${esc(n.voiceId)} найдена локально`:n.ready?"Есть marker, нужна проверка модели":"Neural Voice ещё не скачан",
-          "koPrepareNeural",n.verified?"Тест нейроголоса":"Скачать Neural Voice")}
+        ${statusCard("Голос Kitsune","🔊",n.verified,
+          !n.available?"Голос Kitsune ещё не загружен":n.verified?"Записи Kitsune проверены и сохранены офлайн":"Сохрани готовые записи для чтения без интернета",
+          "koPrepareNeural",n.verified?"Послушать Kitsune":"Сохранить голос офлайн")}
       </section>
 
       <section class="ko-actions glass-panel">
@@ -214,13 +214,13 @@
       setAction("Сейчас нет сети. Уже загруженные компоненты продолжат работать, но новые модели скачать нельзя.","error");
       return;
     }
-    if(!confirm("Подготовить Brain, Whisper и Neural Voice для автономной работы? Это может скачать несколько сотен мегабайт и занять заметное время."))return;
+    if(!confirm("Подготовить Brain, Whisper и записи Kitsune для автономной работы? Это может скачать несколько сотен мегабайт и занять заметное время."))return;
     try{
       setAction("1/3 · Подготавливаю Kitsune Brain…");
       await window.KitsuneBrain?.prepare?.();
       setAction("2/3 · Подготавливаю Whisper…");
       await window.KitsuneVoiceDialogue?.prepare?.();
-      setAction("3/3 · Подготавливаю Neural Voice…");
+      setAction("3/3 · Сохраняю записи Kitsune…");
       await window.AlfiNeuralVoice?.download?.();
       setAction("✅ Подготовка завершена. Проверяю локальные кэши…","ok");
       await requestPersist(false);
@@ -280,11 +280,11 @@
       catch(e){setAction(String(e?.message||e),"error")}
     });
     document.querySelector("#koPrepareNeural")?.addEventListener("click",async()=>{
-      setAction("Подготавливаю Neural Voice…");
+      setAction("Сохраняю записи Kitsune…");
       try{
-        if(window.AlfiNeuralVoice?.isReady?.())await window.AlfiNeuralVoice?.test?.();
+        if(await window.AlfiNeuralVoice?.verify?.())await window.AlfiNeuralVoice?.test?.();
         else await window.AlfiNeuralVoice?.download?.();
-        setAction("✅ Neural Voice подготовлен/проверен.","ok");setTimeout(refresh,400)
+        setAction("✅ Записи Kitsune сохранены и проверены.","ok");setTimeout(refresh,400)
       }catch(e){setAction(String(e?.message||e),"error")}
     });
   }

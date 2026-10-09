@@ -18,7 +18,7 @@
       "./camera-import-v210.js?v=3.1.0-rc.5"
     ],
     search:["./course-search-v200.js?v=3.1.0-rc.5"],
-    offline:["./offline-center-v200.js?v=3.1.0-rc.5"],
+    offline:["./offline-center-v200.js?v=single-voice-v05.1"],
     progress:[
       "./mastery-score-v220.js?v=3.1.0-rc.5",
       "./reliability-center-v220.js?v=3.1.0-rc.5"
@@ -31,7 +31,6 @@
     ],
     assistant:[
       /* Dependency order from the confirmed 3.8.7 stack. */
-      "./neural-voice-v17.js?v=3.1.0-rc.5",
       "./kitsune-brain-v18.js?v=3.1.0-rc.5",
       "./kitsune-voice-v19.js?v=3.1.0-rc.5",
       "./kitsune-live-v110.js?v=3.1.0-rc.5",
@@ -41,10 +40,9 @@
       "./access-admin-v235.js?v=3.1.0-rc.5",
       "./intelligence-router-v230.js?v=3.1.0-rc.5",
       "./cloud-chat-ux-v231.js?v=3.1.0-rc.5",
-      "./local-voice-lab-v231.js?v=3.1.0-rc.5",
-      "./voice-conversation-v237.js?v=3.1.0-rc.5",
+      "./voice-conversation-v237.js?v=single-voice-v05.1",
       "./kitsune-presence-v238.js?v=3.1.0-rc.5",
-      "./voice-stability-v2387.js?v=3.1.0-rc.5",
+      "./voice-stability-v2387.js?v=single-voice-v05.1",
       "./chat-dialog-firewall-v231.js?v=3.1.0-rc.5"
     ]
   };

@@ -1,0 +1,16 @@
+{
+  "status": "passed_by_user",
+  "version": "0.7.4",
+  "reported_before": "2026-10-10",
+  "date_precision": "conversation_order",
+  "devices": [
+    "PC",
+    "Android",
+    "iOS"
+  ],
+  "quote": "Да, все проверки проходят на всех устройствах! Можно разворачивать на гитхаб. В Дополннение оформи дополнительно грамотно Релиз с подробным описанием проекта!",
+  "source": "Прямая просьба пользователя в текущем чате",
+  "hardware_details": "not_provided",
+  "publication_authorized": true,
+  "progress_preservation_required": true
+}

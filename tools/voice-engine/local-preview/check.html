@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проверка локального Kitsune</title>
+<style>body{font:16px/1.5 system-ui;max-width:850px;margin:30px auto;padding:0 18px;background:#f5f8ff;color:#182033}main{padding:22px;border:1px solid #d8e1ec;border-radius:16px;background:white}h1{font-size:25px}a{color:#1755ad}td,th{padding:9px;text-align:left;border-bottom:1px solid #e5eaf0}table{width:100%;border-collapse:collapse;font-size:14px}.ok{color:#176b36}.bad{color:#a72020}button{padding:10px;font:inherit;cursor:pointer}code{word-break:break-all}</style>
+<main><h1>Проверка локального Kitsune</h1>
+<p>Эта страница открывается отдельно от кэша приложения и проверяет файлы оформления и скрипты.</p>
+<p><a href="/algebra8-course/">Открыть приложение</a> · <a href="/algebra8-course/?intro=off">Открыть без заставки</a></p>
+<p id="summary" role="status">Проверяю загрузку файлов…</p>
+<table><thead><tr><th>Файл</th><th>Результат</th></tr></thead><tbody id="results"></tbody></table>
+<p><button type="button" id="retry">Повторить проверку</button></p>
+<p>Для проверки соединения с телефона сначала откройте HTTP-адрес приложения в той же домашней сети. После этого подключайте сертификат и проверяйте HTTPS.</p>
+<p id="phone"></p><p>Если здесь появились ошибки, пришлите их текст или снимок этой страницы. Для запуска серверного журнала оставьте окно START.bat открытым.</p></main>
+<script>
+const files=[['styles.css?v=auto-voice-toggle-v04.1','text/css'],['platform-v300.css?v=3.1.0-rc.5','text/css'],['startup-intro.css?v=cinematic-v316.2','text/css'],['app.js?v=3.1.0-rc.5','javascript'],['platform-v300.js?v=3.1.0-rc.5','javascript'],['startup-intro.js?v=cinematic-v316.2','javascript']];
+async function check(){
+  const rows=document.querySelector('#results'),summary=document.querySelector('#summary');rows.replaceChildren();let good=0;
+  summary.textContent='Проверяю загрузку файлов…';
+  for(const [file,type] of files){
+    const row=document.createElement('tr'),name=document.createElement('td'),result=document.createElement('td');name.textContent=file.split('?')[0];row.append(name,result);rows.append(row);
+    try{
+      const response=await fetch('/algebra8-course/'+file,{cache:'no-store',signal:AbortSignal.timeout(10000)});
+      const contentType=response.headers.get('content-type')||'',text=await response.text();
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      if(!contentType.includes(type))throw new Error('Неверный тип: '+contentType);
+      if(text.trimStart().startsWith('<'))throw new Error('Вместо файла сервер вернул HTML');
+      if(text.length<100)throw new Error('Файл пустой или обрезан');
+      result.textContent='Загружен полностью · '+text.length+' символов';result.className='ok';good++;
+    }catch(error){result.textContent=error.message;result.className='bad';}
+  }
+  summary.textContent=good===files.length?'Все 6 файлов загружаются. Если оформление приложения отсутствует, нужна проверка ошибок браузера и прежнего кэша.':'Загружено '+good+' из '+files.length+'. Причина указана рядом с файлом.';
+}
+document.querySelector('#retry').onclick=check;
+const ip='192.168.3.10';document.querySelector('#phone').textContent='Телефон, первый тест: http://'+ip+':8080/algebra8-course/';
+check();
+</script></html>

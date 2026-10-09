@@ -1,0 +1,323 @@
+{
+  "records": [
+    {
+      "id": "pilot_v04_fractions_001_ea346eb9d899",
+      "text": "Привет! Сегодня мы продолжим изучать дро́би.",
+      "phonemes": [
+        "prʲivʲˈet!",
+        "sʲivˈodnʲʌ mˈy prʌdˈoɭʒym ɪzutʃʲˈɑtʲ drˈobʲɪ."
+      ]
+    },
+    {
+      "id": "pilot_v04_fractions_002_ec94a8119911",
+      "text": "В каждой дро́би есть числи́тель и знамена́тель.",
+      "phonemes": [
+        "f kˈɑʒdʌj drˈobʲɪ jestʲ tʃʲisɭʲˈitʲiɭʲ ɪ znʌmʲinˈɑtʲiɭ."
+      ]
+    },
+    {
+      "id": "pilot_v04_fractions_003_87bcb4daa823",
+      "text": "Давай разберём один интересный пример вместе!",
+      "phonemes": [
+        "davˈɑj rʌzbʲirʲˈɵm ʌdʲˈin ɪntʲirʲˈesnyj prʲimʲˈer vmʲˈesʲtʲi!"
+      ]
+    },
+    {
+      "id": "pilot_v04_equations_001_2b443897b3f5",
+      "text": "Смотри! Эти чи́сла помогут нам разобраться с уравнением.",
+      "phonemes": [
+        "smʌtrʲˈɪ!",
+        "ˈɛtʲɪ tʃʲˈisɭa pʌmˈoɡut nˈɑm rʌzʌbrˈɑtsˌʌ s uravnʲˈenʲijim."
+      ]
+    },
+    {
+      "id": "pilot_v04_equations_002_fa29d1b6e692",
+      "text": "Сначала определим неизвестное. Затем перенесём слагаемые и найдём ответ. Не торопись!",
+      "phonemes": [
+        "snatʃʲˈɑɭa ʌprʲidʲiɭʲˈim nʲiizvʲˈesnʌjɪ.",
+        "zatʲˈem pʲirʲinʲisʲˈɵm sɭaɡˈɑjimyjɪ ɪ najdʲˈɵm ʌtvʲˈet.",
+        "nʲɪ tʌrʌpʲˈisʲ!"
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_001_671d2828ef37",
+      "text": "Тема Рациональные выражения. Рациональное выражение — это математическая запись из чисел и букв, где используются привычные действия.",
+      "phonemes": [
+        "tʲˈema rʌtsyʌnˈɑɭnyjɪ vyraʒˈɛnʲija.",
+        "rʌtsyʌnˈɑɭnʌjɪ vyraʒˈɛnʲijɪ; ˈɛtʌ mʌtʲimatʲˈitʃʲiskʌja zˈɑpʲisʲ ɪs tʃʲˈisʲiɭ ɪ bˈukf, ɡdʲˈe ɪspˈoɭzujutsʌ prʲivˈytʃʲnyjɪ dʲˈejstvʲija."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_002_2df80c59ebcf",
+      "text": "Но есть один важный контрольный вопрос: не превращается ли знамена́тель в ноль?",
+      "phonemes": [
+        "no jestʲ ʌdʲˈin vˈɑʒnyj kʌntrˈoɭnyj vʌprˈos: nʲɪ prʲivraɕˈɑjitsʌ ɭʲˈɪ znʌmʲinˈɑtʲiɭ v nˈoɭ?"
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_003_3bd5c0ed8b97",
+      "text": "Если превращается — такое значение переменной брать нельзя.",
+      "phonemes": [
+        "jˈesɭʲɪ prʲivraɕˈɑjitsʌ; takˈojɪ znatʃʲˈenʲijɪ pʲirʲimʲˈennʌj brˈɑtʲ nʲiɭʑˈɑ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_004_3866119b8c7d",
+      "text": "Рациональным называют выражение, составленное из чисел, переменных, действий сложения, вычитания, умножения, деления и целых степеней.",
+      "phonemes": [
+        "rʌtsyʌnˈɑɭnym nʌzyvˈɑjut vyraʒˈɛnʲijɪ, sʌstˈɑvɭʲinnʌjɪ ɪs tʃʲˈisʲiɭ, pʲirʲimʲˈennyx, dʲˈejstvʲij sɭʌʒˈɛnʲija, vytʃʲitˈɑnʲija, umnʌʒˈɛnʲija, dʲiɭʲˈenʲija ɪ tsˈɛɭyx sʲtʲipʲinʲˈej."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_005_a46688f1b1b5",
+      "text": "При этом область допустимых значений определяется условием, что знамена́тель не равен нулю.",
+      "phonemes": [
+        "prʲɪ ˈɛtʌm ˈobɭʌstʲ dʌpusʲtʲˈimyx znatʃʲˈenʲij ʌprʲidʲiɭʲˈɑjitsʌ usɭˈovʲijim, ʃto znʌmʲinˈɑtʲiɭ nʲɪ rˈɑvʲin nuɭʲˈu\"."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_006_3e7e56e74957",
+      "text": "Главная идея: Если переменная находится в знаменателе, обязательно проверь, при каких значениях знамена́тель становится равным нулю.",
+      "phonemes": [
+        "ɡɭˈɑvnʌja ɪdʲˈeja: jˈesɭʲɪ pʲirʲimʲˈennʌja naxˈodʲitsʌ v znʌmʲinˈɑtʲiɭʲi, ʌbʲazˈɑtʲiɭnʌ prʌvʲˈerɪ^, prʲɪ kakʲˈix znatʃʲˈenʲijax znʌmʲinˈɑtʲiɭ stanˈovʲitsʌ rˈɑvnym nuɭʲˈu\"."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_007_f82e3a5f244a",
+      "text": "Эти значения запрещены. Почему это работает: Запрет появился не «по договорённости».",
+      "phonemes": [
+        "ˈɛtʲɪ znatʃʲˈenʲija zʌprʲiɕinˈy.",
+        "pʌtʃʲimˈu ˈɛtʌ rabˈotʌjit: zaprʲˈet pʌjavʲˈiɭsʲʌ nʲɪ pʌ dʌɡʌvʌrʲˈɵnnʌsʲtʲɪ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_008_f052844df8a6",
+      "text": "Деление а делить на бэ означает поиск числа, которое при умножении на бэ даст а.",
+      "phonemes": [
+        "dʲiɭʲˈenʲijɪ a dʲiɭʲˈitʲ nə bˈɛ ʌznatʃʲˈɑjit pˈoisk tʃʲˈisɭa, kʌtˈorʌjɪ prʲɪ umnʌʒˈɛnʲiɪ nə bˈɛ dˈɑst ˈɑ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_009_68866a3fd130",
+      "text": "При бэ равно ноль это определение перестаёт работать.",
+      "phonemes": [
+        "prʲɪ bˈɛ ravnˈo nˈoɭʲ ˈɛtʌ ʌprʲidʲiɭʲˈenʲijɪ pʲirʲistajˈɵt rabˈotʌtʲ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_010_e1fc63fbd074",
+      "text": "Важно не ошибиться: Типичная ошибка — смотреть только на числи́тель и забывать проверить знамена́тель.",
+      "phonemes": [
+        "vˈɑʒnʌ nʲɪ ʌʃybʲˈitsˌʌ: tʲipʲˈitʃʲnʌja ʌʃˈypka; smʌtrʲˈetʲ tˈoɭkʌ nə tʃʲisɭʲˈitʲiɭʲ ɪ zʌbyvˈɑtʲ prʌvʲˈerʲitʲ znʌmʲinˈɑtʲiɭ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-1_011_b9db320a51ae",
+      "text": "знамена́тель всегда проверяем на ноль запрещённые значения — часть условия после сокращения исходные ограничения сохраняются",
+      "phonemes": [
+        "znʌmʲinˈɑtʲiɭ fsʲiɡdˈɑ prʌvʲirʲˈɑjim nə nˈoɭ zʌprʲiɕˈɵnnyjɪ znatʃʲˈenʲija; tʃʲˈɑstʲ usɭˈovʲija pˈosɭʲi sʌkraɕˈenʲija ɪsxˈodnyjɪ ʌɡrʌnʲitʃʲˈenʲija sʌxranʲˈɑjutsʌ"
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_001_7bf93a302c21",
+      "text": "Тема Основное свойство дро́би. Сокращение. Главное правило: а делить на бэ равно дробь с числителем а умножить на цэ и знаменателем бэ умножить на цэ , если бэ не равно ноль и цэ не равно ноль .",
+      "phonemes": [
+        "tʲˈema ʌsnʌvnˈojɪ svˈojstvʌ drˈobʲɪ.",
+        "sʌkraɕˈenʲijɪ.",
+        "ɡɭˈɑvnʌjɪ prˈɑvʲiɭʌ: a dʲiɭʲˈitʲ nə bˈɛ ravnˈo drˈop s tʃʲisɭʲˈitʲiɭʲim a umnˈoʒytʲ nə tsˈɛ ɪ znʌmʲinˈɑtʲiɭʲim bˈɛ umnˈoʒytʲ nə tsˈɛ, jˈesɭʲɪ bˈɛ nʲɪ ravnˈo nˈoɭʲ ɪ tsˈɛ nʲɪ ravnˈo nˈoɭ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_002_8ecdfebb7a6f",
+      "text": "Поэтому общий множитель числителя и знаменателя можно убрать.",
+      "phonemes": [
+        "pʌˈɛtʌmu ˈopɕij mnˈoʒytʲiɭ tʃʲisɭʲˈitʲiɭʲʌ ɪ znʌmʲinˈɑtʲiɭʲʌ mˈoʒnʌ ubrˈɑtʲ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_003_a11e3fb6a585",
+      "text": "Основное свойство дро́би позволяет умножать или делить числи́тель и знамена́тель на одно и то же ненулевое число или выражение.",
+      "phonemes": [
+        "ʌsnʌvnˈojɪ svˈojstvʌ drˈobʲɪ pʌzvʌɭʲˈɑjit umnʌʒˈɑtʲ ˌɪɭʲɪ dʲiɭʲˈitʲ tʃʲisɭʲˈitʲiɭʲ ɪ znʌmʲinˈɑtʲiɭ nə ʌdnˈo ɪ tˈo ʒy nʲinuɭʲivˈojɪ tʃʲisɭˈo ˌɪɭʲɪ vyraʒˈɛnʲijɪ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_004_723605f524aa",
+      "text": "На этом основано сокращение дробе́й. Главная идея: Сокращать можно множители , но нельзя «зачёркивать части суммы».",
+      "phonemes": [
+        "nə ˈɛtʌm ʌsnˈovʌnʌ sʌkraɕˈenʲijɪ drʌbʲˈej.",
+        "ɡɭˈɑvnʌja ɪdʲˈeja: sʌkraɕˈɑtʲ mˈoʒnʌ mnˈoʒytʲiɭʲɪ, no nʲiɭʑˈɑ zatʃʲˈɵrkʲivʌtʲ tʃʲˈɑsʲtʲɪ sˈummy."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_005_bf01b8dfdd6e",
+      "text": "Например, в дробь с числителем икс плюс два и знаменателем икс нельзя сократить икс.",
+      "phonemes": [
+        "nʌprʲimʲˈer, v drˈop s tʃʲisɭʲˈitʲiɭʲim ˈɪks pɭʲˈu\"s dvˈɑ ɪ znʌmʲinˈɑtʲiɭʲim ˈɪks nʲiɭʑˈɑ sʌkratʲˈitʲ ˈɪks."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_006_ecc335599eda",
+      "text": "Почему это работает: Потому что дробь умножается на цэ делить на цэ , а цэ делить на цэ равно один .",
+      "phonemes": [
+        "pʌtʃʲimˈu ˈɛtʌ rabˈotʌjit: pʌtʌmˈu ʃto drˈopʲ umnʌʒˈɑjitsʌ nə tsˈɛ dʲiɭʲˈitʲ nə tsˈɛ, a tsˈɛ dʲiɭʲˈitʲ nə tsˈɛ ravnˈo ʌdʲˈin."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_007_4fbd46e5f6a0",
+      "text": "Значение выражения не меняется. Важно не ошибиться: Ошибка: пытаться сократить икс в сумме дробь с числителем икс плюс два и знаменателем икс .",
+      "phonemes": [
+        "znatʃʲˈenʲijɪ vyraʒˈɛnʲija nʲɪ mʲinʲˈɑjitsʌ.",
+        "vˈɑʒnʌ nʲɪ ʌʃybʲˈitsˌʌ: ʌʃˈypka: pytˈɑtsˌʌ sʌkratʲˈitʲ ˈɪks f sˈummʲi drˈop s tʃʲisɭʲˈitʲiɭʲim ˈɪks pɭʲˈu\"s dvˈɑ ɪ znʌmʲinˈɑtʲiɭʲim ˈɪks."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-2_008_652a71015388",
+      "text": "Сокращают только множители. сначала разложи на множители сокращай только общий множитель не забывай ограничения исходной дро́би",
+      "phonemes": [
+        "sʌkraɕˈɑjut tˈoɭkʌ mnˈoʒytʲiɭʲɪ snatʃʲˈɑɭa rʌzɭʌʒˈy nə mnˈoʒytʲiɭʲɪ sʌkrˈɑɕʌj tˈoɭkʌ ˈopɕij mnˈoʒytʲiɭ nʲɪ zʌbyvˈɑj ʌɡrʌnʲitʃʲˈenʲija ɪsxˈodnʌj drˈobʲɪ"
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_001_3ae43fea9c94",
+      "text": "Тема Сложение и вычитание дробе́й с одинаковыми знаменателями.",
+      "phonemes": [
+        "tʲˈema sɭʌʒˈɛnʲijɪ ɪ vytʃʲitˈɑnʲijɪ drʌbʲˈej s ʌdʲinˈɑkʌvymʲɪ znʌmʲinˈɑtʲiɭʲʌmʲɪ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_002_7aea3de2d08b",
+      "text": "Правило: а делить на цэ плюс бэ делить на цэ равно дробь с числителем а плюс бэ и знаменателем цэ .",
+      "phonemes": [
+        "prˈɑvʲiɭʌ: a dʲiɭʲˈitʲ nə tsˈɛ pɭʲˈu\"s bˈɛ dʲiɭʲˈitʲ nə tsˈɛ ravnˈo drˈop s tʃʲisɭʲˈitʲiɭʲim a pɭʲˈu\"s bˈɛ ɪ znʌmʲinˈɑtʲiɭʲim tsˈɛ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_003_203af2e0b5e2",
+      "text": "Для вычитания точно так же. Если знаменатели дробе́й совпадают, мы складываем или вычитаем числители и сохраняем общий знамена́тель.",
+      "phonemes": [
+        "dɭʲɑ vytʃʲitˈɑnʲija tˈotʃʲnʌ tˈɑk ʒy.",
+        "jˈesɭʲɪ znʌmʲinˈɑtʲiɭʲɪ drʌbʲˈej sʌfpadˈɑjut, mˈy skɭˈɑdyvʌjim ˌɪɭʲɪ vˈytʃʲitʌjim tʃʲisɭʲˈitʲiɭʲɪ ɪ sʌxranʲˈɑjim ˈopɕij znʌmʲinˈɑtʲiɭ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_004_f4abbecad141",
+      "text": "Общий знамена́тель при этом остаётся неизменным, а его ненулевое значение по-прежнему входит в область допустимых значений исходного выражения.",
+      "phonemes": [
+        "ˈopɕij znʌmʲinˈɑtʲiɭ prʲɪ ˈɛtʌm ʌstajˈɵtsʌ nʲiizmʲˈennym, a jɪvˈo nʲinuɭʲivˈojɪ znatʃʲˈenʲijɪ pʌprʲˈeʒnʲimu fxˈodʲit v ˈobɭʌstʲ dʌpusʲtʲˈimyx znatʃʲˈenʲij ɪsxˈodnʌvʌ vyraʒˈɛnʲija."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_005_84b8ecbf8c8b",
+      "text": "Главная идея: Знамена́тель не складывается. два делить на семь плюс три делить на семь равно пять делить на семь , а не пять делить на четырнадцать .",
+      "phonemes": [
+        "ɡɭˈɑvnʌja ɪdʲˈeja: znʌmʲinˈɑtʲiɭ nʲɪ skɭˈɑdyvʌjitsʌ dvˈɑ dʲiɭʲˈitʲ nə sʲˈemʲ pɭʲˈu\"s trʲˈɪ dʲiɭʲˈitʲ nə sʲˈemʲ ravnˈo pʲˈɑtʲ dʲiɭʲˈitʲ nə sʲˈemʲ, a nʲɪ pʲˈɑtʲ dʲiɭʲˈitʲ nə tʃʲitˈyrnʌtsʌtʲ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_006_1f69e41096fb",
+      "text": "Почему это работает: Знамена́тель показывает размер одной доли.",
+      "phonemes": [
+        "pʌtʃʲimˈu ˈɛtʌ rabˈotʌjit: znʌmʲinˈɑtʲiɭ pʌkˈɑzyvʌjit razmʲˈer ʌdnˈoj dˈoɭʲɪ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_007_09b4b0c1ef98",
+      "text": "Если размер долей одинаковый, меняется только количество таких долей.",
+      "phonemes": [
+        "jˈesɭʲɪ razmʲˈer dˈoɭʲij ʌdʲinˈɑkʌvyj, mʲinʲˈɑjitsʌ tˈoɭkʌ kʌɭʲˈitʃʲistvʌ takʲˈix dˈoɭʲij."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_008_7d1ecf868209",
+      "text": "Важно не ошибиться: Частая ошибка — сложить и числители, и знаменатели одновременно.",
+      "phonemes": [
+        "vˈɑʒnʌ nʲɪ ʌʃybʲˈitsˌʌ: tʃʲˈɑstʌja ʌʃˈypka; sɭʌʒˈytʲ ɪ tʃʲisɭʲˈitʲiɭʲɪ, ɪ znʌmʲinˈɑtʲiɭʲɪ ʌdnʌvrʲimʲˈennʌ."
+      ]
+    },
+    {
+      "id": "grade8_algebra_v05_grade8_1-3_009_ff98f264a0f3",
+      "text": "одинаковый знамена́тель сохраняем при вычитании ставь скобки после действия проверь сокращение",
+      "phonemes": [
+        "ʌdʲinˈɑkʌvyj znʌmʲinˈɑtʲiɭ sʌxranʲˈɑjim prʲɪ vytʃʲitˈɑnʲiɪ stˈɑf skˈopkʲɪ pˈosɭʲi dʲˈejstvʲija prʌvʲˈerɪ^ sʌkraɕˈenʲijɪ"
+      ]
+    },
+    {
+      "id": "01_greeting",
+      "text": "Привет! Я Китсуне. Давай решим новую задачу вместе.",
+      "phonemes": [
+        "prʲivʲˈet!",
+        "ˈja kʲitsˈunʲi.",
+        "davˈɑj rʲiʃˈym nˈovuju zadˈɑtʃʲu vmʲˈesʲtʲi."
+      ]
+    },
+    {
+      "id": "02_step",
+      "text": "Начнём с первого шага. Приравняй знамена́тель икс плюс четыре к нулю.",
+      "phonemes": [
+        "natʃʲnʲˈɵm s pʲˈervʌvʌ ʃˈɑɡa.",
+        "prʲiravnʲˈɑj znʌmʲinˈɑtʲiɭʲ ˈɪks pɭʲˈu\"s tʃʲitˈyrʲi k nuɭʲˈu\"."
+      ]
+    },
+    {
+      "id": "03_correct",
+      "text": "Верно! Ты правильно нашёл ответ. Икс равен минус четырём.",
+      "phonemes": [
+        "vʲˈernʌ!",
+        "tˈy prˈɑvʲiɭnʌ naʃˈoɭ ʌtvʲˈet.",
+        "ˈɪks rˈɑvʲin mʲˈinus tʃʲityrʲˈɵm."
+      ]
+    },
+    {
+      "id": "04_incorrect",
+      "text": "Пока не совсем верно. Проверь знак перед числом. Давай попробуем ещё раз.",
+      "phonemes": [
+        "pʌkˈɑ nʲɪ sʌfsʲˈem vʲˈernʌ.",
+        "prʌvʲˈerɪ^ znˈɑk pʲirʲˈet tʃʲisɭˈom.",
+        "davˈɑj pʌprˈobujim jɪɕˈɵ rˈɑs."
+      ]
+    },
+    {
+      "id": "05_chat",
+      "text": "Конечно, помогу! Напиши, какой шаг тебе непонятен, и мы разберём его вместе.",
+      "phonemes": [
+        "kʌnʲˈeʃnʌ, pʌmʌɡˈu!",
+        "nʌpʲiʃˈy, kakˈoj ʃˈɑk tʲibʲˈe nʲipʌnʲˈɑtʲin, ɪ mˈy rʌzbʲirʲˈɵm jɪvˈo vmʲˈesʲtʲi."
+      ]
+    },
+    {
+      "id": "06_stress",
+      "text": "В каждой дро́би есть числи́тель и знамена́тель. Теперь найдём ко́рни уравнения.",
+      "phonemes": [
+        "f kˈɑʒdʌj drˈobʲɪ jestʲ tʃʲisɭʲˈitʲiɭʲ ɪ znʌmʲinˈɑtʲiɭ.",
+        "tʲipʲˈerɪ^ najdʲˈɵm kˈornʲɪ uravnʲˈenʲija."
+      ]
+    }
+  ],
+  "audition_texts": [
+    {
+      "id": "01_greeting",
+      "text": "Привет! Я Китсуне. Давай решим новую задачу вместе."
+    },
+    {
+      "id": "02_step",
+      "text": "Начнём с первого шага. Приравняй знамена́тель икс плюс четыре к нулю."
+    },
+    {
+      "id": "03_correct",
+      "text": "Верно! Ты правильно нашёл ответ. Икс равен минус четырём."
+    },
+    {
+      "id": "04_incorrect",
+      "text": "Пока не совсем верно. Проверь знак перед числом. Давай попробуем ещё раз."
+    },
+    {
+      "id": "05_chat",
+      "text": "Конечно, помогу! Напиши, какой шаг тебе непонятен, и мы разберём его вместе."
+    },
+    {
+      "id": "06_stress",
+      "text": "В каждой дро́би есть числи́тель и знамена́тель. Теперь найдём ко́рни уравнения."
+    }
+  ]
+}

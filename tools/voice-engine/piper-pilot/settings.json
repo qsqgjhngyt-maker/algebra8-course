@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "experiment": "kitsune-piper-pilot-01",
+  "reference_sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+  "piper_version": "1.8.0",
+  "piper_source_commit": "639388b6317fc4731e91d53da42aea68fd4166ff",
+  "checkpoint_revision": "97200aff5bea3736d7eb75488b56cc6f50af9cab",
+  "checkpoint_path": "ru/ru_RU/irina/medium/epoch=4139-step=929464.ckpt",
+  "checkpoint_sha256": "8a8e1d945bee6c2a7050dd99c3bca24cae4b02adb0d120a135d220079e78601d",
+  "checkpoint_dataset_license": "Unknown in upstream MODEL_CARD; local experiment only, distribution review pending",
+  "sample_rate": 22050,
+  "holdout_group": "grade8_algebra_v05:grade8_1-3",
+  "seed": 1729,
+  "batch_size": 1,
+  "max_epochs": 60,
+  "max_steps": 2400,
+  "max_time_minutes": 60,
+  "learning_rate": 0.0001,
+  "learning_rate_d": 0.00005,
+  "synthesis": {"noise_scale": 0.667, "length_scale": 1.0, "noise_w_scale": 0.8},
+  "audition_texts": [
+    {"id": "01_greeting", "text": "Привет! Я Китсуне. Давай решим новую задачу вместе."},
+    {"id": "02_step", "text": "Начнём с первого шага. Приравняй знамена́тель икс плюс четыре к нулю."},
+    {"id": "03_correct", "text": "Верно! Ты правильно нашёл ответ. Икс равен минус четырём."},
+    {"id": "04_incorrect", "text": "Пока не совсем верно. Проверь знак перед числом. Давай попробуем ещё раз."},
+    {"id": "05_chat", "text": "Конечно, помогу! Напиши, какой шаг тебе непонятен, и мы разберём его вместе."},
+    {"id": "06_stress", "text": "В каждой дро́би есть числи́тель и знамена́тель. Теперь найдём ко́рни уравнения."}
+  ]
+}

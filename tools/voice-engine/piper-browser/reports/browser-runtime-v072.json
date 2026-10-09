@@ -1,0 +1,75 @@
+{
+  "status": "passed_in_tested_PC_browser",
+  "date": "2026-10-09",
+  "build": "voice-piper-v07-6370425392e3",
+  "environment": "Chromium in Codex In-app Browser on Windows; HTTP localhost; real Worker, eSpeak WASM, ONNX WASM and Web Audio",
+  "regression": {
+    "before": {
+      "model_bytes_verified_ms": 155,
+      "ready_after_120000_ms": false
+    },
+    "cause": "ORT 1.22 skips locateFile with wasmBinary; Emscripten computes a relative WASM URL from blob import.meta.url and leaves initialization pending",
+    "fix": "Explicit verified local blob URLs for both wasmPaths.mjs and wasmPaths.wasm; 30000 ms initTimeout; no runtime byte changes"
+  },
+  "diagnostic_measurement": {
+    "clock": "milliseconds elapsed from creating the Worker; one run, not a performance guarantee",
+    "ready_ms": 1031,
+    "wav_ms": 1861,
+    "generation_after_ready_ms": 830,
+    "text": "Я здесь. Можешь написать, что именно непонятно в текущем задании.",
+    "browser_media_ready_state": 4,
+    "browser_media_error": null,
+    "wav": {
+      "file": "browser-new-phrase-v072.wav",
+      "bytes": 181292,
+      "sample_rate": 22050,
+      "samples": 90624,
+      "seconds": 4.1099319727891155,
+      "peak": 0.31842041015625,
+      "rms": 0.04860712268225789,
+      "sha256": "b4a28da3b3ff0b0502ee6ca1e4e9d24bd10dfbf85197bba5eea2b6fd609888d0"
+    }
+  },
+  "main_PWA_checks": {
+    "worker": "Uninstrumented release worker from source",
+    "update_accepted": true,
+    "saved_package_restored_without_reinstall": true,
+    "new_phrase_button": "passed",
+    "auto_off_dialog_notice": "passed",
+    "manual_dialog_audio": "passed",
+    "auto_on_new_dialog_response": "passed",
+    "exercise": "7 / (x + 4)",
+    "next_step_audio": "passed",
+    "wrong_answer_5_audio": "passed",
+    "correct_answer_minus_4_audio": "passed",
+    "playback_evidence": "Visible «Китсуне читает новую фразу.» reached by waiting on the corresponding dialog/exercise status",
+    "console_errors_during_checks": 0,
+    "screenshot": "browser-chat-v072.jpg"
+  },
+  "network": {
+    "generation_worker": "Only its own verified local blob URLs allowed; HTTP fetch/XHR rejected",
+    "physical_network_disconnect": "not_tested"
+  },
+  "preserved": {
+    "model_sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913",
+    "config_sha256": "4df10841559dac37f783b4a7329603afbf51508177d0861601a3fe630f9cd176",
+    "russian_dictionary_sha256": "ad087eb02abe6eb061d74e8cb438aab322443bd6dd3620e76497c5694310fe6c",
+    "package_files": 11,
+    "manifest_bytes_unchanged_from_v071": true,
+    "approved_static_wavs": 33,
+    "production_HTML": "unchanged"
+  },
+  "automated": {
+    "voice_tests": 81,
+    "application_checks": 13
+  },
+  "pending": {
+    "Yandex_user_browser": "not_tested",
+    "Chrome_Edge_user_browsers": "not_tested",
+    "Android": "not_tested",
+    "iOS": "not_tested",
+    "physical_HTTPS_phones": "not_tested"
+  },
+  "pushed": false,
+  "published": false
+}

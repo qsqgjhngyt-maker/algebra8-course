@@ -1,0 +1,13 @@
+{
+  "package": "piper-tts",
+  "version": "1.8.0",
+  "source_commit": "639388b6317fc4731e91d53da42aea68fd4166ff",
+  "source_path": "piper/espeak-ng-data/ru_dict",
+  "wheel_RECORD": "piper/espeak-ng-data/ru_dict,sha256=rQh-sCq-brBh106MtDiqsyJEO9bdNiDnZJfFaUMQ_mw,9053144",
+  "sha256": "ad087eb02abe6eb061d74e8cb438aab322443bd6dd3620e76497c5694310fe6c",
+  "bytes": 9053144,
+  "license": "GPL-3.0-or-later; bundled eSpeak NG Russian data",
+  "source_url": "https://github.com/OHF-Voice/piper1-gpl/tree/639388b6317fc4731e91d53da42aea68fd4166ff",
+  "espeak_source_url": "https://github.com/espeak-ng/espeak-ng",
+  "usage_ru": "Те же байты русского словаря, которые использовало обучение одобренной модели. Записать в FS /espeak-ng-data/ru_dict до callMain; другие данные WASM не менять."
+}

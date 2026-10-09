@@ -8,6 +8,57 @@
 
   const VERSION="1.7.3";
   const perExercise={};
+  let voicePanel=null,voiceRun=0;
+
+  const voiceNote=p=>p?.querySelector(".v173-result-voice")||p?.querySelector(".v173-voice-status");
+  function speechRequested(owner){
+    if(voicePanel&&voicePanel!==owner){
+      const note=voiceNote(voicePanel);if(note)note.textContent="";
+      voiceRun++;voicePanel=null;
+    }
+  }
+  function updateVoiceUi(){
+    if(!voicePanel?.isConnected)return;
+    const note=voiceNote(voicePanel);
+    if(note)note.textContent=window.KitsuneDynamicVoice?.info?.().message||"";
+  }
+  function readVoice(p,text,state,force=false){
+    const run=++voiceRun,previous=voicePanel,note=voiceNote(p);voicePanel=p;let failed=false;
+    const options={lessonOwner:p,onError:message=>{if(run===voiceRun){failed=true;if(note)note.textContent=message;}},
+      onDone:()=>{if(run===voiceRun){voicePanel=null;if(note&&!failed)note.textContent="";}}};
+    let accepted;
+    if(force){try{v151SpeechUnlocked=true;}catch{}accepted=window.v151Speak?.(text,{...options,state,force:true});}
+    else accepted=window.v151LessonSpeak?.(text,state,options);
+    if((accepted||voicePanel===null)&&previous&&previous!==p){const oldNote=voiceNote(previous);if(oldNote)oldNote.textContent="";}
+    if(!accepted&&voicePanel===p){voicePanel=previous;voiceRun=run-1;}
+    return accepted;
+  }
+  function result(container,text,state){
+    let note=container.querySelector(".v173-result-voice");
+    if(!note){
+      note=document.createElement("div");note.className="v173-voice-status v173-result-voice";
+      note.setAttribute("role","status");note.setAttribute("aria-live","polite");
+      const fb=container.querySelector(".feedback");
+      if(fb)fb.insertAdjacentElement("afterend",note);else container.appendChild(note);
+    }
+    note.textContent="";readVoice(container,strip(text),state);
+  }
+  function announce(ctx,text,state="explain",{auto=true}={}){
+    const p=panel(ctx);text=strip(text);
+    p.dataset.voiceText=text;
+    const note=p.querySelector(".v173-voice-status");
+    if(note)note.textContent="";
+    const read=force=>readVoice(p,p.dataset.voiceText,state,force);
+    p._kitsuneRead=()=>read(true);
+    if(auto)read(false);
+  }
+  function cancelVoice(ctx){
+    const p=ctx.box.querySelector(".v173-inline-tutor");
+    if(!p||voicePanel!==p)return;
+    voiceRun++;voicePanel=null;window.v161StopSpeech?.();
+    const note=p?.querySelector(".v173-voice-status");if(note)note.textContent="";
+  }
+  window.KitsuneLessonVoice={announce,result,speechRequested,updateUi:updateVoiceUi,cancel:cancelVoice};
 
   function strip(s){
     try{return v16Strip(s)}catch(e){
@@ -319,7 +370,9 @@
         <button type="button" class="v173-btn v173-why">❓ Почему так?</button>
         <button type="button" class="v173-btn v173-work">✍️ Проверить мой ход</button>
         <button type="button" class="v173-btn danger-soft v173-answer">👁 Показать ответ</button>
+        <button type="button" class="v173-btn v173-read">🔊 Прочитать шаг</button>
       </div>
+      <div class="v173-voice-status" role="status" aria-live="polite"></div>
       <div class="v173-why-box"></div>
       <div class="v173-work-box">
         <textarea placeholder="Напиши свой промежуточный шаг, например: 3x<9 или D=16"></textarea>
@@ -331,7 +384,8 @@
     if(fb)fb.insertAdjacentElement("afterend",p);
     else ctx.box.appendChild(p);
 
-    p.querySelector(".v173-close").addEventListener("click",()=>p.classList.remove("show"));
+    p.querySelector(".v173-close").addEventListener("click",()=>{cancelVoice(ctx);p.classList.remove("show");});
+    p.querySelector(".v173-read").addEventListener("click",()=>p._kitsuneRead?.());
     p.querySelector(".v173-next").addEventListener("click",()=>revealNext(ctx));
     p.querySelector(".v173-answer").addEventListener("click",()=>revealAnswer(ctx));
     p.querySelector(".v173-why").addEventListener("click",()=>toggleWhy(ctx));
@@ -379,6 +433,7 @@
     const state=perExercise[ctx.key]||(perExercise[ctx.key]={level:1,steps:buildSteps(ctx)});
     state.level=Math.min(3,(state.level||1)+1);
     render(ctx,{reason:"manual"});
+    announce(ctx,`Шаг ${state.level}. ${state.steps[state.level-1]}`);
   }
 
   function revealAnswer(ctx){
@@ -389,6 +444,7 @@
     p.querySelector('[data-step="4"]')?.classList.add("show");
     p.querySelector(".v173-answer").textContent="✅ Ответ показан";
     p.querySelector(".v173-answer").disabled=true;
+    announce(ctx,state.steps[3]);
   }
 
   function toggleWhy(ctx){
@@ -397,6 +453,7 @@
     const why=strip(ctx.lesson.why)||strip(ctx.lesson.remember)||lessonRule(ctx);
     box.textContent=`Почему: ${why}`;
     box.classList.add("show");
+    announce(ctx,box.textContent);
   }
 
   function checkWork(ctx){
@@ -405,6 +462,7 @@
     if(!raw){
       out.textContent="Напиши хотя бы один промежуточный шаг.";
       out.className="v173-work-result warn show";
+      announce(ctx,out.textContent,"think");
       return;
     }
 
@@ -416,12 +474,14 @@
     if(cls?.correct){
       out.textContent="✅ Этот ход приводит к правильному итоговому ответу.";
       out.className="v173-work-result good show";
+      announce(ctx,out.textContent,"happy");
       return;
     }
 
     // We don't pretend a local rule engine can prove arbitrary algebra strings.
     out.textContent=`Я вижу шаг «${raw}». Сверь его с конкретной опорой этого задания: ${hint} Если это последний шаг, нажми обычную «Проверить» — курс сравнит итог точно.`;
     out.className="v173-work-result warn show";
+    announce(ctx,out.textContent,"think");
   }
 
   window.v173OpenInline=function(ctx,opts={}){
@@ -433,6 +493,9 @@
       }
     }
     render(ctx,opts);
+    const state=perExercise[ctx.key];
+    // Ошибку уже озвучивает обработчик штатной проверки. Не заменяем её подсказкой.
+    announce(ctx,`Шаг ${state.level}. ${state.steps[state.level-1]}`,"explain",{auto:opts.reason!=="wrong"});
   };
 
   function ensureAlfiShortcut(){
@@ -450,10 +513,10 @@
       let ctx=null;
       try{ctx=v16CurrentContext()}catch(e){}
       if(ctx){
-        window.v173OpenInline?.(ctx,{reason:"manual"});
         try{v15Close?.()}catch(e){}
+        window.v173OpenInline?.(ctx,{reason:"manual"});
       }else{
-        try{v15Chip?.("Сначала выбери задание в уроке") }catch(e){}
+        try{v15Message?.("Открой урок и выбери задание: нажми в поле ответа или кнопку «Разобрать с Kitsune» под примером.",{state:"think",open:true,typing:false});}catch(e){}
       }
     });
     actions.appendChild(b);

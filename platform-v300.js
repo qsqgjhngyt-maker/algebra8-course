@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const VERSION="3.1.0-rc.5";
+  const VERSION="3.1.0-rc.6";
   let legacyMode=false;
   const KEY="kitsune_math_track_v300";
   const catalog=window.KitsuneCurriculum;
@@ -79,7 +79,7 @@
     const home=homeButton();
     if(home){home.innerHTML="🏠 <span>Главная платформы</span>";home.title="Главная платформы — выбор курса";}
     if(title())title().textContent="Библиотека курсов Kitsune Math";
-    content().innerHTML=`<section class="platform-hero reveal"><span class="eyebrow">Kitsune Math · ${VERSION}</span><h2>Библиотека курсов Kitsune Math</h2><p>Выбери свой курс или экзаменационную траекторию. Математика для 7–11 классов, подготовка к ОГЭ и ЕГЭ. Читай объяснения, решай задачи и возвращайся к темам, которые хочется понять лучше.</p><div class="platform-alpha-note">Локальная версия для проверки перед выпуском. В каждом курсе — теория, примеры, практика и собственный прогресс.</div><button type="button" class="platform-source-trust platform-source-link" id="platformSourceTrust"><span>✓ Программа сверяется с официальными источниками</span><small>Федеральные рабочие программы · ФИПИ ОГЭ/ЕГЭ · показать источники →</small></button><div class="platform-track-grid">${catalog.tracks.map(trackCard).join("")}</div></section>`;
+    content().innerHTML=`<section class="platform-hero reveal"><span class="eyebrow">Kitsune Math · ${VERSION}</span><h2>Библиотека курсов Kitsune Math</h2><p>Выбери свой курс или экзаменационную траекторию. Математика для 7–11 классов, подготовка к ОГЭ и ЕГЭ. Читай объяснения, решай задачи и возвращайся к темам, которые хочется понять лучше.</p><div class="platform-alpha-note">В каждом курсе — теория, примеры, практика и собственный прогресс.</div><button type="button" class="platform-source-trust platform-source-link" id="platformSourceTrust"><span>✓ Программа сверяется с официальными источниками</span><small>Федеральные рабочие программы · ФИПИ ОГЭ/ЕГЭ · показать источники →</small></button><div class="platform-track-grid">${catalog.tracks.map(trackCard).join("")}</div></section>`;
     content().querySelectorAll("[data-platform-track]").forEach(b=>b.addEventListener("click",()=>selectTrack(b.dataset.platformTrack)));
     window.applyReveal?.();
   }
@@ -594,7 +594,9 @@
       v3RecordResult(trackId,bridgeId,d,`${bridgeId}-challenge`,ok,e.q,input.value);
     });
 
-    document.querySelector("#platformSpeakTheory")?.addEventListener("click",()=>speakTheory(d));
+    const readingButton=document.querySelector("#platformSpeakTheory");
+    if(readingButton)readingButton.dataset.kitsuneReadingText=d.voice||"";
+    readingButton?.addEventListener("click",()=>speakTheory(d));
     document.querySelector("#platformStopTheory")?.addEventListener("click",stopTheory);
     document.querySelector("#v3PrintLesson")?.addEventListener("click",()=>window.print());
     document.querySelector("#v3FinishLesson")?.addEventListener("click",()=>{
@@ -724,14 +726,7 @@
         return;
       }
     }catch{}
-    try{
-      if("speechSynthesis" in window){
-        speechSynthesis.cancel();
-        const u=new SpeechSynthesisUtterance(value);
-        u.lang="ru-RU";
-        speechSynthesis.speak(u);
-      }
-    }catch{}
+    window.KitsuneRuntimeStability?.toast?.("Голос Kitsune ещё не загружен.");
   }
 
   function v3BindCalmTheorySpeech(root=document){
@@ -743,7 +738,7 @@
         const box=document.getElementById(id);
         if(!box)return;
         const body=box.querySelector(".v3-calm-theory-body");
-        v3SpeakText(body?.innerText||body?.textContent||"");
+        v3SpeakText(body?(window.KitsuneSchoolNotation?.elementText?.(body)??body.innerText??body.textContent):"");
       });
     });
     root.querySelectorAll("[data-v3-calm-stop]").forEach(btn=>{
@@ -791,7 +786,7 @@
   function speakTheory(a){
     if(!a?.voice)return;
     try{if(typeof window.v151Speak==="function"){window.v151Speak(a.voice,{state:"explain",force:true});return}}catch{}
-    try{if("speechSynthesis" in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(a.voice);u.lang="ru-RU";speechSynthesis.speak(u)}}catch{}
+    window.KitsuneRuntimeStability?.toast?.("Голос Kitsune ещё не загружен.");
   }
 
   function renderUtility(view){

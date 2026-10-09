@@ -143,14 +143,7 @@
         return;
       }
     }catch{}
-    try{
-      if("speechSynthesis" in window){
-        speechSynthesis.cancel();
-        const u=new SpeechSynthesisUtterance(text);
-        u.lang="ru-RU";
-        speechSynthesis.speak(u);
-      }
-    }catch{}
+    window.KitsuneRuntimeStability?.toast?.("Голос Kitsune ещё не загружен.");
   }
 
   function stop(){
@@ -180,6 +173,9 @@
 
     if(anchor)panel.insertBefore(details,anchor);else panel.appendChild(details);
 
+    details.querySelector("#theorySpeakV300").dataset.kitsuneReadingText=a.voice||[
+      a.lead,...arr(a.sections).flatMap(s=>[s.title,s.body]),...arr(a.summary)
+    ].filter(Boolean).join(". ");
     details.querySelector("#theorySpeakV300")?.addEventListener("click",()=>{
       const text=a.voice||[
         a.lead,

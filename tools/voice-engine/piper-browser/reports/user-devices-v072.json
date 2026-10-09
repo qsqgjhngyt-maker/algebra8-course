@@ -1,0 +1,11 @@
+{
+  "version": "0.7.2",
+  "build": "voice-piper-v07-6370425392e3",
+  "method": "user_report",
+  "PC": "passed_by_user",
+  "Android": "passed_by_user",
+  "iOS": "passed_by_user",
+  "models_and_browser_versions": "not_provided",
+  "feedback_ru": "Пользователь подтвердил работу на ПК, Android и iPhone. Запросил более заметные паузы, чтение разделителей заголовков и удаление из речи редакционных окончаний и декоративных эмодзи.",
+  "scope_ru": "Подтверждение относится к v0.7.2; новые изменения подготовки речи v0.7.3 проверяются отдельно."
+}

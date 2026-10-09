@@ -1,0 +1,240 @@
+{
+  "status": "passed",
+  "environment": "Node WASM; synthesis sample with explicit PCM silence; browser playback checked separately",
+  "source_text": "1 · Смысл темы\nПосле урока ты должен(на) уметь находить запрещённые значения.\n\nЯ здесь 🦊 Можешь написать или сказать вслух, что именно непонятно в текущем задании.\n\nНапример, 1/2. Теперь 2³. дробь. В числителе 7. В знаменателе x + 4.\n\nСравним: x ⩾ 2, а x ⩽ 3. Посчитаем: 2 · 3 = 6.\n\nНаша цель — понять математику. Название Cloud Brain. x ≠ 0.",
+  "plan": [
+    {
+      "text": "Раздел один, Смысл темы.",
+      "pause_after_ms": 750,
+      "audio_seconds": 2.147845804988662,
+      "generation_seconds": 0.5185856000000001
+    },
+    {
+      "text": "После урока тебе нужно уметь находить запрещённые значения.",
+      "pause_after_ms": 650,
+      "audio_seconds": 3.320453514739229,
+      "generation_seconds": 0.6893768999999997
+    },
+    {
+      "text": "Я здесь.",
+      "pause_after_ms": 260,
+      "audio_seconds": 0.9287981859410431,
+      "generation_seconds": 0.20209140000000025
+    },
+    {
+      "text": "Можешь написать или сказать вслух, что именно непонятно в текущем задании.",
+      "pause_after_ms": 650,
+      "audio_seconds": 5.317369614512471,
+      "generation_seconds": 1.0831863
+    },
+    {
+      "text": "Например, одна вторая.",
+      "pause_after_ms": 450,
+      "length_multiplier": 1.12,
+      "audio_seconds": 2.681904761904762,
+      "generation_seconds": 0.5438877999999995
+    },
+    {
+      "text": "Теперь два в третьей сте́пени.",
+      "pause_after_ms": 450,
+      "length_multiplier": 1.12,
+      "audio_seconds": 2.414875283446712,
+      "generation_seconds": 0.4942579999999998
+    },
+    {
+      "text": "дробь.",
+      "pause_after_ms": 450,
+      "length_multiplier": 1.12,
+      "audio_seconds": 0.6733786848072563,
+      "generation_seconds": 0.143866
+    },
+    {
+      "text": "В числителе семь.",
+      "pause_after_ms": 450,
+      "length_multiplier": 1.12,
+      "audio_seconds": 1.3931972789115645,
+      "generation_seconds": 0.29216460000000005
+    },
+    {
+      "text": "В знаменателе икс плюс четыре.",
+      "pause_after_ms": 650,
+      "length_multiplier": 1.12,
+      "audio_seconds": 2.2407256235827666,
+      "generation_seconds": 0.45578870000000005
+    },
+    {
+      "text": "Сравним: икс больше или равно два, а икс меньше или равно три.",
+      "pause_after_ms": 450,
+      "length_multiplier": 1.12,
+      "audio_seconds": 5.526349206349207,
+      "generation_seconds": 1.0338787999999994
+    },
+    {
+      "text": "Посчитаем: два умножить на три равно шесть.",
+      "pause_after_ms": 650,
+      "length_multiplier": 1.12,
+      "audio_seconds": 3.5062131519274375,
+      "generation_seconds": 0.6609700000000003
+    },
+    {
+      "text": "Наша цель — понять математику.",
+      "pause_after_ms": 260,
+      "pronunciation": {
+        "before": [
+          "n",
+          "ˈ",
+          "ɑ",
+          "ʃ",
+          "a",
+          " ",
+          "t",
+          "s",
+          "ˈ",
+          "ɛ",
+          "ɭ",
+          ";",
+          " ",
+          "p",
+          "ʌ",
+          "n",
+          "ʲ",
+          "ˈ",
+          "ɑ",
+          "t",
+          "ʲ",
+          " ",
+          "m",
+          "ʌ",
+          "t",
+          "ʲ",
+          "i",
+          "m",
+          "ˈ",
+          "ɑ",
+          "t",
+          "ʲ",
+          "i",
+          "k",
+          "u",
+          "."
+        ],
+        "after": [
+          "n",
+          "ˈ",
+          "ɑ",
+          "ʃ",
+          "a",
+          " ",
+          "t",
+          "s",
+          "ˈ",
+          "ɛ",
+          "ɭ",
+          "ʲ",
+          ";",
+          " ",
+          "p",
+          "ʌ",
+          "n",
+          "ʲ",
+          "ˈ",
+          "ɑ",
+          "t",
+          "ʲ",
+          " ",
+          "m",
+          "ʌ",
+          "t",
+          "ʲ",
+          "i",
+          "m",
+          "ˈ",
+          "ɑ",
+          "t",
+          "ʲ",
+          "i",
+          "k",
+          "u",
+          "."
+        ]
+      },
+      "audio_seconds": 2.786394557823129,
+      "generation_seconds": 0.5300842999999995
+    },
+    {
+      "text": "Название облачный помощник.",
+      "pause_after_ms": 260,
+      "audio_seconds": 2.5309750566893423,
+      "generation_seconds": 0.47949980000000053
+    },
+    {
+      "text": "икс не равно ноль.",
+      "pause_after_ms": 0,
+      "length_multiplier": 1.12,
+      "pronunciation": {
+        "before": [
+          "ˈ",
+          "ɪ",
+          "k",
+          "s",
+          " ",
+          "n",
+          "ʲ",
+          "ɪ",
+          " ",
+          "r",
+          "a",
+          "v",
+          "n",
+          "ˈ",
+          "o",
+          " ",
+          "n",
+          "ˈ",
+          "o",
+          "ɭ",
+          "."
+        ],
+        "after": [
+          "ˈ",
+          "ɪ",
+          "k",
+          "s",
+          " ",
+          "n",
+          "ʲ",
+          "ɪ",
+          " ",
+          "r",
+          "a",
+          "v",
+          "n",
+          "ˈ",
+          "o",
+          " ",
+          "n",
+          "ˈ",
+          "o",
+          "ɭ",
+          "ʲ",
+          "."
+        ]
+      },
+      "audio_seconds": 1.3583673469387756,
+      "generation_seconds": 0.2749916999999987
+    }
+  ],
+  "model_sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913",
+  "audio_file": "reading-sample-v073.wav",
+  "sample_rate": 22050,
+  "audio_seconds": 43.207074829931976,
+  "bytes": 1905476,
+  "sha256": "ac6605949ab276424ffba8c719d15cda897c93482e4c5eae280d4e5a22f4be0e",
+  "network": "blocked",
+  "conversation_sample": {
+    "audio_file": "conversation-sample-v073.wav",
+    "seconds": 7.195736961451247,
+    "bytes": 317376,
+    "sha256": "37f44a28e1708b9628a066272c92451e7bcf612989981969fb069ef01d31515a"
+  }
+}

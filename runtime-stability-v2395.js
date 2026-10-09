@@ -3,8 +3,7 @@
 
    Consolidated mobile/low-memory guard:
    - prevents automatic heavy AI preparation on constrained devices;
-   - keeps automatic speech off on iPhone / very weak devices, while manual
-     speech and the full voice dialogue remain available by explicit action;
+   - keeps auto speech opt-in, preserving the user's explicit selection;
    - stops the Smart Tutor relabel MutationObserver from self-triggering;
    - makes lazy buttons work on the first press;
    - adds clear Math Lab validation instead of silent no-op buttons.
@@ -49,7 +48,7 @@
     try{localStorage.setItem(ZERO_CONFIG_KEY,"0")}catch{}
   }
   if(initialPolicy.ttsConstrained){
-    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
+    try{if(localStorage.getItem(AUTO_SPEAK_KEY)===null)localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
   }
 
   function injectStyles(){
@@ -138,23 +137,20 @@
 
   /* ------------------------------------------------------------------
      Low-memory voice policy.
-     Auto narration is the feature the real iPhone test identified as the
-     remaining crash trigger. Manual speaker/voice dialogue are untouched.
+     Сохраняем выбор пользователя; на слабом устройстве показываем пояснение.
      ------------------------------------------------------------------ */
   function applyAutoVoicePolicy(){
     const p=policy();
     if(!p.ttsConstrained)return;
-    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
     const checkbox=document.querySelector("#v151AutoVoice");
     if(!checkbox)return;
-    checkbox.checked=false;
-    checkbox.disabled=true;
-    checkbox.title="На этом устройстве автоозвучка отключена для стабильности. Ручная кнопка озвучки работает.";
+    checkbox.disabled=false;
+    checkbox.title="Автоозвучку можно включать и выключать. Если приложение замедляется, используйте ручную озвучку.";
     const host=checkbox.closest("label")||checkbox.parentElement;
     if(host&&!host.querySelector(".kitsune-auto-voice-note2395")){
       const note=document.createElement("small");
       note.className="kitsune-auto-voice-note2395";
-      note.textContent="На этом устройстве автоозвучка отключена для стабильности. Ручная 🔊 озвучка и голосовой диалог доступны.";
+      note.textContent="Если приложение замедляется при автоозвучке, выключите её и используйте кнопку 🔊.";
       host.appendChild(note);
     }
   }
@@ -335,17 +331,6 @@
        !button.matches("#v15SpeakBtn,#v151TestVoice")){
       stopEvent(event);handleLazyButton(button,"voice-action");
     }
-  },true);
-
-  document.addEventListener("change",event=>{
-    const target=event.target;
-    if(target?.id!=="v151AutoVoice")return;
-    const p=policy();
-    if(!p.ttsConstrained||!target.checked)return;
-    stopEvent(event);
-    target.checked=false;
-    try{localStorage.setItem(AUTO_SPEAK_KEY,"0")}catch{}
-    toast("Автоозвучка на этом устройстве отключена для стабильности. Кнопка ручной озвучки работает.");
   },true);
 
   function quietAudio(){

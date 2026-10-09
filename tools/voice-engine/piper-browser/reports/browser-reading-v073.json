@@ -1,0 +1,86 @@
+{
+  "status": "passed_checked_local_PWA",
+  "date": "2026-10-09",
+  "build": "voice-piper-v07-f7f822c4a24b",
+  "environment": "Chromium in Codex In-app Browser on Windows; localhost; real release Worker and Web Audio; phone viewport emulation",
+  "main_PWA": {
+    "saved_package_restored_without_reinstall": true,
+    "theory_button_playback": "Visible «Китсуне читает новую фразу.» in settings",
+    "theory_heading_source": "All seven existing headings verified in actual innerText; text on screen preserved",
+    "pause_status": "Visible «Китсуне делает паузу…» in earlier v0.7.3 browser run with identical pause implementation",
+    "pause_test_build": "voice-piper-v07-ced18e2d0795",
+    "opening_settings": "Does not restart reading",
+    "stop": "Earlier v073 run returned ready; new reading controls are being added in v074",
+    "stop_test_build": "voice-piper-v07-ced18e2d0795",
+    "local_diagnostic_banner": "absent_after_update",
+    "console_errors": 0,
+    "conversation": {
+      "skills_question": "answered locally",
+      "goal_question": "answered locally",
+      "automatic_playback": "visible Китсуне читает новую фразу.",
+      "manual_playback": "visible Китсуне читает новую фразу.",
+      "screenshot": "conversation-v073.jpg",
+      "soft_l": "actual phonemes before/after recorded in reading-v073.json",
+      "Cloud_Brain": "облачный помощник"
+    },
+    "math": {
+      "DOM_fraction_extraction": "school-frac-num / school-frac-den are read as one fraction; SUP retained; source nodes unchanged",
+      "scalar_cases": "1/2, 3/4, 2³, x⁻³, (x+1)⁴, ⩾/≥, ⩽/≤, ≠, ≈, √, ÷, multiplication, modulus",
+      "synthesis_length_multiplier": 1.12,
+      "math_sentence_pause_ms": 450,
+      "WAV_cache_key_includes_tempo": true
+    }
+  },
+  "intro": {
+    "media_preserved": true,
+    "desktop_layout": "CSS landscape rules unchanged",
+    "method": "actual PWA screenshots; viewport emulation, not physical phones",
+    "sizes": [
+      {
+        "width": 320,
+        "height": 568,
+        "mode": "full_video",
+        "media_width": 576,
+        "media_height": 324,
+        "screenshot": "mobile-intro-v073-320.jpg"
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "mode": "full_video",
+        "media_width": 702,
+        "media_height": 394.875,
+        "screenshot": "mobile-intro-v073-390.jpg"
+      },
+      {
+        "width": 430,
+        "height": 932,
+        "mode": "short_poster",
+        "media_width": 774,
+        "media_height": 435.375,
+        "screenshot": "mobile-intro-v073-430.jpg"
+      }
+    ],
+    "visual_result": "Whole character visible, ears, paws and tail fit; portrait object-fit:contain"
+  },
+  "automated": {
+    "voice_tests": 96,
+    "application_checks": 13
+  },
+  "sample": {
+    "report": "reading-v073.json",
+    "audio": "reading-sample-v073.wav",
+    "seconds": 43.207074829931976
+  },
+  "previous_device_confirmation": {
+    "version": "0.7.2",
+    "method": "user_report",
+    "PC": "passed_by_user",
+    "Android": "passed_by_user",
+    "iOS": "passed_by_user"
+  },
+  "v073_physical_devices": "pending_user_check",
+  "publication": "after_user_confirmation_of_local_check",
+  "pushed": false,
+  "published": false
+}

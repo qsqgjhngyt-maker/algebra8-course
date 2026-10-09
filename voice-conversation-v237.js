@@ -6,8 +6,7 @@
    - compact thematic memory keeps follow-up questions on one topic;
    - only a small, privacy-filtered memory digest may accompany ordinary
      Cloud Brain conversation; raw audio and full chat history never do;
-   - local Piper Irina is preferred for speech, with existing voice/system
-     fallback preserved;
+   - replies use the single Kitsune Voice Engine;
    - hands-free loop: listen -> recognize -> answer -> speak -> listen;
    - mic can interrupt speech;
    - lesson/dialog context remains protected by the final navigation firewall.
@@ -18,11 +17,8 @@
   const VERSION="2.3.0-beta.3.7.2";
   const MEMORY_KEY="a8_kitsune_topic_memory_v237";
   const HANDSFREE_KEY="a8_kitsune_handsfree_v237";
-  const VOICE_KEY="a8_kitsune_irina_enabled_v237";
   const HISTORY_KEY="a8_kitsune_dialog_history_v19";
 
-  const PIPER_PACKAGE="https://cdn.jsdelivr.net/npm/@realtimex/piper-tts-web@1.1.1/+esm";
-  const IRINA_VOICE_ID="ru_RU-irina-medium";
 
   const MAX_MEMORY_CHARS=920;
   const MAX_MEMORY_ITEMS=6;
@@ -30,7 +26,6 @@
 
   let memoryState=loadJson(MEMORY_KEY,{threads:{}});
   let handsFree=readBool(HANDSFREE_KEY,false);
-  let irinaEnabled=readBool(VOICE_KEY,true);
 
   let originalBrainChat=null;
   let originalSpeak=null;
@@ -39,17 +34,11 @@
   let speechWrapped=false;
 
   let speaking=false;
+  let speechInDialog=false;
   let speakingRun=0;
   let handsFreeTimer=null;
   let lastReplyAt=0;
 
-  let piperModule=null;
-  let piperModulePromise=null;
-  let piperSession=null;
-  let piperReady=false;
-  let piperPreparing=false;
-  let piperAudioCtx=null;
-  let piperSource=null;
 
   function loadJson(key,fallback){
     try{
@@ -347,174 +336,14 @@
     return true;
   }
 
-  async function loadPiper(){
-    if(piperModule)return piperModule;
-    if(piperModulePromise)return piperModulePromise;
-
-    piperModulePromise=(async()=>{
-      piperModule=await import(PIPER_PACKAGE);
-      return piperModule;
-    })();
-
-    try{return await piperModulePromise}
-    catch(error){
-      piperModulePromise=null;
-      throw error;
-    }
-  }
-
-  function piperSessionFor(tts){
-    if(piperSession)return piperSession;
-    if(typeof tts?.TtsSession==="function"){
-      try{
-        piperSession=new tts.TtsSession({
-          voiceId:IRINA_VOICE_ID,
-          allowLocalModels:true,
-          fallbackStrategy:"auto",
-          logger:message=>{
-            try{console.debug("[Kitsune Irina]",message)}catch{}
-          }
-        });
-      }catch{
-        piperSession=null;
-      }
-    }
-    return piperSession;
-  }
-
-  async function piperPredict(tts,text){
-    const session=piperSessionFor(tts);
-    if(session&&typeof session.predict==="function"){
-      return session.predict(text);
-    }
-    return tts.predict({text,voiceId:IRINA_VOICE_ID});
-  }
-
-  async function checkIrinaStored(){
-    try{
-      const tts=await loadPiper();
-      if(typeof tts.stored!=="function")return piperReady;
-      const list=await tts.stored();
-      piperReady=Array.isArray(list)&&list.includes(IRINA_VOICE_ID);
-      return piperReady;
-    }catch{
-      return false;
-    }
-  }
-
   async function unlockAudio(){
-    const AC=window.AudioContext||window.webkitAudioContext;
-    if(!AC)return false;
-    if(!piperAudioCtx||piperAudioCtx.state==="closed")piperAudioCtx=new AC();
-    if(piperAudioCtx.state==="suspended"){
-      try{await piperAudioCtx.resume()}catch{}
-    }
-    return piperAudioCtx.state==="running";
+    return window.KitsuneStaticVoice?.unlock?.() || false;
   }
-
-  async function prepareIrina(){
-    if(piperPreparing)return false;
-    piperPreparing=true;
-    setVoiceStatus("Подготавливаю локальный голос Irina…","thinking");
-
-    try{
-      await unlockAudio();
-      const tts=await loadPiper();
-
-      if(await checkIrinaStored()){
-        setVoiceStatus("✅ Irina уже сохранена на устройстве.","ok");
-        updateControls();
-        return true;
-      }
-
-      if(typeof tts.download!=="function"){
-        throw new Error("Piper runtime не поддерживает download().");
-      }
-
-      await tts.download(IRINA_VOICE_ID,progress=>{
-        const total=Number(progress?.total)||0;
-        const loaded=Number(progress?.loaded)||0;
-        const pct=total>0?Math.round(loaded/total*100):0;
-        setVoiceStatus(`⬇ Irina: ${pct||"…"}%`,"thinking");
-      });
-
-      piperReady=await checkIrinaStored();
-      if(!piperReady)throw new Error("Модель Irina не появилась в локальном хранилище.");
-
-      setVoiceStatus("✅ Локальный голос Irina готов.","ok");
-      updateControls();
-      return true;
-    }catch(error){
-      setVoiceStatus(
-        "Irina пока недоступна — останется текущий локальный/системный голос. "+
-        String(error?.message||error).slice(0,110),
-        "warn"
-      );
-      return false;
-    }finally{
-      piperPreparing=false;
-      updateControls();
-    }
-  }
-
   function stopIrina(){
     speakingRun++;
     speaking=false;
-    try{piperSource?.stop()}catch{}
-    try{piperSource?.disconnect()}catch{}
-    piperSource=null;
+    speechInDialog=false;
   }
-
-  async function playIrina(blob,onDone=null,runId=0){
-    if(!(blob instanceof Blob))throw new Error("Piper не вернул аудио.");
-    const ok=await unlockAudio();
-    if(!ok)throw new Error("Воспроизведение заблокировано браузером.");
-
-    const buffer=await piperAudioCtx.decodeAudioData((await blob.arrayBuffer()).slice(0));
-    if(runId!==speakingRun)return false;
-
-    const source=piperAudioCtx.createBufferSource();
-    piperSource=source;
-    source.buffer=buffer;
-
-    const gain=piperAudioCtx.createGain();
-    gain.gain.value=.98;
-
-    const analyser=piperAudioCtx.createAnalyser();
-    analyser.fftSize=512;
-    analyser.smoothingTimeConstant=.58;
-
-    source.connect(gain);
-    gain.connect(analyser);
-    analyser.connect(piperAudioCtx.destination);
-
-    try{window.KitsuneLive?.attachAnalyser?.(analyser)}catch{}
-    try{window.v161MarkSpeaking?.(true,"explain")}catch{}
-
-    speaking=true;
-    source.onended=()=>{
-      if(piperSource===source)piperSource=null;
-      speaking=false;
-      try{window.KitsuneLive?.detachAnalyser?.()}catch{}
-      try{window.v161MarkSpeaking?.(false,"explain")}catch{}
-      onDone?.();
-    };
-    source.start();
-    return true;
-  }
-
-  async function speakIrina(text,opts={}){
-    const runId=++speakingRun;
-    const phrase=clean(text);
-    if(!phrase)return false;
-
-    const tts=await loadPiper();
-    if(!(await checkIrinaStored()))throw new Error("irina_not_ready");
-    const wav=await piperPredict(tts,phrase);
-    if(runId!==speakingRun)return false;
-    return playIrina(wav,opts.onDone,runId);
-  }
-
   function scheduleHandsFree(){
     clearTimeout(handsFreeTimer);
     if(!handsFree||!dialogOpen()||document.hidden)return;
@@ -540,7 +369,10 @@
 
   function stopAllSpeech(){
     stopIrina();
-    try{originalStop?.()}catch{}
+    try{
+      if(originalStop)originalStop();
+      else{window.KitsuneStaticVoice?.stop();window.KitsuneDynamicVoice?.stop();}
+    }catch{}
     try{window.speechSynthesis?.cancel?.()}catch{}
   }
 
@@ -555,29 +387,30 @@
 
     window.v151Speak=function(text,opts={}){
       const userDone=typeof opts?.onDone==="function"?opts.onDone:null;
+      const inDialog=dialogOpen();
+      let run=null,finished=false,accepted=false,returned=false,failed=false;
       const finish=()=>{
+        if(finished||(run!==null&&run!==speakingRun))return;
+        finished=true;
         speaking=false;
+        speechInDialog=false;
         try{userDone?.()}catch{}
-        scheduleHandsFree();
+        if(returned&&accepted&&!failed&&inDialog)scheduleHandsFree();
+      };
+      const failure=message=>{
+        if(finished||(run!==null&&run!==speakingRun))return;
+        failed=true;
+        try{opts.onError?.(message);}catch{}
       };
 
-      if(irinaEnabled){
-        speaking=true;
-        speakIrina(text,{...opts,onDone:finish})
-          .then(ok=>{
-            if(ok!==false)return;
-            speaking=false;
-            originalSpeak(text,{...opts,onDone:finish});
-          })
-          .catch(()=>{
-            speaking=false;
-            originalSpeak(text,{...opts,onDone:finish});
-          });
-        return true;
-      }
-
       speaking=true;
-      return originalSpeak(text,{...opts,onDone:finish});
+      accepted=originalSpeak(text,{...opts,onDone:finish,onError:failure});
+      run=speakingRun;
+      returned=true;
+      speaking=!!accepted&&!finished;
+      speechInDialog=speaking&&inDialog;
+      if(finished&&accepted&&!failed&&inDialog)scheduleHandsFree();
+      return accepted;
     };
 
     window.v161StopSpeech=function(){
@@ -614,19 +447,6 @@
   function updateControls(){
     const hf=document.querySelector("#v237HandsFree");
     if(hf)hf.checked=handsFree;
-    const irina=document.querySelector("#v237Irina");
-    if(irina)irina.checked=irinaEnabled;
-
-    const prepare=document.querySelector("#v237PrepareIrina");
-    if(prepare){
-      prepare.disabled=piperPreparing;
-      prepare.textContent=piperReady
-        ?"✅ Irina готова"
-        :piperPreparing
-          ?"⏳ Подготовка Irina…"
-          :"⬇ Подготовить Irina";
-    }
-
     updateMemoryChip();
   }
 
@@ -645,10 +465,6 @@
         <input id="v237HandsFree" type="checkbox">
         <span>🎧 Разговор без рук</span>
       </label>
-      <label style="display:flex;gap:5px;align-items:center;cursor:pointer">
-        <input id="v237Irina" type="checkbox">
-        <span>🔊 Irina</span>
-      </label>
       <button id="v237NewTopic" type="button" class="secondary" style="padding:5px 8px">Новая тема</button>
       <span id="v237MemoryChip" style="margin-left:auto;opacity:.75">🧠 Новая тема</span>
     `;
@@ -663,13 +479,6 @@
       else clearTimeout(handsFreeTimer);
     });
 
-    bar.querySelector("#v237Irina")?.addEventListener("change",async event=>{
-      irinaEnabled=!!event.target.checked;
-      writeBool(VOICE_KEY,irinaEnabled);
-      await unlockAudio();
-      if(irinaEnabled&&!piperReady)checkIrinaStored().then(updateControls);
-    });
-
     bar.querySelector("#v237NewTopic")?.addEventListener("click",()=>{
       const key=currentContextKey();
       resetThread(key,contextLabel());
@@ -680,38 +489,7 @@
     updateControls();
   }
 
-  function injectSettings(){
-    const host=document.querySelector("#v19VoiceSettings")||document.querySelector("#v18KitsuneBrain")||document.querySelector("#v15Settings");
-    if(!host||document.querySelector("#v237LiveVoiceSettings"))return;
-
-    const block=document.createElement("div");
-    block.id="v237LiveVoiceSettings";
-    block.className="v19-voice-settings";
-    block.innerHTML=`
-      <div class="v19-voice-head">
-        <div>
-          <strong>🦊 Живой голосовой диалог</strong>
-          <small>Whisper → тематическая память → Kitsune → Piper Irina</small>
-        </div>
-        <span>v${VERSION}</span>
-      </div>
-      <p>Полная история остаётся на устройстве. Для обычного облачного диалога может отправляться только короткая безопасная выдержка из последних реплик, чтобы Kitsune понимала «а почему?» и «а если так?».</p>
-      <div id="v237VoiceStatus" style="margin:8px 0;font-size:11px">Проверяю локальный голос Irina…</div>
-      <button type="button" class="v15-action primary-action" id="v237PrepareIrina">⬇ Подготовить Irina</button>
-    `;
-    host.appendChild(block);
-
-    block.querySelector("#v237PrepareIrina")?.addEventListener("click",async()=>{
-      await unlockAudio();
-      await prepareIrina();
-    });
-
-    checkIrinaStored().then(ready=>{
-      if(ready)setVoiceStatus("✅ Irina уже сохранена на устройстве.","ok");
-      else setVoiceStatus("Irina ещё не подготовлена. До этого работает текущий голосовой fallback.","");
-      updateControls();
-    });
-  }
+  function injectSettings(){}
 
   function installInterruptHandler(){
     document.addEventListener("pointerdown",event=>{
@@ -727,16 +505,19 @@
   }
 
   function observeDialog(){
+    let wasOpen=dialogOpen();
     const observer=new MutationObserver(()=>{
       injectDialogControls();
       injectSettings();
       wrapBrain();
       wrapSpeech();
 
-      if(!dialogOpen()){
+      const nowOpen=dialogOpen();
+      if(wasOpen&&!nowOpen){
         clearTimeout(handsFreeTimer);
-        if(speaking)stopAllSpeech();
+        if(speaking&&speechInDialog)stopAllSpeech();
       }
+      wasOpen=nowOpen;
     });
     observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
   }
@@ -757,21 +538,12 @@
   async function release(){
     clearTimeout(handsFreeTimer);
     stopAllSpeech();
-    piperSession=null;
-    piperModule=null;
-    piperModulePromise=null;
-    try{
-      if(piperAudioCtx&&piperAudioCtx.state!=="closed")await piperAudioCtx.close();
-    }catch{}
-    piperAudioCtx=null;
-    piperReady=false;
     return true;
   }
 
   window.KitsuneLiveConversation={
     version:VERSION,
-    voiceId:IRINA_VOICE_ID,
-    prepareIrina,
+    voiceId:"kitsune-qwen-v05",
     memory:()=>JSON.parse(JSON.stringify(memoryState)),
     routingFix:()=>({
       version:VERSION,
@@ -792,14 +564,6 @@
       }
       return handsFree;
     },
-    irina:enabled=>{
-      if(typeof enabled==="boolean"){
-        irinaEnabled=enabled;
-        writeBool(VOICE_KEY,irinaEnabled);
-        updateControls();
-      }
-      return {enabled:irinaEnabled,ready:piperReady};
-    },
     speaking:()=>speaking,
     release
   };
@@ -813,7 +577,7 @@
     injectSettings();
     wrapBrain();
     wrapSpeech();
-    checkIrinaStored().then(updateControls);
+    updateControls();
   };
 
   if(document.readyState==="loading"){

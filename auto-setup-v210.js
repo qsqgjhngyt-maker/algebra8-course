@@ -146,7 +146,7 @@
     const api=window.AlfiNeuralVoice;
     if(!api){state.voice="fallback";save();return}
     try{
-      status("Подготовка 3/4","Подготавливаю голос Kitsune. Если Neural Voice несовместим, останется системный голос.");
+      status("Подготовка 3/4","Сохраняю готовые записи Kitsune для чтения офлайн.");
       let ok=false;
       try{ok=!!(await api.verify?.())}catch(e){ok=!!api.isReady?.()}
       if(!ok)await api.download?.();

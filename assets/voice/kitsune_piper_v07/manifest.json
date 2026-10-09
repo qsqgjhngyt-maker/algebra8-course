@@ -1,0 +1,112 @@
+{
+  "schema_version": 3,
+  "engine": "kitsune-piper-v07",
+  "voice_identity": "kitsune",
+  "reference_sha256": "50e9ea8ff8e7b3513c7b41080c36ac3ed82a333617d46195da081da4feae77c4",
+  "status": "ready",
+  "files": [
+    {
+      "path": "model/kitsune.onnx",
+      "bytes": 63522235,
+      "sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913"
+    },
+    {
+      "path": "model/kitsune.onnx.json",
+      "bytes": 5067,
+      "sha256": "4df10841559dac37f783b4a7329603afbf51508177d0861601a3fe630f9cd176"
+    },
+    {
+      "path": "model/phoneme-cases.json",
+      "bytes": 19161,
+      "sha256": "016c13340074e2a0a1a168ec4e315e9b55a4f5644635a4f050746ebe02a298b7"
+    },
+    {
+      "path": "runtime/ort.wasm.min.js",
+      "bytes": 48327,
+      "sha256": "65e09376df69107e881b5c34d2d37aed333a366b6d941073ec518168e269b87d"
+    },
+    {
+      "path": "runtime/ort-wasm-simd-threaded.mjs",
+      "bytes": 20856,
+      "sha256": "30dd851d9c00622940500f71ddd2ff8820c5cb65270816080175b958705385a8"
+    },
+    {
+      "path": "runtime/ort-wasm-simd-threaded.wasm",
+      "bytes": 11210254,
+      "sha256": "71aef04959c5c1b6de461b6538e2058e306610034a85aad2742d0c7fd4533fe4"
+    },
+    {
+      "path": "runtime/LICENSE_ONNXRUNTIME.txt",
+      "bytes": 1094,
+      "sha256": "c250d6278f0b47a6439fb7592b08b58a55eb9f535aa49a1db63211c3f982b674"
+    },
+    {
+      "path": "runtime/ru_dict.bin",
+      "bytes": 9053144,
+      "sha256": "ad087eb02abe6eb061d74e8cb438aab322443bd6dd3620e76497c5694310fe6c"
+    },
+    {
+      "bytes": 120714,
+      "sha256": "fef0c2fc442d24fdef5c7c7cc37d5da2314407640fe11ab1bfe347c723dff19b",
+      "path": "runtime/piper_phonemize.js"
+    },
+    {
+      "bytes": 635212,
+      "sha256": "b777cd107a91d2bcc6a1ea46f2c26a662a7407394fe84589198aeaa83dd7a9d6",
+      "path": "runtime/piper_phonemize.wasm"
+    },
+    {
+      "bytes": 18077249,
+      "sha256": "29f1025eb23a5b5c192cd14a6efbce4509402ff265405072ee6f7d1a09b78f8c",
+      "path": "runtime/piper_phonemize.data"
+    }
+  ],
+  "model_bytes": 63522235,
+  "public_distribution": "pending_base_dataset_license",
+  "runtime_onnx": "onnxruntime-web@1.22.0",
+  "validation": {
+    "listening": {
+      "status": "approved_by_user",
+      "date": "2026-10-09",
+      "model_sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913"
+    },
+    "native_cpu": {
+      "status": "passed",
+      "model_sha256": "e8a65629b7590195d03072495c5cbd4198ba526051f5e40d279f8d91529dc913"
+    },
+    "onnx_wasm": {
+      "status": "passed",
+      "environment": "Node V8; phoneme preparation excluded"
+    },
+    "phonemizer_wasm": {
+      "status": "passed",
+      "environment": "Node V8/WASM; browser and phones not tested",
+      "stress_distinguished": true,
+      "native_phoneme_matches": 39,
+      "cases": 39
+    },
+    "full_tts_wasm": {
+      "status": "passed",
+      "environment": "Node V8/WASM; browser and phones not tested",
+      "phrases": 7,
+      "network": "blocked"
+    },
+    "PC_browser": {
+      "status": "passed_by_user",
+      "scope": "v0.7.4: пользователь подтвердил проверки на всех устройствах",
+      "device_details": "not_provided"
+    },
+    "Android": {
+      "status": "passed_by_user",
+      "scope": "v0.7.4: пользователь подтвердил проверки на всех устройствах",
+      "device_details": "not_provided"
+    },
+    "iOS": {
+      "status": "passed_by_user",
+      "scope": "v0.7.4: пользователь подтвердил проверки на всех устройствах",
+      "device_details": "not_provided"
+    },
+    "user_report": "tools/voice-engine/piper-browser/reports/user-devices-v074.json"
+  },
+  "runtime_phonemizer": "@diffusionstudio/piper-wasm@1.0.0"
+}

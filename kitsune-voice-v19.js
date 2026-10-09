@@ -1,7 +1,7 @@
 
 /* =====================================================================
    v1.9.0 · KITSUNE VOICE DIALOGUE
-   Push-to-talk → local Whisper → Kitsune Brain → Neural/System Voice.
+   Push-to-talk → local Whisper → Kitsune Brain → единый голос Kitsune.
    Audio is decoded locally and passed to Transformers.js in a Web Worker.
    ===================================================================== */
 (() => {
@@ -12,11 +12,9 @@
   const WHISPER_MODEL="onnx-community/whisper-tiny";
 
   const READY_KEY="a8_kitsune_whisper_ready_v19";
-  const VOICE_REPLY_KEY="a8_kitsune_voice_reply_v19";
   const HISTORY_KEY="a8_kitsune_dialog_history_v19";
 
   let whisperReady=false;
-  let voiceReplies=true;
   let history=[];
   let activeCtx=null;
   let messageSequence=0;
@@ -44,8 +42,6 @@
 
   try{
     whisperReady=localStorage.getItem(READY_KEY)==="1";
-    const vr=localStorage.getItem(VOICE_REPLY_KEY);
-    voiceReplies=vr===null?true:vr==="1";
     history=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
     if(!Array.isArray(history))history=[];
     history=history.slice(-20);
@@ -54,7 +50,6 @@
   function save(){
     try{
       localStorage.setItem(READY_KEY,whisperReady?"1":"0");
-      localStorage.setItem(VOICE_REPLY_KEY,voiceReplies?"1":"0");
       localStorage.setItem(HISTORY_KEY,JSON.stringify(history.slice(-20)));
     }catch(e){}
   }
@@ -342,17 +337,11 @@
       <div class="v19-whisper-status">Whisper ещё не подготовлен. Текстовый диалог уже доступен.</div>
       <div class="v19-whisper-progress"><div><i></i></div><span></span></div>
       <button type="button" class="v15-action primary-action v19-prepare">⬇ Подготовить Whisper</button>
-      <label class="v19-reply-toggle">
-        <input type="checkbox" ${voiceReplies?"checked":""}>
-        <span><b>🔊 Голосовые ответы</b><small>Kitsune отвечает вслух после текста или микрофона.</small></span>
-      </label>
+      <p>Озвучкой ответов управляет общая кнопка «Автоозвучка» Китсуне.</p>
       <p>Микрофон работает локально: аудио преобразуется в 16 кГц и распознаётся Whisper в браузере. На устройстве без WebGPU включается более медленный WASM fallback.</p>`;
     host.appendChild(block);
 
     block.querySelector(".v19-prepare")?.addEventListener("click",prepareWhisper);
-    block.querySelector("input")?.addEventListener("change",e=>{
-      voiceReplies=!!e.target.checked;save();updateVoiceUi();
-    });
 
     if(whisperReady)setWhisperStatus("Whisper был подготовлен ранее. При первом голосовом вводе загружу его из browser cache.","ok");
     updateVoiceUi();
@@ -419,6 +408,10 @@
     root.querySelector(".v19-dialog-close").addEventListener("click",closeDialog);
     root.addEventListener("click",e=>{if(e.target===root)closeDialog()});
     root.querySelector(".v19-send-btn").addEventListener("click",()=>sendCurrentInput());
+    root.querySelector("#v19DialogLog").addEventListener("click",e=>{
+      const button=e.target.closest?.("[data-v19-read]");if(!button)return;
+      readReply(Number(button.dataset.v19Read));
+    });
     root.querySelector(".v19-mic-btn").addEventListener("click",toggleRecord);
     const input=root.querySelector("textarea");
     input.addEventListener("keydown",e=>{
@@ -507,6 +500,14 @@
     history.push(msg);history=history.slice(-24);save();renderHistory();
   }
 
+  function readReply(ts){
+    const message=history.find(m=>m.ts===ts&&m.role==="assistant"&&(m.contextKey||"free")===contextKey(activeCtx));
+    if(!message)return;
+    if(typeof v151SpeechUnlocked!=="undefined")v151SpeechUnlocked=true;
+    try{window.v151Speak?.(message.content,{state:"explain",force:true});}
+    catch{dialogState("Не удалось запустить голос Китсуне. Попробуй ещё раз.","warn");}
+  }
+
   function renderHistory(){
     const log=document.querySelector("#v19DialogLog");
     if(!log)return;
@@ -519,7 +520,7 @@
     log.innerHTML=shown.map(m=>`
       <div class="v19-msg ${m.role==="user"?"user":"kitsune"}">
         ${m.role==="assistant"?'<span class="v19-msg-avatar"><img src="./assets/kitsune/idle.png" alt=""></span>':""}
-        <div><small>${m.role==="user"?"Ты":"Kitsune"}</small><p>${escapeHtml(m.content)}</p></div>
+        <div><small>${m.role==="user"?"Ты":"Kitsune"}</small><p>${escapeHtml(m.content)}</p>${m.role==="assistant"?`<button type="button" class="v173-btn" data-v19-read="${Number(m.ts)}">🔊 Прочитать</button>`:""}</div>
       </div>`).join("");
     log.scrollTop=log.scrollHeight;
   }
@@ -565,12 +566,14 @@
     dialogState("");
     addHistory("assistant",reply,ctx);
 
-    if(voiceReplies){
+    if((typeof v151VoiceAuto==="undefined"||v151VoiceAuto)&&(typeof v151VoiceEnabled==="undefined"||v151VoiceEnabled)){
       try{
         if(typeof window.v151Speak==="function"){
           window.v151Speak(reply,{state:"explain",force:true});
         }
-      }catch(e){}
+      }catch(e){dialogState("Не удалось запустить голос Китсуне. Попробуй ещё раз.","warn");}
+    }else{
+      dialogState("Автоозвучка выключена в настройках Китсуне.","ok");
     }
   }
 

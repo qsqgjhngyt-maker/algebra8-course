@@ -1267,12 +1267,12 @@
           beginListening();
         };
         try{
-          window.v151Speak("Я здесь. Слушаю тебя.",{
+          const accepted=window.v151Speak("Я здесь. Слушаю тебя.",{
             state:"happy",
             force:true,
             onDone
           });
-          setTimeout(onDone,2400);
+          if(!accepted)onDone();
         }catch{
           beginListening();
         }

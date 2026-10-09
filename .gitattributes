@@ -1,4 +1,20 @@
 * text=auto eol=lf
 *.png binary
 *.zip binary
+*.wav binary
+assets/voice/pilot_v04/manifest.json -text
+tools/voice-engine/VOICE_*_APPROVED/** -text
+tools/voice-engine/kitsune_*.py -text
+tools/voice-engine/kitsune_lessons_v04.json -text
 *.bat text eol=crlf
+assets/voice/kitsune_ondevice_v06/model/** -text
+assets/voice/kitsune_ondevice_v06/runtime/** -text
+tools/voice-engine/device/LICENSE_ONNXRUNTIME.txt -text
+
+assets/voice/kitsune_piper_v07/** -text
+assets/voice/grade8_algebra_v05/manifest.json -text
+licenses/voice/** -text
+tools/voice-engine/piper-browser/data/COPYING -text whitespace=cr-at-eol,-blank-at-eof
+# Сторонние файлы сохраняются дословно и проверяются по SHA-256.
+licenses/voice/*COPYING.txt -text whitespace=cr-at-eol,-blank-at-eof
+assets/voice/kitsune_piper_v07/runtime/ort-wasm-simd-threaded.mjs -text whitespace=cr-at-eol,-blank-at-eol

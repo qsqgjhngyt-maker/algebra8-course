@@ -1,4 +1,4 @@
-/* Kitsune Math cinematic startup intro · cinematic-v316.2 */
+/* Kitsune Math cinematic startup intro · cinematic-v316.3 */
 html.kitsune-intro-active,
 html.kitsune-intro-active body{overflow:hidden!important;overscroll-behavior:none}
 
@@ -123,6 +123,17 @@ html.kitsune-intro-active body{overflow:hidden!important;overscroll-behavior:non
 .kitsune-startup-intro.is-cinematic-reduced .kitsune-startup-intro__skip,
 .kitsune-startup-intro.is-cinematic-short .kitsune-startup-intro__hint,
 .kitsune-startup-intro.is-cinematic-reduced .kitsune-startup-intro__hint{display:none}
+
+/* На портретном экране масштаб зависит от ширины, а не от высоты телефона.
+   Широкие края ролика служат фоном; персонаж остаётся в центральной области. */
+@media (orientation:portrait){
+  .kitsune-startup-intro__cinema{
+    inset:auto;left:50%;top:45%;width:min(180vw,105svh);height:auto;aspect-ratio:16/9;
+    transform:translate(-50%,-50%)
+  }
+  .kitsune-startup-intro__video,.kitsune-startup-intro__poster{object-fit:contain}
+  .kitsune-startup-intro__poster{transform:none}
+}
 
 @media (max-width:520px){
   .kitsune-startup-intro__video,.kitsune-startup-intro__poster{object-position:50% 50%}
