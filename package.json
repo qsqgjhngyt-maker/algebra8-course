@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node tests/release/qa-static.cjs",
+    "test:curriculum": "node --test tests/curriculum-status.test.cjs tests/curriculum-checker.test.cjs tests/curriculum-publisher.test.cjs",
     "test:browser": "node tests/release/qa-browser.cjs",
     "test:voice": "node tests/release/qa-voice.cjs",
     "test:visual": "node tests/release/qa-visual.cjs",

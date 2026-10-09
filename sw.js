@@ -6,8 +6,8 @@
    - heavy optional AI/voice modules are cached only when actually requested;
    - installed navigation remains immutable until the next release activates.
    ===================================================================== */
-const CACHE="kitsune-math-3.1.0-rc.6-voice-piper-v074-progress-rc6";
-const RUNTIME_CACHE="kitsune-math-runtime-3.1.0-rc.6-voice-piper-v074-progress-rc6";
+const CACHE="kitsune-math-3.1.0-rc.6-voice-piper-v074-progress-rc6-curriculum-pages-v1";
+const RUNTIME_CACHE="kitsune-math-runtime-3.1.0-rc.6-voice-piper-v074-progress-rc6-curriculum-pages-v1";
 const NEURAL_CACHE="algebra8-ai-runtime-v1";
 const RELEASE="3.1.0-rc.6";
 
@@ -152,7 +152,7 @@ const CORE_ASSETS=[
   "./navigation-stability-v2396.js?v=3.1.0-rc.6",
   "./runtime-loader-v2395.js?v=single-voice-v05.1",
   "./mobile-voice-entry-v2397.js?v=3.1.0-rc.6",
-  "./curriculum-sources-ui-v302.js?v=3.1.0-rc.6",
+  "./curriculum-sources-ui-v302.js?v=curriculum-pages-v1",
   "./platform-v300.js?v=3.1.0-rc.6",
   "./app-kernel-v200.js?v=3.1.0-rc.6",
   "./auto-setup-v210.js?v=single-voice-v05.1",
@@ -303,6 +303,8 @@ self.addEventListener("fetch",event=>{
   // Не дублируем эти записи в общем runtime-кэше оболочки.
   if(sameOrigin&&url.pathname.startsWith(new URL('./assets/voice/',self.location.href).pathname))return;
   if(sameOrigin&&url.pathname==="/api/curriculum-status")return;
+  // Отчёт обновляется отдельно от оболочки; последнее состояние хранит UI.
+  if(sameOrigin&&url.pathname===new URL('./curriculum-status.json',self.location.href).pathname)return;
   if(sameOrigin&&isPrivatePath(url.pathname))return;
 
   if(sameOrigin){

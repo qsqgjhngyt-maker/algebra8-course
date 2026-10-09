@@ -84,6 +84,13 @@ test('WAV обрабатывает отдельный проверяемый к�
   assert(!h.stores.has(runtime));
 });
 
+test('Отчёт источников не застывает в кэше оболочки и получает сетевой ответ отдельно',async()=>{
+  const h=harness();await h.run('install');const before=h.requests();
+  assert.equal(await h.fetchRequest('./curriculum-status.json?report=1'),undefined);
+  assert.equal(await h.fetchRequest('./curriculum-status.json?report=2'),undefined);
+  assert.equal(h.requests(),before);
+});
+
 test('Настоящая оболочка GitHub RC5 остаётся до принятия RC6; готовый Piper сохраняется',async()=>{
   const legacySource=fs.readFileSync(path.join(__dirname,'fixtures/sw-github-rc5-30d1df3.txt'),'utf8');
   const oldName=legacySource.match(/const CACHE="([^"]+)"/)[1];

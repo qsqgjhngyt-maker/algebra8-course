@@ -1,7 +1,8 @@
 {
   "name": "Kitsune Math 7–11",
   "version": "3.1.0-rc.6",
-  "build_revision": "voice-piper-v074-progress-rc6",
+  "build_revision": "voice-piper-v074-progress-rc6-curriculum-pages-v1",
+  "curriculum_status": "daily-github-report-with-offline-last-status",
   "channel": "release-candidate",
   "architecture": "static-github-pages-pwa",
   "backend": "optional-stateless-credential-broker",
